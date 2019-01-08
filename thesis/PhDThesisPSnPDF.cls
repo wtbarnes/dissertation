@@ -838,6 +838,10 @@ wish to left align your text}
 \newcommand{\@university}{}
 \newcommand{\university}[1]{\renewcommand{\@university}{#1}}
 
+% The address of your University
+\newcommand{\@address}{}
+\newcommand{\address}[1]{\renewcommand{\@address}{#1}}
+
 % Defining the crest
 \newcommand{\@crest}{}
 \newcommand{\crest}[1]{\renewcommand{\@crest}{#1}}
@@ -864,6 +868,10 @@ wish to left align your text}
 \newif\ifPHD@advisor\PHD@advisorfalse
 \newcommand{\@advisor}{}
 \newcommand{\advisor}[1]{\renewcommand{\@advisor}{#1}\PHD@advisortrue}
+
+% Committee
+\newcommand{\@committee}{}
+\newcommand{\committee}[1]{\renewcommand{\@committee}{#1}}
 
 % Advisor Title (Advisor - Default, can be changed)
 \newcommand{\@advisorrole}{Advisor: }
@@ -927,67 +935,46 @@ wish to left align your text}
 % ******************************** Title Page **********************************
 \renewcommand{\maketitle}{
 
-% To compute the free vertical space in Title page
+%% To compute the free vertical space in Title page
 \computeTitlePageSpacing
-
+%
 \thispagestyle{empty}
-
+%
 \begin{singlespace}
 \begin{center}
-
-% University Crest Long if college crest is defined
-\ifPHD@collegeshield%
-	{\usebox{\PHD@crest}}
-	\vspace{.15\PHD@titlepagespacing}
-\fi
-
-% Title
-{\usebox{\PHD@Title}} % subtitle is defined
-
-
-% Crest
-
-\ifPHD@collegeshield%
-	\vspace{.15\PHD@titlepagespacing}
-	{\usebox{\PHD@collegecrest}}
-	\vspace{.1\PHD@titlepagespacing}
-\else
-	\vspace{.25\PHD@titlepagespacing}
-	{\usebox{\PHD@crest}}
-	\vspace{.15\PHD@titlepagespacing}
-\fi
-
-
-
-% Author
-{\usebox{\PHD@author}}
-\vspace*{1em}
-
-% Supervisor
-\ifPHD@supervisor%
-{\usebox{\PHD@supervisor}}
-\vspace*{0.5em}
-\fi
-
-% Advisor
-\ifPHD@advisor%
-{\usebox{\PHD@advisor}}
-\vspace*{0.5em}
-\fi
-
-% Department and University
-{\usebox{\PHD@dept}}
-\vspace{.2\PHD@titlepagespacing}
-
-% Submission Text
+%
+%% Department and University
+{\usebox{\PHD@university}}
+%
+%% Title
+%{\usebox{\PHD@Title}} % subtitle is defined
+%
+%% Author
+{\usebox{\PHD@titleauthor}}
+%
+%% Submission Text
 {\usebox{\PHD@submission}}
-
-% College and degree date
+%
+%% Committee
+{\usebox{\PHD@committee}}
+%
+%% Supervisor
+%\ifPHD@supervisor%
+%{\usebox{\PHD@supervisor}}
+%\vspace*{0.5em}
+%\fi
+%
+%% Advisor
+%\ifPHD@advisor%
+%{\usebox{\PHD@advisor}}
+%\vspace*{0.5em}
+%\fi
+%
+%% College and degree date
 \vfill
-{\usebox{\PHD@collegedate}}
-    
+{\usebox{\PHD@addressdate}}
+%    
 \end{center}
-
 \end{singlespace}
 }
 
@@ -1149,7 +1136,8 @@ wish to left align your text}
 \newsavebox{\PHD@Title}
 \begin{lrbox}{\PHD@Title}
   \begin{minipage}[c]{0.98\textwidth}
-    \centering \Huge \bfseries{\@title}
+    \vspace{2em}
+    \centering \Large \bfseries{\@title}
     \ifthenelse{\equal{\@subtitle}{}}{
       % subtitle is not defined
     }{
@@ -1174,12 +1162,20 @@ wish to left align your text}
   \fi
 \end{lrbox}
 
-% Author Box
-\newsavebox{\PHD@author}
-\begin{lrbox}{\PHD@author}
-  \begin{minipage}[c]{\textwidth}
-    \centering \Large \bfseries{\@author}
-      \vspace{0.5em}   
+% Title and Author Box
+\newsavebox{\PHD@titleauthor}
+\begin{lrbox}{\PHD@titleauthor}
+  \begin{minipage}[c]{0.98\textwidth}
+    \vspace{2em}
+    \begin{singlespace}\centering \Large {\bf\@title}\end{singlespace}
+    \ifthenelse{\equal{\@subtitle}{}}{
+      % subtitle is not defined
+    }{
+      \\
+      \centering \large {\@subtitle}
+    } % subtitle is defined
+    \par \centering \large by \par 
+    \centering \large {\bf\@author}
   \end{minipage}
 \end{lrbox}
 
@@ -1219,6 +1215,20 @@ wish to left align your text}
   \end{minipage}
 \end{lrbox}
 
+% Committee Box
+\newsavebox{\PHD@committee}
+\begin{lrbox}{\PHD@committee}
+  \begin{minipage}[r]{\textwidth}
+    \vspace{2em}
+    \begin{flushright}
+      {\sc Approved, Thesis Committee:} \par \vspace{2.5em}
+      \renewcommand{\and}{\vspace{2.5em}\par\rule{0.5\textwidth}{1pt}\par}
+      \begin{singlespace}\rule{0.5\textwidth}{1pt}\par\@committee\end{singlespace}
+    \end{flushright}
+  \end{minipage}
+\end{lrbox}
+
+
 % Department Box
 \newsavebox{\PHD@dept}
 \begin{lrbox}{\PHD@dept}
@@ -1228,51 +1238,49 @@ wish to left align your text}
   \end{minipage}
 \end{lrbox}
 
+% University Box
+\newsavebox{\PHD@university}
+\begin{lrbox}{\PHD@university}
+  \begin{minipage}[c]{\textwidth}
+    \centering {\large \sc \@university \par}
+  \end{minipage}
+\end{lrbox}
+
 % Submission Box
 \newsavebox{\PHD@submission}
 \begin{lrbox}{\PHD@submission}
   \begin{minipage}[c]{\textwidth}
+    \vspace{2em}
     \begin{center}
-      \large \submissiontext \par
-      \large \textit {\@degreetitle} \par
+      \large \sc \begin{singlespace}\submissiontext\end{singlespace}
+      \large \bf {\@degreetitle} \par
     \end{center}
   \end{minipage}
 \end{lrbox}
 
-% College and Date Box
-\newsavebox{\PHD@collegedate}
-\begin{lrbox}{\PHD@collegedate}
+% Address and Date Box
+\newsavebox{\PHD@addressdate}
+\begin{lrbox}{\PHD@addressdate}
 \begin{minipage}[c]{\textwidth}
-  \large
-  \ifthenelse{\equal{\@college}{}}{
-    % college is not defined
-    \begin{center}
-      \@degreedate
-    \end{center}
-  }{
-    % college is defined
-    \begin{minipage}[b]{0.49\textwidth}
-      \flushleft\@college
-    \end{minipage}
-    \begin{minipage}[b]{0.49\textwidth}
-      \flushright \@degreedate
-    \end{minipage}
-  } % college is defined
+  \singlespacing
+  \centering \large \sc {\@address} \par
+  \centering \large \@degreedate
 \end{minipage}
 \end{lrbox}
 
 %  Now to compute the free vertical space
 \newlength{\PHD@titlepagespacing}
 \setlength{\PHD@titlepagespacing}{ \textheight %
-			- \totalheightof{\usebox{\PHD@Title}}
-			- \totalheightof{\usebox{\PHD@crest}}
-			- \totalheightof{\usebox{\PHD@collegecrest}}
-			- \totalheightof{\usebox{\PHD@author}}
-                   	- \totalheightof{\usebox{\PHD@supervisor}}
-                   	- \totalheightof{\usebox{\PHD@advisor}}
-			- \totalheightof{\usebox{\PHD@dept}}
+			%- \totalheightof{\usebox{\PHD@Title}}
+			%- \totalheightof{\usebox{\PHD@crest}}
+			%- \totalheightof{\usebox{\PHD@collegecrest}}
+			- \totalheightof{\usebox{\PHD@titleauthor}}
+      %             	- \totalheightof{\usebox{\PHD@supervisor}}
+      %             	- \totalheightof{\usebox{\PHD@advisor}}
+      - \totalheightof{\usebox{\PHD@committee}}
+			- \totalheightof{\usebox{\PHD@university}}
 			- \totalheightof{\usebox{\PHD@submission}}
-			- \totalheightof{\usebox{\PHD@collegedate}}
+			- \totalheightof{\usebox{\PHD@addressdate}}
 }
 }
 

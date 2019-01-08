@@ -1,0 +1,37 @@
+%% Set figure styling using PythonTeX, TeXFigure, and Matplotlib
+% TeXFigure configuration
+\begin{pythontexcustomcode}{py}
+# Imports
+import os
+import texfigure
+pytex.formatter = texfigure.repr_latex_formatter
+import numpy as np
+import matplotlib
+matplotlib.use('pdf')
+import matplotlib.pyplot as plt
+import matplotlib.colors
+from sunpy.map import Map, GenericMap
+import astropy.units as u
+from astropy.coordinates import SkyCoord
+from astropy.visualization import ImageNormalize,AsinhStretch,SqrtStretch
+import synthesizAR
+manager_opts = {'python_dir': 'python', 'fig_dir': 'figures', 'data_dir': 'data',}
+# Set some plot styling here
+plt.rcParams['font.family'] = 'serif'
+plt.rcParams['font.serif'] = 'Computer Modern'
+plt.rcParams['text.usetex'] = True
+plt.rcParams['axes.titlesize'] = 10
+plt.rcParams['axes.labelsize'] = 10
+plt.rcParams['legend.fontsize'] = 7
+plt.rcParams['xtick.labelsize'] = 8
+plt.rcParams['ytick.labelsize'] = 8
+plt.rcParams['xtick.major.pad'] = 3
+plt.rcParams['xtick.minor.pad'] = 3
+plt.rcParams['ytick.major.pad'] = 3
+plt.rcParams['ytick.minor.pad'] = 3
+plt.rcParams['xtick.direction'] = 'in'
+plt.rcParams['ytick.direction'] = 'in'
+plt.rcParams['savefig.dpi'] = 200
+plt.rcParams['savefig.format'] = 'pdf'
+plt.rcParams['savefig.bbox'] = 'tight'
+\end{pythontexcustomcode}

@@ -1,5 +1,38 @@
-% ************************** Thesis Abstract *****************************
-% Use `abstract' as an option in the document class to print only the titlepage and the abstract.
 \begin{abstract}
-This is where you write your abstract ...
+While it is generally agreed that the continually stressed coronal
+magnetic field is responsible for the million-degree temperatures in the
+upper solar atmosphere, the mechanism responsible for transporting this
+stored energy to the coronal plasma is yet unknown. In particular, the
+frequency with which this energy is deposited into active regions, areas
+of intense magnetic activity, remains largely unconstrained. In this
+dissertation, I use a new forward modeling pipeline, combined with
+well-known machine learning classification methods, to better constrain
+the frequency of energy deposition in active region cores. Specifically,
+I simulate time-dependent, multi-wavelength emission over an entire
+active region for a range of nanoflare frequencies. From these synthetic
+intensities, I compute two commonly-used observables, the timelag and
+the emission measure slope, and compare the distributions of these
+parameters in order to better understand how the underlying heating
+frequency is related to observable quantities. I then use these
+synthetic data to train a random forest classifier in order to classify
+real data in terms of the heating frequency. In doing so, I am able to
+map the heating frequency, pixel by pixel, across an entire active
+region. In addition to this parameter survey of heating frequencies, I
+also describe a model for relating the underlying magnetic field
+structure of the active region to the heating frequency and compute the
+resulting emission in multiple narrowband channels. The resulting
+observables from this new model are assessed against the classified
+observations. Altogether, this work represents a critical step in
+constraining heating frequency in active region cores.
+
+A novel component of this dissertation is the modular and scalable
+fowarding modeling pipeline, written in the Python programming language,
+that builds a ``magnetic skeleton'' from a three-dimensional field
+extrapolation, configures thousands of field-aligned hydrodynamic loop
+models, and computes arbitrary line-of-sight projections of the
+time-dependent, three-dimensional active region emission. Another novel
+component of this dissertation is the use of a random forest
+classification model. By training such a model on our synthetic data, we
+are able to systematically and quantitatively assess agreement between
+modeled nanoflare frequencies and observations.
 \end{abstract}

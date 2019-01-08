@@ -1,0 +1,37 @@
+% Text for chapter 1
+\chapter{The Physics of Coronal Loops}\label{ch:loops}
+
+% Figure manager for Chapter 2
+\begin{pycode}[chapter_2]
+name = 'chapter_2'
+ch1 = texfigure.Manager(
+    pytex,
+    os.path.join('.', name),
+    number=2,
+    **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
+)
+\end{pycode}
+
+This is the chapter on coronal loops
+
+\section{Energy Balance}
+
+\section{Scaling Laws}
+
+RTV, Martens
+
+\section{Hydrostatic Solutions}
+
+Show some basic hydrostatic solutions, some more complicated ones
+
+\section{Hydrodynamics}
+
+Do we need to derive the hydrodynamic equations?
+
+Discuss HYDRAD in here
+
+\section{The EBTEL Model}
+
+Derive normal and two-fluid EBTEL equations, show examples
+
+\section{Summary}

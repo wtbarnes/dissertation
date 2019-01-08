@@ -79,7 +79,10 @@ See Rice University thesis formatting guidelines [here](https://graduate.rice.ed
 10. Appendix
   * fiasco
 
-Should there be a chapter for Barnes et al. (2016b)? This fits theme somewhat: first we look for hot plasma using simplified models. We find that it is hard to diagnose heating frequency via hot plasma. Then, we use more advanced models to search for signatures of heating frequency in the cooler plasma. This decision can be made towards the end.
+### Notes
+
+* Should there be a chapter for Barnes et al. (2016b)? This fits theme somewhat: first we look for hot plasma using simplified models. We find that it is hard to diagnose heating frequency via hot plasma. Then, we use more advanced models to search for signatures of heating frequency in the cooler plasma. This decision can be made towards the end.
+* Should there be a separate chapter on formation of spectra and diagnostics? Good logical separation. Diagnostics chapter would be: hot plasma, density diagnostics, DEM/EM, and timelags
 
 ## Examples
 

@@ -25,7 +25,7 @@
 \ifsetCustomFont
   % Set your custom font here and use `customfont' in options. Leave empty to
   % load computer modern font (default LaTeX font).
-  %\RequirePackage{helvet}
+  \RequirePackage{}
 
   % For use with XeLaTeX
   %  \setmainfont[
@@ -44,10 +44,40 @@
 % *****************************************************************************
 % **************************** Custom Packages ********************************
 
-% ************************* Algorithms and Pseudocode **************************
+% ************************* Algorithms and Pseudocode *************************
 
 %\usepackage{algpseudocode}
 
+% ************************* PythonTeX *****************************************
+
+\usepackage{pythontex}
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% PythonTeX Bug Fix % % % % % % % % % % % % % % % % % % % % % % % %
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+% pytexbug fix for context in customcode.
+\makeatletter
+\renewenvironment{pythontexcustomcode}[2][begin]{%
+	\VerbatimEnvironment
+	\Depythontex{env:pythontexcustomcode:om:n}%
+	\ifstrequal{#1}{begin}{}{%
+		\ifstrequal{#1}{end}{}{\PackageError{\pytx@packagename}%
+			{Invalid optional argument for pythontexcustomcode}{}
+		}%
+	}%
+	\xdef\pytx@type{CC:#2:#1}%
+	\edef\pytx@cmd{code}%
+	% PATCH \def\pytx@context{}%
+	\pytx@SetContext
+	% END PATCH
+	\def\pytx@group{none}%
+	\pytx@BeginCodeEnv[none]}%
+{\end{VerbatimOut}%
+\setcounter{FancyVerbLine}{\value{pytx@FancyVerbLineTemp}}%
+\stepcounter{\pytx@counter}%
+}%
+\makeatother
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+\setpythontexcontext{figurewidth=\the\columnwidth}
 
 % ********************Captions and Hyperreferencing / URL **********************
 
@@ -84,7 +114,7 @@
 
 
 % *********************************** SI Units *********************************
-\usepackage{siunitx} % use this package module for SI units
+%\usepackage{siunitx} % use this package module for SI units
 
 
 % ******************************* Line Spacing *********************************

@@ -1,7 +1,4 @@
-% ******************************* PhD Thesis Template **************************
-% Please have a look at the README.md file for info on how to use the template
-
-\documentclass[letterpaper,12pt,times,authoryear,print,oneside,custommargin]{PhDThesisPSnPDF}
+\documentclass[letterpaper,12pt,customfont,authoryear,print,oneside,custommargin]{PhDThesisPSnPDF}
 
 % ******************************************************************************
 % ******************************* Class Options ********************************
@@ -109,10 +106,9 @@
 % ******************************** Front Matter ********************************
 \begin{document}
 
+\input{pytexrc} % PythonTex/TexFigure setup
 \frontmatter
-
 \maketitle
-
 \include{front_matter/abstract}
 \include{front_matter/acknowledgement}
 \include{front_matter/dedication}
@@ -120,9 +116,7 @@
 % *********************** Adding TOC and List of Figures ***********************
 
 \tableofcontents
-
 \listoffigures
-
 \listoftables
 
 % \printnomenclature[space] space can be set as 2em between symbol and description
@@ -133,7 +127,7 @@
 % ******************************** Main Matter *********************************
 \mainmatter
 
-%\include{Chapter1/chapter1}
+\include{chapter_1/text}
 %\include{Chapter2/chapter2}
 %\include{Chapter3/chapter3}
 %\include{Chapter4/chapter4}
@@ -141,32 +135,11 @@
 %\include{Chapter6/chapter6}
 %\include{Chapter7/chapter7}
 
-
-
-% ********************************** Back Matter *******************************
-% Backmatter should be commented out, if you are using appendices after References
-%\backmatter
-
 % ********************************** Bibliography ******************************
 \begin{spacing}{0.9}
-
-% To use the conventional natbib style referencing
-% Bibliography style previews: http://nodonn.tipido.net/bibstyle.php
-% Reference styles: http://sites.stat.psu.edu/~surajit/present/bib.htm
-
 \bibliographystyle{aasjournal}
 \cleardoublepage
-\bibliography{references} % Path to your References.bib file
-
-
-% If you would like to use BibLaTeX for your references, pass `custombib' as
-% an option in the document class. The location of 'reference.bib' should be
-% specified in the preamble.tex file in the custombib section.
-% Comment out the lines related to natbib above and uncomment the following line.
-
-%\printbibliography[heading=bibintoc, title={References}]
-
-
+\bibliography{references}
 \end{spacing}
 
 % ********************************** Appendices ********************************

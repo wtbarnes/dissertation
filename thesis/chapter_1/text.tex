@@ -1,0 +1,17 @@
+% Text for chapter 1
+\chapter{Introduction}\label{ch:introduction}
+
+% Figure manager for Chapter 1
+\begin{pycode}[chapter_1]
+name = 'chapter_1'
+ch1 = texfigure.Manager(
+    pytex,
+    os.path.join('.', name),
+    number=1,
+    **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
+)
+\end{pycode}
+
+This is the introduction to my PhD thesis
+
+\citet{bradshaw_cooling_2010} % until I have real citations

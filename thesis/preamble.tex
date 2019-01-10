@@ -44,49 +44,17 @@
 % *****************************************************************************
 % **************************** Custom Packages ********************************
 
-% ************************* Algorithms and Pseudocode *************************
-
 %\usepackage{algpseudocode}
-
-% ************************* PythonTeX *****************************************
-
-\usepackage{pythontex}
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% PythonTeX Bug Fix % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
-% pytexbug fix for context in customcode.
-\makeatletter
-\renewenvironment{pythontexcustomcode}[2][begin]{%
-	\VerbatimEnvironment
-	\Depythontex{env:pythontexcustomcode:om:n}%
-	\ifstrequal{#1}{begin}{}{%
-		\ifstrequal{#1}{end}{}{\PackageError{\pytx@packagename}%
-			{Invalid optional argument for pythontexcustomcode}{}
-		}%
-	}%
-	\xdef\pytx@type{CC:#2:#1}%
-	\edef\pytx@cmd{code}%
-	% PATCH \def\pytx@context{}%
-	\pytx@SetContext
-	% END PATCH
-	\def\pytx@group{none}%
-	\pytx@BeginCodeEnv[none]}%
-{\end{VerbatimOut}%
-\setcounter{FancyVerbLine}{\value{pytx@FancyVerbLineTemp}}%
-\stepcounter{\pytx@counter}%
-}%
-\makeatother
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-\setpythontexcontext{figurewidth=\the\columnwidth}
+\usepackage{proofread}
 
 % ********************Captions and Hyperreferencing / URL **********************
 
+\usepackage{hyperref}
 % Captions: This makes captions of figures use a boldfaced small font.
 %\RequirePackage[small,bf]{caption}
 
 \RequirePackage[labelsep=space,tableposition=top]{caption}
 \renewcommand{\figurename}{Fig.} %to support older versions of captions.sty
-
 
 % *************************** Graphics and figures *****************************
 
@@ -176,9 +144,16 @@
 % ******************************* Nomenclature *********************************
 
 % To change the name of the Nomenclature section, uncomment the following line
-
 %\renewcommand{\nomname}{Symbols}
 
+%%%%%%%%%%%%% Nomenclature symbol key %%%%%%%%%%%%%%%%%%%%%
+% first letter Z is for Acronyms 
+% first letter A is for Roman symbols
+% first letter G is for Greek Symbols
+% first letter X is for Other Symbols
+% first letter R is for superscripts
+% first letter S is for subscripts
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % ********************************* Appendix ***********************************
 

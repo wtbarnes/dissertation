@@ -1,4 +1,4 @@
-\documentclass[letterpaper,12pt,fourier,authoryear,print,oneside,custommargin]{PhDThesisPSnPDF}
+\documentclass[letterpaper,12pt,fourier,authoryear,print,oneside,custommargin,index]{PhDThesisPSnPDF}
 
 % ******************************************************************************
 % ******************************* Class Options ********************************
@@ -78,6 +78,7 @@
 % ********************************** Preamble **********************************
 % Preamble: Contains packages and user-defined commands and settings
 \input{preamble}
+\input{pythontex} % PythonTex/TexFigure setup
 
 % ************************ Thesis Information & Meta-data **********************
 % Thesis title and author information, refernce file for biblatex
@@ -106,37 +107,32 @@
 % ******************************** Front Matter ********************************
 \begin{document}
 
-\input{pytexrc} % PythonTex/TexFigure setup
 \frontmatter
 \maketitle
-\include{front_matter/abstract}
-\include{front_matter/acknowledgement}
-\include{front_matter/dedication}
+\include{frontmatter/abstract}
+\include{frontmatter/acknowledgement}
+\include{frontmatter/dedication}
 
 % *********************** Adding TOC and List of Figures ***********************
 
 \tableofcontents
 \listoffigures
 \listoftables
-
-% \printnomenclature[space] space can be set as 2em between symbol and description
-%\printnomenclature[3em]
-
 \printnomenclature
 
 % ******************************** Main Matter *********************************
 \mainmatter
 
-\include{chapter_1/text}
-\include{chapter_2/text}
-\include{chapter_3/text}
+\include{chapter1/text}
+\include{chapter2/text}
+\include{chapter3/text}
 
 % ********************************** Bibliography ******************************
-\begin{spacing}{0.9}
+\begin{singlespace}
 \bibliographystyle{aasjournal}
 \cleardoublepage
 \bibliography{references}
-\end{spacing}
+\end{singlespace}
 
 % ********************************** Appendices ********************************
 
@@ -145,6 +141,6 @@
 %\end{appendices}
 
 % *************************************** Index ********************************
-%\printthesisindex % If index is present
+\printthesisindex % If index is present
 
 \end{document}

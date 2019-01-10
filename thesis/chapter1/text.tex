@@ -2,8 +2,8 @@
 \chapter{Introduction}\label{ch:introduction}
 
 % Figure manager for Chapter 1
-\begin{pycode}[chapter_1]
-name = 'chapter_1'
+\begin{pycode}[chapter1]
+name = 'chapter1'
 ch1 = texfigure.Manager(
     pytex,
     os.path.join('.', name),
@@ -18,19 +18,14 @@ This is the introduction to my PhD thesis
 
 Here is a test plot
 
-\begin{pycode}[chapter_1]
-fig = plt.figure(figsize=texfigure.figsize(
-    pytex,
-    scale=0.5,
-    height_ratio=1,
-))
+\begin{pycode}[chapter1]
+fig = plt.figure(figsize=texfigure.figsize(pytex,scale=0.5,height_ratio=1,))
 ax = fig.gca()
 x = np.linspace(-4*np.pi,4*np.pi,1000)
 ax.plot(x,np.sin(x))
-ax.set_xlabel(r'$x$')
+ax.set_xlabel(r'$x$ [Some normal text]')
 ax.set_ylabel(r'$\sin{(x)}$')
-fig_test = ch1.save_figure('test')
+fig_test = ch1.save_figure('test', fext='.pgf')
 fig_test.caption = r'This is a test of TexFigure in my thesis'
-fig_test.figure_width = r'0.5\columnwidth'
 \end{pycode}
-\py[chapter_1]|fig_test|
+\py[chapter1]|fig_test|

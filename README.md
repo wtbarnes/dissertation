@@ -46,7 +46,12 @@ See Rice University thesis formatting guidelines [here](https://graduate.rice.ed
     * Theory
     * Simple Example
     * AIA Temperature Response example
-4. synthesizAR: A Python framework for forward-modeling optically-thin emission
+4. Inferring Heating Properties from "Hot" Active Region Plasma Heated by Single Nanoflares
+  * Content of Barnes et al. (2016a)
+  * Use of hot plasma as a diagnostic for presence of nanoflares
+  * It is hard!
+  * Let's try more advanced forward modeling and looking at different diagnostics...
+5. synthesizAR: A Python framework for forward-modeling optically-thin emission (should this be in the appendix?)
   * Magnetograms
   * Field extrapolations (Should this go somewhere else? It's own chapter?)
     * Potential versus non-linear force-free
@@ -59,13 +64,13 @@ See Rice University thesis formatting guidelines [here](https://graduate.rice.ed
   * Binning intensities
   * (show code examples and illustrate with an example using the Martens scaling laws)
   * (highlight that this is open-source, documented, tested, pure Python)
-5. Modeling Nanoflare Heating Frequency in AR NOAA 1158
+6. Modeling Nanoflare Heating Frequency in AR NOAA 1158
   * Introduction
   * Heating model
   * Intensities
   * Timelags
   * EM slopes
-6. Classifying Nanoflare Heating Frequency in AR NOAA 1158
+7. Classifying Nanoflare Heating Frequency in AR NOAA 1158
   * Introduction
   * Observations
   * EM Slopes
@@ -73,16 +78,11 @@ See Rice University thesis formatting guidelines [here](https://graduate.rice.ed
   * Classification of slopes and timelags
     * Detailed description of random forest classification
     * Results
-7. ~~How does varying the LOS affect the distribution of observables?~~
 8. A Probabilistic Heating Model for Bundles of Coronal Loops
 9. Conclusions
 10. Appendix
+  * Complete timelag and cross-correlation results from paper 1 (maps for all channel pairs)
   * fiasco
-
-### Notes
-
-* Should there be a chapter for Barnes et al. (2016b)? This fits theme somewhat: first we look for hot plasma using simplified models. We find that it is hard to diagnose heating frequency via hot plasma. Then, we use more advanced models to search for signatures of heating frequency in the cooler plasma. This decision can be made towards the end.
-* Should there be a separate chapter on formation of spectra and diagnostics? Good logical separation. Diagnostics chapter would be: hot plasma, density diagnostics, DEM/EM, and timelags
 
 ## Examples
 

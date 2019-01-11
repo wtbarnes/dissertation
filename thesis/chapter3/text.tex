@@ -2,6 +2,7 @@
 \chapter{Emission Diagnostics of Coronal Heating}\label{ch:diagnostics}
 
 % Figure manager for Chapter 3
+% spell-checker: disable %
 \begin{pycode}[chapter_3]
 name = 'chapter3'
 ch1 = texfigure.Manager(
@@ -11,6 +12,7 @@ ch1 = texfigure.Manager(
     **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
 )
 \end{pycode}
+% spell-checker: enable %
 
 Diagnosing the properties of the underlying energy deposition in the corona is nontrivial as measurements are limited to remote sensing data from ground- and space-based instruments. Additionally, until the recently launched Parker Solar Probe mission \citep{fox_solar_2016}, \textit{in situ} measurements were limited to the solar wind at 1 AU. Thus, inferring the dynamics and energy budget of the coronal plasma necessitates the use of multiple diagnostics computed from the observed coronal emission at multiple wavelengths. In \autoref{sec:line_formation}, I discuss the physics of the formation of the optically thin solar spectrum. In \autoref{sec:dem}, I give an overview of the differential emission measure distribution (DEM) and discuss how the DEM can be used to understand the frequency of energy deposition in the solar atmosphere. Lastly, in \autoref{sec:timelag}, I discuss the time-lag analysis technique and show how it can be used to visualize large-scale cooling patterns in active regions.
 

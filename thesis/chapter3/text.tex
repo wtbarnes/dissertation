@@ -12,7 +12,7 @@ ch1 = texfigure.Manager(
 )
 \end{pycode}
 
-Diagnosing the properties of the underlying energy deposition in the corona is nontrivial as measurements are limited to remote sensing data from ground- and space-based instruments. Additionally, until the recently launched Parker Solar Probe mission \citep{fox_solar_2016}, \textit{in situ} measurements were limited to the solar wind at 1 AU. Thus, inferring the dynamics and energy budget of the coronal plasma necessitates the use of multiple diagnostics computed from the observed coronal emission at multiple wavelengths. In \autoref{sec:line_formation}, I discuss the physics of the formation of the optically thin solar spectrum. In \autoref{sec:dem}, I give an overview of the differential emission measure distribution (DEM) and discuss how the DEM can be used to understand the frequency of energy deposition in the solar atmosphere. Lastly, in \autoref{sec:timelag}, I discuss the timelag analysis technique and show how it can be used to visualize large-scale cooling patterns in active regions.
+Diagnosing the properties of the underlying energy deposition in the corona is nontrivial as measurements are limited to remote sensing data from ground- and space-based instruments. Additionally, until the recently launched Parker Solar Probe mission \citep{fox_solar_2016}, \textit{in situ} measurements were limited to the solar wind at 1 AU. Thus, inferring the dynamics and energy budget of the coronal plasma necessitates the use of multiple diagnostics computed from the observed coronal emission at multiple wavelengths. In \autoref{sec:line_formation}, I discuss the physics of the formation of the optically thin solar spectrum. In \autoref{sec:dem}, I give an overview of the differential emission measure distribution (DEM) and discuss how the DEM can be used to understand the frequency of energy deposition in the solar atmosphere. Lastly, in \autoref{sec:timelag}, I discuss the time-lag analysis technique and show how it can be used to visualize large-scale cooling patterns in active regions.
 
 \nomenclature[z-au]{AU}{astronomical unit}
 \nomenclature[z-dem]{DEM}{differential emission measure}
@@ -44,20 +44,47 @@ where $n_e$ is the electron density, $\textup{Ab}(X)=n_X/n_H$ is the abundance o
 \begin{equation}\label{eq:emissivity_simplified}
     P(\lambda_{ji}) = 0.83\frac{hc}{\lambda_{ji}}\textup{Ab}(X)f_{X,k}N_{X,k,j}A_{ji}n_e.
 \end{equation}
-Both $\textup{Ab}(X)$ and $A_{ji}$, which is a function of electron temperature, $T_e$, can be looked up in the CHIANTI atomic database \citep{dere_chianti_1997,young_chianti_2016}. $N_{X,k,j}$ is a function of both $T_e$ and $n_e$ and can be computed by assuming the the excitation and deexcitation processes are in equilibrium. This is discussed in \autoref{subsec:collisional_excitation} and \autoref{subsec:level_pops}. $f_{X,k}$ is primarily a function of $T_e$ and is discussed in \autoref{subsec:ionization_recombination} and \autoref{subsec:ioneq_versus_nei}. Thus, for a given distribution of $T_e$ and $n_e$ along the LOS, we can compute the intensity of a transition $\lambda_{ji}$ using \autoref{eq:emissivity_simplified} and \autoref{eq:intensity}.
-
-\nomenclature[a-h]{$h$}{Planck constant}
-\nomenclature[a-c]{$c$}{speed of light in a vacuum}
-\nomenclature[g-nu]{$\nu$}{photon frequency}
-\nomenclature[s-k]{$k$}{ionization stage}
-\nomenclature[z-los]{LOS}{line-of-sight}
+Both $\textup{Ab}(X)$ and $A_{ji}$, which is a function of electron temperature, $T_e$, can be looked up in the CHIANTI atomic database (see \autoref{subsec:chianti}). $N_{X,k,j}$ is a function of both $T_e$ and $n_e$ and can be computed by assuming the the excitation and deexcitation processes are in equilibrium. This is discussed in \autoref{subsec:collisional_excitation} and \autoref{subsec:level_pops}. $f_{X,k}$ is primarily a function of $T_e$ and is discussed in \autoref{subsec:ionization_recombination} and \autoref{subsec:ioneq_versus_nei}. Thus, for a given distribution of $T_e$ and $n_e$ along the LOS, we can compute the intensity of a transition $\lambda_{ji}$ using \autoref{eq:emissivity_simplified} and \autoref{eq:intensity}.
 
 \subsection{Collision Excitation of Atomic Levels}\label{subsec:collisional_excitation}
 
-For a photon to be produced by the spontaneous radiative decay from excited state $j$ to lower energy state $i$ (see \autoref{eq:radiative_decay}), the ion must first be excited into state $j$. In the solar atmosphere, the most important excitation process is the inelastic collisions between ions and free electrons,
+For a photon to be produced by spontaneous radiative decay from excited state $j$ to lower energy state $i$ (see \autoref{eq:radiative_decay}), the ion must first be excited into state $j$. In the solar atmosphere, the most important excitation process is the inelastic collisions between ions and free electrons,
 \begin{equation}\label{eq:inelastic_collisions}
     X_{k,i} + e(E_{\textup{initial}}) \to X_{k,j} + e(E_{\textup{final}})
 \end{equation}
+where $e$ denotes the free electron and $E_{\textup{initial}}$ and $E_{\textup{final}}$ are the initial and final energies of the electron, respectively \citep{phillips_ultraviolet_2008}. The initial and final energies of the ion are $E_i$ and $E_j$, respectively. If $E_i<E_j$, $X_k$ has been \textit{collisionally excited} from a lower to a higher energy state and the free electron has lost an amount of energy equal to the separation between these two levels,
+\begin{equation*}
+    E_{\textup{final}} - E_{\textup{initial}}  = E_i - E_j.
+\end{equation*}
+Conversely, if $E_i>E_j$, $X_k$ is \textit{collisionally deexcited} from $i$ to $j$ and the free electron gains an amount of energy equal to $E_i - E_j$.
+
+In order to understand how energy levels are populated and depopulated by collisions, it is necessary to compute the rate at which collisions occur in a plasma with electron temperature $T_e$ for an ion $X_k$. I will now derive the excitation and deexcitation rate coefficients. This derivation closely follows the treatment in sections 3.2 and 3.3 of \citet{del_zanna_solar_2018} as well as section 4.2 of \citet{phillips_ultraviolet_2008}.
+
+The rate coefficient for collisional excitation is given by,
+\begin{equation}\label{eq:rate_coefficient}
+    C^e_{ij} = \int_{v_0}^{\infty}\textup{d}v\,v\sigma_{ij}(v)f(v),
+\end{equation}
+where $v$ is the electron velocity, $\sigma_{ij}(v)$ is the cross-section for inelastic collisions between the ion and electron, and $f(v)$ is the velocity distribution function of the electrons. Additionally, $v_0$ is the threshold velocity such that $m_ev_0^2/2 = E_j - E_i$, where $m_e$ is the mass of the electron. Any electron with $v<v_0$ will not be able to excite atom from level $i$ to $j$. It is commonly assumed that the distribution of free electrons in the solar atmosphere is in thermodynamic equilibrium such that it is well-described by a Maxwell-Boltzmann distribution,
+\begin{equation}\label{eq:maxwellian}
+    f(v) = 4\pi v^2 \left(\frac{m_e}{2\pi k_BT_e}\right)^{3/2}\exp{\left(-\frac{m_ev^2}{2k_BT_e}\right)},
+\end{equation}
+where $k_B$ is the Boltzmann constant. Plugging \autoref{eq:maxwellian} into \autoref{eq:rate_coefficient},
+\begin{equation*}
+    C^e_{ij} =  4\pi\left(\frac{m_e}{2\pi k_BT_e}\right)^{3/2}\int_{v_0}^{\infty}\textup{d}v\,v^3\sigma_{ij}(v)\exp{\left(-\frac{m_ev^2}{2k_BT_e}\right)},
+\end{equation*}
+and making the change of variables $E=m_ev^2/2$,
+\begin{align}\label{eq:rate_coefficient_e}
+    C^e_{ij} &= 4\pi\left(\frac{m_e}{2\pi k_BT_e}\right)^{3/2}\int_{E_0}^{\infty}\textup{d}E\,\frac{2E}{m_e^2}\sigma_{ij}(E)\exp{\left(-\frac{E}{k_BT_e}\right)},\nonumber\\
+    &= \sqrt{\frac{8}{\pi m_e}}(k_BT_e)^{-3/2}\int_{E_0}^{\infty}\textup{d}E\,E\sigma_{ij}(E)\exp{\left(-\frac{E}{k_BT_e}\right)},\nonumber\\
+    &= \sqrt{\frac{8k_BT_e}{\pi m_e}}\int_{E_0}^{\infty}\textup{d}\left(\frac{E}{k_BT_e}\right)\,\frac{E}{k_BT_e}\sigma_{ij}(E)\exp{\left(-\frac{E}{k_BT_e}\right)},
+\end{align}
+where $E_0=mv_0^2/2=E_j-E_i$ is the minimum electron energy required to excite the ion from $i$ to $j$.
+
+The cross-section for excitation by inelastic collisions can be expressed as,
+\begin{equation}\label{eq:cross_section}
+    \sigma_{ij}(E) = \pi a_0^2 \Omega_{ij}(E)\frac{I_H}{\omega_iE},
+\end{equation}
+where $a_0$ is the Bohr radius, $I_H$ is the ionization potential of hydrogen, $\omega_i$ is the statistical weight of level $i$, and $\Omega_{ij}$ is the dimensionless collision strength. It should be noted that $\Omega_{ij}$ is symmetric such that $\Omega_{ij}(E)=\Omega_{ji}(E - (E_j - E_i))$.
 
 \hilite{Production of satellite lines via dielectronic recombination important for levels above the ionization potential}
 
@@ -69,7 +96,11 @@ For a photon to be produced by the spontaneous radiative decay from excited stat
 
 \subsection{Equilibrium versus Nonequilibrium Ionization}\label{subsec:ioneq_versus_nei}
 
-\nomenclature[z-nei]{NEI}{nonequilibrium ionization}
+\subsection{The CHIANTI Atomic Database}\label{subsec:chianti}
+
+The CHIANTI atomic database \citep{dere_chianti_1997,young_chianti_1998,landi_chianti_1999,dere_chianti-atomic_2001,landi_chianti-atomic_2002,young_chianti-atomic_2003,landi_chianti-atomic_2006,landi_chianti-atomic_2006-1,dere_chianti_2009,landi_chiantiatomic_2009,young_chiantiatomic_2009,landi_chiantiatomic_2012,landi_chiantiatomic_2013,del_zanna_chianti_2015,young_chianti_2016} is an essential tool for performing spectroscopy of optically-thin astrophysical plasmas such as the solar corona. The database provides information on atomic transitions for all ions of over 30 different elements, from hydrogen to zinc. For a given ion, CHIANTI provides wavelengths and energies (among other information) for many thousands of atomic transitions as well as various derived quantities, including the ionization and recombination rates, energy level populations, and spectral line intensities. Additionally, CHIANTI provides multiple measurements of elemental abundances in both the corona and photosphere. Data and routines are also included for computing the free-free and free-bound continuum emission. 
+
+Began in 1995, CHIANTI is an international collaboration between the University of Cambridge, the University of Michigan, and George Mason University and is an invaluable asset to the solar physics community. It is primarily used in the study of the solar atmosphere though it has broader astrophysical applications as well \citep[see Figure 4 of][]{young_chianti_2016}. Users typically interact with the database via the provided Interactive Data Language (IDL)routines or the more recently-released ChiantiPy package \citep{landi_chiantiatomic_2012,barnes_chiantipy_2017}, an interface to CHIANTI implemented in the Python programming language. All work presented in this thesis makes heavy use of the CHIANTI atomic database via the fiasco Python package (see \autoref{ap:fiasco}).
 
 \section{Continuum Emission}\label{sec:continuum}
 
@@ -81,8 +112,33 @@ For a photon to be produced by the spontaneous radiative decay from excited stat
 
 \section{The Differential Emission Measure Distribution}\label{sec:dem}
 
-\section{Timelag Analysis}\label{sec:timelag}
+\hilite{Write intensity in terms of contribution function; define contribution function; define DEM}
 
-Theory, show example with Gaussian pulses, discuss AIA channel sensitivity, relate timelag to cooling time
+\subsection{Inversion Methods}
+
+\subsection{The Emission Measure Slope}
+
+\subsection{Inferring the Presence of Very Hot Plasma}
+
+\section{Time-lag Analysis}\label{sec:timelag}
+
+\hilite{Theory, show example with Gaussian pulses, discuss AIA channel sensitivity, relate time lag to cooling time}
+
+\subsection{Cross-correlation}
+
+\subsection{Temperature Sensitivity of the AIA Passbands}
+
+\subsection{Time lag between AIA Channel Pairs}
 
 \section{Summary}
+
+% Nomenclature
+\nomenclature[a-h]{$h$}{Planck constant}
+\nomenclature[a-c]{$c$}{speed of light in a vacuum}
+\nomenclature[g-nu]{$\nu$}{photon frequency}
+\nomenclature[s-k]{$k$}{ionization stage}
+\nomenclature[z-los]{LOS}{line-of-sight}
+\nomenclature[z-nei]{NEI}{nonequilibrium ionization}
+\nomenclature[a-te]{$T_e$}{electron temperature}
+\nomenclature[a-ne]{$n_e$}{electron density}
+\nomenclature[a-kb]{$k_B$}{Boltzmann constant}

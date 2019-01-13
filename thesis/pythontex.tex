@@ -35,6 +35,7 @@
 %% Setup PythonTeX and TeXFigure
 \begin{pythontexcustomcode}{py}
 import os
+from fractions import Fraction
 
 import texfigure
 pytex.formatter = texfigure.repr_latex_formatter
@@ -66,7 +67,7 @@ plt.rcParams['font.serif'] = 'Utopia'
 plt.rcParams['text.usetex'] = True
 #plt.rcParams['axes.titlesize'] = 12
 #plt.rcParams['axes.labelsize'] = 12
-#plt.rcParams['legend.fontsize'] = 10
+plt.rcParams['legend.fontsize'] = 10
 #plt.rcParams['xtick.labelsize'] = 10
 #plt.rcParams['ytick.labelsize'] = 10
 plt.rcParams['xtick.major.pad'] = 3

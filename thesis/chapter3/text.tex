@@ -3,9 +3,9 @@
 
 % Figure manager for Chapter 3
 % spell-checker: disable %
-\begin{pycode}[chapter_3]
+\begin{pycode}[chapter3]
 name = 'chapter3'
-ch1 = texfigure.Manager(
+ch3 = texfigure.Manager(
     pytex,
     os.path.join('.', name),
     number=3,
@@ -16,8 +16,11 @@ ch1 = texfigure.Manager(
 
 Diagnosing the properties of the underlying energy deposition in the corona is nontrivial as measurements are limited to remote sensing data from ground- and space-based instruments. Additionally, until the recently launched Parker Solar Probe mission \citep{fox_solar_2016}, \textit{in situ} measurements were limited to the solar wind at 1 AU. Thus, inferring the dynamics and energy budget of the coronal plasma necessitates the use of multiple diagnostics computed from the observed coronal emission at multiple wavelengths. In \autoref{sec:line_formation}, I discuss the physics of the formation of the optically thin solar spectrum. In \autoref{sec:dem}, I give an overview of the differential emission measure distribution (DEM) and discuss how the DEM can be used to understand the frequency of energy deposition in the solar atmosphere. Lastly, in \autoref{sec:timelag}, I discuss the time-lag analysis technique and show how it can be used to visualize large-scale cooling patterns in active regions.
 
-\nomenclature[z-au]{AU}{astronomical unit}
-\nomenclature[z-dem]{DEM}{differential emission measure}
+\section{The CHIANTI Atomic Database}\label{subsec:chianti}
+
+The CHIANTI atomic database \citep{dere_chianti_1997,young_chianti_1998,landi_chianti_1999,dere_chianti-atomic_2001,landi_chianti-atomic_2002,young_chianti-atomic_2003,landi_chianti-atomic_2006,landi_chianti-atomic_2006-1,dere_chianti_2009,landi_chiantiatomic_2009,young_chiantiatomic_2009,landi_chiantiatomic_2012,landi_chiantiatomic_2013,del_zanna_chianti_2015,young_chianti_2016} is an essential tool for performing spectroscopy of optically-thin astrophysical plasmas such as the solar corona. It is primarily used in the study of the solar atmosphere though it has broader astrophysical applications as well \citep[see Figure 4 of][]{young_chianti_2016}. The database provides information on atomic transitions for all ions of over 30 different elements, from hydrogen to zinc. For a given ion, CHIANTI provides wavelengths and energies (among other information) for many thousands of atomic transitions as well as various derived quantities, including the ionization and recombination rates, energy level populations, and spectral line intensities. Additionally, CHIANTI provides multiple measurements of elemental abundances in both the corona and photosphere. Data and routines are also included for computing the free-free and free-bound continuum emission. 
+
+The CHIANTI project is an international collaboration between the University of Cambridge, the University of Michigan, and George Mason University and is an invaluable asset to the solar physics community. Version 1.0 of the database was released in 1995 and at the time of writing, the current version is 8.0.7. Users typically interact with the database via the provided Interactive Data Language (IDL) routines or the more recently-released ChiantiPy package \citep{landi_chiantiatomic_2012,barnes_chiantipy_2017}, an interface to CHIANTI implemented in the Python programming language. All work presented in this thesis makes heavy use of the CHIANTI atomic database via the fiasco Python package (see \autoref{ap:fiasco}).
 
 \section{Spectral Line Formation}\label{sec:line_formation}
 
@@ -48,7 +51,7 @@ where $n_e$ is the electron density, $\textup{Ab}(X)=n_X/n_H$ is the abundance o
 \end{equation}
 Both $\textup{Ab}(X)$ and $A_{ji}$, which is a function of electron temperature, $T_e$, can be looked up in the CHIANTI atomic database (see \autoref{subsec:chianti}). $N_{X,k,j}$ is a function of both $T_e$ and $n_e$ and can be computed by assuming the the excitation and deexcitation processes are in equilibrium. This is discussed in \autoref{subsec:collisional_excitation} and \autoref{subsec:level_pops}. $f_{X,k}$ is primarily a function of $T_e$ and is discussed in \autoref{subsec:ionization_recombination} and \autoref{subsec:ioneq_versus_nei}. Thus, for a given distribution of $T_e$ and $n_e$ along the LOS, we can compute the intensity of a transition $\lambda_{ji}$ using \autoref{eq:emissivity_simplified} and \autoref{eq:intensity}.
 
-\subsection{Collision Excitation of Atomic Levels}\label{subsec:collisional_excitation}
+\subsection{Collisional Excitation of Atomic Levels}\label{subsec:collisional_excitation}
 
 For a photon to be produced by spontaneous radiative decay from excited state $j$ to lower energy state $i$ (see \autoref{eq:radiative_decay}), the ion must first be excited into state $j$. In the solar atmosphere, the most important excitation process is the inelastic collisions between ions and free electrons,
 \begin{equation}\label{eq:inelastic_collisions}
@@ -60,13 +63,15 @@ where $e$ denotes the free electron and $E_{\textup{initial}}$ and $E_{\textup{f
 \end{equation*}
 Conversely, if $E_i>E_j$, $X_k$ is \textit{collisionally deexcited} from $i$ to $j$ and the free electron gains an amount of energy equal to $E_i - E_j$.
 
-In order to understand how energy levels are populated and depopulated by collisions, it is necessary to compute the rate at which collisions occur in a plasma with electron temperature $T_e$ for an ion $X_k$. I will now derive the excitation and deexcitation rate coefficients. This derivation closely follows the treatment in sections 3.2 and 3.3 of \citet{del_zanna_solar_2018} as well as section 4.2 of \citet{phillips_ultraviolet_2008}.
+\hilite{Production of satellite lines via dielectronic recombination important for levels above the ionization potential}
+
+In order to understand how energy levels are populated and depopulated by collisions, it is necessary to compute the rate at which collisions occur in a plasma with electron temperature $T_e$ for an ion $X_k$. I will now derive the excitation and deexcitation rate coefficients. This derivation closely follows the treatment in sections 3.2 and 3.3 of \citet{del_zanna_solar_2018} as well as section 4.2 of \citet{phillips_ultraviolet_2008}.  
 
 The rate coefficient for collisional excitation is given by,
 \begin{equation}\label{eq:rate_coefficient}
     C^e_{ij} = \int_{v_0}^{\infty}\textup{d}v\,v\sigma_{ij}(v)f(v),
 \end{equation}
-where $v$ is the electron velocity, $\sigma_{ij}(v)$ is the cross-section for inelastic collisions between the ion and electron, and $f(v)$ is the velocity distribution function of the electrons. Additionally, $v_0$ is the threshold velocity such that $m_ev_0^2/2 = E_j - E_i$, where $m_e$ is the mass of the electron. Any electron with $v<v_0$ will not be able to excite atom from level $i$ to $j$. It is commonly assumed that the distribution of free electrons in the solar atmosphere is in thermodynamic equilibrium such that it is well-described by a Maxwell-Boltzmann distribution,
+where $v$ is the electron velocity, $\sigma_{ij}(v)$ is the cross-section for inelastic collisions between the ion and electron, and $f(v)$ is the velocity distribution function of the electrons. Additionally, $v_0$ is the threshold velocity such that $m_ev_0^2/2 = E_j - E_i$, where $m_e$ is the mass of the electron. Any electron with $v<v_0$ will not be able to excite atom from level $i$ to $j$. It is commonly assumed that the distribution of free electrons in the solar atmosphere is in thermodynamic equilibrium such that it is well-described by a Maxwell-Boltzmann distribution\footnote{Observations of non-thermal particles \citep[e.g][]{dzifcakova_diagnostics_2011} suggest that the distribution of free electrons in the solar corona may be better described by a $\kappa$-distribution. For more details see \citet{cranmer_suprathermal_2014} or the comprehensive review by \citet{dudik_nonequilibrium_2017}.},
 \begin{equation}\label{eq:maxwellian}
     f(v) = 4\pi v^2 \left(\frac{m_e}{2\pi k_BT_e}\right)^{3/2}\exp{\left(-\frac{m_ev^2}{2k_BT_e}\right)},
 \end{equation}
@@ -86,23 +91,82 @@ The cross-section for excitation by inelastic collisions can be expressed as,
 \begin{equation}\label{eq:cross_section}
     \sigma_{ij}(E) = \pi a_0^2 \Omega_{ij}(E)\frac{I_H}{\omega_iE},
 \end{equation}
-where $a_0$ is the Bohr radius, $I_H$ is the ionization potential of hydrogen, $\omega_i$ is the statistical weight of level $i$, and $\Omega_{ij}$ is the dimensionless collision strength. It should be noted that $\Omega_{ij}$ is symmetric such that $\Omega_{ij}(E)=\Omega_{ji}(E - (E_j - E_i))$.
+where $a_0$ is the Bohr radius, $I_H$ is the ionization potential of hydrogen, $\omega_i$ is the statistical weight of level $i$, and $\Omega_{ij}$ is the dimensionless collision strength. It should be noted that $\Omega_{ij}$ is symmetric such that $\Omega_{ij}(E)=\Omega(E^{\prime})$, where $E^{\prime}=E - E_{ij} = E - (E_j - E_i)$ is the final energy of the electron after it has been scattered. Plugging \autoref{eq:cross_section} into \autoref{eq:rate_coefficient_e},
+\begin{equation}
+    C^e_{ij} = I_Ha_0^2\sqrt{\frac{8\pi}{k_Bm_e}}\omega_i^{-1}T_e^{-1/2}\int_{E_0}^{\infty}\textup{d}\left(\frac{E}{k_BT_e}\right)\,\Omega_{ij}(E)\exp{\left(-\frac{E}{k_BT_e}\right)}.
+\end{equation}
+Exploiting the symmetry and making a change of variables to $E^{\prime}$ gives,
+\begin{align}\label{eq:rate_coefficient_final}
+    C^e_{ij} &= I_Ha_0^2\sqrt{\frac{8\pi}{k_Bm_e}}\omega_i^{-1}T_e^{-1/2}\int_{E_0}^{\infty}\textup{d}\left(\frac{E}{k_BT_e}\right)\,\Omega_{ji}(E^\prime)\exp{\left(-\frac{E}{k_BT_e}\right)} \nonumber\\
+    &= I_Ha_0^2\sqrt{\frac{8\pi}{k_Bm_e}}\omega_i^{-1}T_e^{-1/2}\int_{0}^{\infty}\textup{d}\left(\frac{E^\prime}{k_BT_e}\right)\,\Omega_{ji}(E^\prime)\exp{\left(-\frac{E^\prime + E_{ij}}{k_BT_e}\right)} \nonumber\\
+    &= I_Ha_0^2\sqrt{\frac{8\pi}{k_Bm_e}}T_e^{-1/2}\frac{\Upsilon_{ij}}{\omega_i}\exp{\left(-\frac{E_{ij}}{k_BT_e}\right)}
+\end{align}
+where the term $\Upsilon_{ij}$, originally introduced by \citet{seaton_electron_1953}, is the effective collision strength (or Maxwellian-averaged collision strength) and is defined as,
+\begin{equation}\label{eq:effective_collision_strength}
+    \Upsilon_{ij} = \int_{0}^{\infty}\textup{d}\left(\frac{E}{k_BT_e}\right)\,\Omega_{ji}(E)\exp{\left(-\frac{E}{k_BT_e}\right)}.
+\end{equation}
 
-\hilite{Production of satellite lines via dielectronic recombination important for levels above the ionization potential}
+In general, computing cross-sections for excitations by collisions with free-electrons is very difficult and time consuming and requires the use of sophisticated atomic codes which properly account for the energy levels of the target ion and the detailed physics of the interaction between the free electron and target ion \citep[][section 4.2.3]{phillips_ultraviolet_2008,bautista_theoretical_2000}. \citet{burgess_analysis_1992} computed fit coefficients to $\Upsilon$ as a function of $T_e$ in terms of compact, dimensionless variables for a large number of atomic transitions. Reduced fit parameters for $\Upsilon$ are provided in the CHIANTI atomic database using the methods of \citet{burgess_analysis_1992} for all relevant transitions such that effective collision strengths can be efficiently computed for arbitrary $T_e$. \autoref{fig:upsilon} shows $\Upsilon$ as a function of $T$ for several selected transitions of Fe XII.
+
+% spell-checker: disable %
+\begin{pycode}[chapter3]
+fig = plt.figure(figsize=texfigure.figsize(pytex,scale=0.75,))
+ax = fig.gca()
+T = np.logspace(5.5,7.5,100) * u.K
+ion = fiasco.Ion('Fe 12', T)
+ups = ion.effective_collision_strength()
+index = np.where(np.logical_and(ups[0,:] < 1,ups[-1,:]>1e-3))[0][:100]
+ax.plot(T, ups[:, index], color=PALETTE[0], alpha=0.25)
+ax.set_xlabel(r'$T$ [K]')
+ax.set_ylabel(r'$\Upsilon$')
+ax.set_xscale('log')
+ax.set_yscale('log')
+ax.set_xlim(T[[0,-1]].value)
+ax.set_ylim(1e-3,1)
+tfig = ch3.save_figure('upsilon', fext='.pgf')
+tfig.caption = r'Effective collision strength, $\Upsilon$, as a function of temperature $T$ for 100 selected transitions in Fe XII. $\Upsilon$ was interpolated to $T$ using fit coefficients provided by the CHIANTI atomic database and computed using the method of \citet{burgess_analysis_1992}'
+\end{pycode}
+\py[chapter3]|tfig|
+% spell-checker: enable %
+
+The rate coefficient for deexcitation can also be computed using \autoref{eq:rate_coefficient_final}, the excitation rate coefficient. Under the assumption of thermodynamic equilibrium, the processes of excitation and deexcitation by collisions must be in balance such that 
+\begin{equation}\label{eq:eqbm_balance}
+    n_in_eC_{ij}^e = n_jn_eC_{ji}^d,
+\end{equation}
+where $C_{ji}^d$ is the rate coefficient for collisional deexcitation, and the populations of the two levels are in Boltzmann equilibrium,
+\begin{equation}\label{eq:boltzmann_eqbm}
+    \frac{n_i}{n_j} = \frac{\omega_i}{\omega_j}\exp{\left(\frac{E_{ij}}{k_BT_e}\right)},
+\end{equation}
+where $\omega_i$ and $\omega_j$ are the statistical weights of levels $i$ and $j$, respectively. Combining \autoref{eq:eqbm_balance} and \autoref{eq:boltzmann_eqbm} gives an expression for $C_{ji}^d$, the deexcitation rate coefficient,
+\begin{align}\label{eq:dex_rate_coefficient}
+    C_{ji}^d &= \frac{\omega_i}{\omega_j}C_{ij}^e\exp{\left(\frac{E_{ij}}{k_BT_e}\right)},\nonumber\\
+    &= I_Ha_0^2\sqrt{\frac{8\pi}{k_Bm_e}}T_e^{-1/2}\frac{\Upsilon_{ij}}{\omega_j}.
+\end{align}
 
 \subsection{Level Populations}\label{subsec:level_pops}
 
 \hilite{Write down level population calculation, discuss coronal model approximation}
 
+In optically-thin, astrophysical plasmas, is often assumed that the processes which influence populations of atomic energy levels are decoupled from those processes which influence the charge state of the atom (see \autoref{subsec:ionization_recombination}). This is because changes in the energy level populations occur much more frequently than changes in the charge state. Another common approximation is that energy levels are populated primarily by collisional excitation and depopulated by spontaneous radiative decay and that these processes occur primarily between the ground state $g$ and an excited state $j$. Assuming a steady-state equilibrium between these processes,
+\begin{equation}\label{eq:coronal_model}
+    n_{X,k,g}n_eC_{gj}^e = n_{X,k,j}A_{jg},
+\end{equation}
+where the left-hand side corresponds to processes that populate $j$ and the right-hand side corresponds to processes that depopulate $j$. Taken together, these assumptions are often referred to as the \textit{coronal model approximation} \citep{bradshaw_collisional_2013,del_zanna_solar_2018}. 
+
+The coronal model approximation assumes a two-level system ($g$ and $j$) in which the only two competing processes are excitation by collisions and spontaneous radiative decay. However, an ion may have so-called \textit{metastable levels} where the probability of spontaneous radiative decay is very low such that depopulation by collisional deexcitation is not negligible \citet{phillips_ultraviolet_2008,del_zanna_solar_2018}. In this case, the level population calculation must account for transitions between excited states such that the two-level approximation is no longer appropriate. Thus, for a multi-level atom, the system of equations required to calculate the population of $n_j$ (temporarily droppping the $X,k$ subscripts),
+\begin{equation}\label{eq:level_pop}
+\sum_{i>j}n_iA_{ij} + n_e\sum_{i>j}n_iC_{ij}^d + n_e\sum_{i<j}n_iC_{ij}^e
+= n_j\left(\sum_{i<j}A_{ji} + n_e\sum_{i<j}C_{ji}^d + n_e\sum_{i>j}C_{ji}^e\right),
+\end{equation}
+where the left-hand side denotes processes which populate level $j$ and the right-hand side denotes processes that depopulate level $j$ \citep{del_zanna_solar_2018}. Additional processes such as collisional excitation by protons or photoionization by an external radiation field may also influence $n_j$ \citep[see sections 3.4.1 and 3.4.2 of][]{del_zanna_solar_2018}.
+
+In general, the level population $n_j$ is a function of both temperature and density. As \autoref{eq:level_pop} is a system of $J$ coupled equations, where $J$ is the total number of energy levels of ion $X,k$, calculating $n_j$ requires solving a $J\times J$ matrix equation and can be very computationally expensive, depending on the number of energy levels and relevant atomic transitions. 
+
+\hilite{Add level pop figure here}
+
 \subsection{Ionization and Recombination}\label{subsec:ionization_recombination}
 
 \subsection{Equilibrium versus Nonequilibrium Ionization}\label{subsec:ioneq_versus_nei}
-
-\subsection{The CHIANTI Atomic Database}\label{subsec:chianti}
-
-The CHIANTI atomic database \citep{dere_chianti_1997,young_chianti_1998,landi_chianti_1999,dere_chianti-atomic_2001,landi_chianti-atomic_2002,young_chianti-atomic_2003,landi_chianti-atomic_2006,landi_chianti-atomic_2006-1,dere_chianti_2009,landi_chiantiatomic_2009,young_chiantiatomic_2009,landi_chiantiatomic_2012,landi_chiantiatomic_2013,del_zanna_chianti_2015,young_chianti_2016} is an essential tool for performing spectroscopy of optically-thin astrophysical plasmas such as the solar corona. It is primarily used in the study of the solar atmosphere though it has broader astrophysical applications as well \citep[see Figure 4 of][]{young_chianti_2016}. The database provides information on atomic transitions for all ions of over 30 different elements, from hydrogen to zinc. For a given ion, CHIANTI provides wavelengths and energies (among other information) for many thousands of atomic transitions as well as various derived quantities, including the ionization and recombination rates, energy level populations, and spectral line intensities. Additionally, CHIANTI provides multiple measurements of elemental abundances in both the corona and photosphere. Data and routines are also included for computing the free-free and free-bound continuum emission. 
-
-The CHIANTI project is an international collaboration between the University of Cambridge, the University of Michigan, and George Mason University and is an invaluable asset to the solar physics community. Version 1.0 of the database was released in 1995 and at the time of writing, the current version is 8.0.7. Users typically interact with the database via the provided Interactive Data Language (IDL) routines or the more recently-released ChiantiPy package \citep{landi_chiantiatomic_2012,barnes_chiantipy_2017}, an interface to CHIANTI implemented in the Python programming language. All work presented in this thesis makes heavy use of the CHIANTI atomic database via the fiasco Python package (see \autoref{ap:fiasco}).
 
 \section{Continuum Emission}\label{sec:continuum}
 
@@ -135,6 +199,8 @@ The CHIANTI project is an international collaboration between the University of 
 \section{Summary}
 
 % Nomenclature
+\nomenclature[z-au]{AU}{astronomical unit}
+\nomenclature[z-dem]{DEM}{differential emission measure}
 \nomenclature[a-h]{$h$}{Planck constant}
 \nomenclature[a-c]{$c$}{speed of light in a vacuum}
 \nomenclature[g-nu]{$\nu$}{photon frequency}

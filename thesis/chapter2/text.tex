@@ -2,7 +2,8 @@
 \chapter{The Physics of Coronal Loops}\label{ch:loops}
 
 % Figure manager for Chapter 2
-\begin{pycode}[chapter_2]
+% spell-checker: disable
+\begin{pycode}[chapter2]
 name = 'chapter2'
 ch1 = texfigure.Manager(
     pytex,
@@ -11,6 +12,7 @@ ch1 = texfigure.Manager(
     **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
 )
 \end{pycode}
+% spell-checker: enable
 
 This is the chapter on coronal loops
 

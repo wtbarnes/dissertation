@@ -95,16 +95,17 @@ where $a_0$ is the Bohr radius, $I_H$ is the ionization potential of hydrogen, $
 \begin{equation}
     C^e_{ij} = I_Ha_0^2\sqrt{\frac{8\pi}{k_Bm_e}}\omega_i^{-1}T_e^{-1/2}\int_{E_0}^{\infty}\textup{d}\left(\frac{E}{k_BT_e}\right)\,\Omega_{ij}(E)\exp{\left(-\frac{E}{k_BT_e}\right)}.
 \end{equation}
-Exploiting the symmetry and making a change of variables to $E^{\prime}$ gives,
+Exploiting the symmetry of $\Omega_{ij}$ and making a change of variables to $E^{\prime}$ gives,
 \begin{align}\label{eq:rate_coefficient_final}
     C^e_{ij} &= I_Ha_0^2\sqrt{\frac{8\pi}{k_Bm_e}}\omega_i^{-1}T_e^{-1/2}\int_{E_0}^{\infty}\textup{d}\left(\frac{E}{k_BT_e}\right)\,\Omega_{ji}(E^\prime)\exp{\left(-\frac{E}{k_BT_e}\right)} \nonumber\\
     &= I_Ha_0^2\sqrt{\frac{8\pi}{k_Bm_e}}\omega_i^{-1}T_e^{-1/2}\int_{0}^{\infty}\textup{d}\left(\frac{E^\prime}{k_BT_e}\right)\,\Omega_{ji}(E^\prime)\exp{\left(-\frac{E^\prime + E_{ij}}{k_BT_e}\right)} \nonumber\\
     &= I_Ha_0^2\sqrt{\frac{8\pi}{k_Bm_e}}T_e^{-1/2}\frac{\Upsilon_{ij}}{\omega_i}\exp{\left(-\frac{E_{ij}}{k_BT_e}\right)}
 \end{align}
-where the term $\Upsilon_{ij}$, originally introduced by \citet{seaton_electron_1953}, is the effective collision strength (or Maxwellian-averaged collision strength) and is defined as,
+where the term $\Upsilon_{ij}$, originally introduced by \citet{seaton_electron_1953}, is called the effective collision strength (or alternatively the Maxwellian-averaged collision strength) and is defined as,
 \begin{equation}\label{eq:effective_collision_strength}
-    \Upsilon_{ij} = \int_{0}^{\infty}\textup{d}\left(\frac{E}{k_BT_e}\right)\,\Omega_{ji}(E)\exp{\left(-\frac{E}{k_BT_e}\right)}.
+    \Upsilon_{ij} = \int_{0}^{\infty}\textup{d}\left(\frac{E}{k_BT_e}\right)\,\Omega_{ji}(E)\exp{\left(-\frac{E}{k_BT_e}\right)},
 \end{equation}
+where $E$ is now the final energy of the electron after the collision.
 
 In general, computing cross-sections for excitations by collisions with free-electrons is very difficult and time consuming and requires the use of sophisticated atomic codes which properly account for the energy levels of the target ion and the detailed physics of the interaction between the free electron and target ion \citep[][section 4.2.3]{phillips_ultraviolet_2008,bautista_theoretical_2000}. \citet{burgess_analysis_1992} computed fit coefficients to $\Upsilon$ as a function of $T_e$ in terms of compact, dimensionless variables for a large number of atomic transitions. Reduced fit parameters for $\Upsilon$ are provided in the CHIANTI atomic database using the methods of \citet{burgess_analysis_1992} for all relevant transitions such that effective collision strengths can be efficiently computed for arbitrary $T_e$. \autoref{fig:upsilon} shows $\Upsilon$ as a function of $T$ for several selected transitions of Fe XII.
 
@@ -145,9 +146,7 @@ where $\omega_i$ and $\omega_j$ are the statistical weights of levels $i$ and $j
 
 \subsection{Level Populations}\label{subsec:level_pops}
 
-\hilite{Write down level population calculation, discuss coronal model approximation}
-
-In optically-thin, astrophysical plasmas, is often assumed that the processes which influence populations of atomic energy levels are decoupled from those processes which influence the charge state of the atom (see \autoref{subsec:ionization_recombination}). This is because changes in the energy level populations occur much more frequently than changes in the charge state. Another common approximation is that energy levels are populated primarily by collisional excitation and depopulated by spontaneous radiative decay and that these processes occur primarily between the ground state $g$ and an excited state $j$. Assuming a steady-state equilibrium between these processes,
+In optically-thin, astrophysical plasmas, it is often assumed that the processes which influence populations of atomic energy levels are decoupled from those processes which influence the charge state of the atom (see \autoref{subsec:ionization_recombination}). This is because changes in the energy level populations occur much more frequently than changes in the charge state. Another common approximation is that energy levels are populated primarily by collisional excitation and depopulated by spontaneous radiative decay and that these processes occur primarily between the ground state $g$ and an excited state $j$. Assuming a steady-state equilibrium between these processes,
 \begin{equation}\label{eq:coronal_model}
     n_{X,k,g}n_eC_{gj}^e = n_{X,k,j}A_{jg},
 \end{equation}
@@ -160,13 +159,50 @@ The coronal model approximation assumes a two-level system ($g$ and $j$) in whic
 \end{equation}
 where the left-hand side denotes processes which populate level $j$ and the right-hand side denotes processes that depopulate level $j$ \citep{del_zanna_solar_2018}. Additional processes such as collisional excitation by protons or photoionization by an external radiation field may also influence $n_j$ \citep[see sections 3.4.1 and 3.4.2 of][]{del_zanna_solar_2018}.
 
-In general, the level population $n_j$ is a function of both temperature and density. As \autoref{eq:level_pop} is a system of $J$ coupled equations, where $J$ is the total number of energy levels of ion $X,k$, calculating $n_j$ requires solving a $J\times J$ matrix equation and can be very computationally expensive, depending on the number of energy levels and relevant atomic transitions. 
+In general, the level population $n_j$ is a function of both temperature and density. As \autoref{eq:level_pop} is a system of $J$ coupled equations, where $J$ is the total number of energy levels of the ion, calculating $n_j$ requires solving a $J\times J$ matrix equation and can be very computationally expensive, depending on the number of energy levels and relevant atomic transitions. \autoref{fig:level-pop} shows the level populations of several energy levels of O II as a function of electron energy at $10^6$ K.
 
-\hilite{Add level pop figure here}
+% spell-checker: disable %
+\begin{pycode}[chapter3]
+ion = fiasco.Ion('O 2', [1e6]*u.K)
+n = np.logspace(3,12,100)*u.cm**(-3)
+pop = ion.level_populations(n)
 
-\subsection{Ionization and Recombination}\label{subsec:ionization_recombination}
+# Function for making spectroscopic notation for energy levels
+def make_level_label(i):
+    spec = r'$^{s}\mathrm{{{l}}}_{{{j}}}$'.format(
+        j = str(Fraction(ion[i].total_angular_momentum.value)),
+        s = ion._elvlc['multiplicity'][i],
+        l = ion[i].orbital_angular_momentum_label
+    )
+    return f"{ion[i].level}: {' '.join(ion[i].configuration.split('.'))} {spec}"
 
-\subsection{Equilibrium versus Nonequilibrium Ionization}\label{subsec:ioneq_versus_nei}
+fig = plt.figure(figsize=texfigure.figsize(pytex,scale=0.75,))
+ax = fig.gca()
+num_levels = 5
+for i in range(num_levels):
+    ax.plot(n, pop[0,:,i], label=make_level_label(i), color=PALETTE[i])
+ax.set_xscale('log')
+ax.set_yscale('log')
+ax.set_ylim(1e-3,2)
+ax.set_xlim(n[0].value,n[-1].value)
+ax.set_xlabel(r'$n_e$ [cm$^{-3}$]')
+ax.set_ylabel(r'$N_j$')
+ax.legend(loc=4,frameon=False,ncol=2)
+tfig = ch3.save_figure('level-pop', fext='.pgf')
+tfig.caption = r'Level population of the first five levels of O II as a function of electron density, $n_e$, at $T_e=10^6$ K. Note that the ground state is the most abundant for all $n_e$. The level population is normalized to the total number of O II ions such that $\sum_jN_j=1$. Adapted from Fig. XXX of \citet{phillips_ultraviolet_2008}.'
+\end{pycode}
+\py[chapter3]|tfig|
+% spell-checker: enable %
+
+\subsection{Processes which Affect the Ion Charge State}\label{subsec:ionization_recombination}
+
+\hilite{Ionization: direct ionization, excitation autoionization}
+
+\hilite{Recombination: radiative recombination, dielectronic recombination}
+
+\subsection{Equilibrium versus Nonequilibrium Charge States}\label{subsec:ioneq_versus_nei}
+
+\hilite{Discuss breakdown of assumption of ionization equilibrium; show plot of equilibrium charge states; show plot of effective temperature for NEI charge states or population fraction(s) as a function of time for an example calculation in which IEQ != NEI}
 
 \section{Continuum Emission}\label{sec:continuum}
 

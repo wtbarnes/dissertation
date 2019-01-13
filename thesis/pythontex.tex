@@ -1,3 +1,4 @@
+%spell-checker: disable
 %  PythonTeX Configuration
 
 \usepackage{pythontex}
@@ -44,14 +45,19 @@ import matplotlib
 #matplotlib.use('pdf')
 import matplotlib.pyplot as plt
 import matplotlib.colors
+import seaborn
 from sunpy.map import Map, GenericMap
 import astropy.units as u
 from astropy.coordinates import SkyCoord
 from astropy.visualization import ImageNormalize,AsinhStretch,SqrtStretch
+import fiasco
 import synthesizAR
 
 # Directory names for all chapters
 manager_opts = {'python_dir': 'python', 'fig_dir': 'figures', 'data_dir': 'data',}
+
+# Define color palette(s)
+PALETTE = seaborn.color_palette('colorblind', 100)
 
 # Set some plot styling here
 plt.rcParams['text.latex.preamble'] = r'\usepackage{fourier}'

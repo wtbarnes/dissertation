@@ -91,7 +91,7 @@
 
 \ifdefineAbstract
  \pagestyle{empty}
- \includeonly{front_matter/abstract}
+ \includeonly{frontmatter/abstract}
 \fi
 
 % ***************************** Chapter Mode ***********************************
@@ -100,9 +100,9 @@
 % Useful option to review a particular chapter or to send it to supervisior.
 % To use choose `chapter' option in the document class
 
-%\ifdefineChapter
-% \includeonly{Chapter3/chapter3}
-%\fi
+\ifdefineChapter
+ \includeonly{chapter3/text}
+\fi
 
 % ******************************** Front Matter ********************************
 \begin{document}
@@ -136,7 +136,7 @@
 
 % ********************************** Appendices ********************************
 
-\begin{appendices} % Using appendices environment for more functionality
+\begin{appendices}
 \include{appendix1/text}
 \include{appendix2/text}
 \end{appendices}

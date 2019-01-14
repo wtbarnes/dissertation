@@ -202,6 +202,8 @@ In addition to the relative populations of each energy level of the ion, one mus
 \end{equation}
 where $\alpha_k^I$ and $\alpha_k^R$ are the ionization and recombination rates of charge state $k$, respectively \citep{del_zanna_solar_2018}. Note that ionization from lower charge states and recombination from higher charge states are source terms while ionization and recombination out of the current charge state are sinks. Solutions to \autoref{eq:population_fraction} are discussed in \autoref{subsec:ioneq_versus_nei}.
 
+\subsubsection{Ionization}
+
 In optically-thin astrophysical plasmas such as the solar corona, the dominant processes contributing to the total ionization rate are collisional (or direct) ionization and excitation-autoionization \citep{bradshaw_collisional_2013}. Thus, the total ionization rate can be written as,
 \begin{equation}\label{eq:total_ionization_rate}
     \alpha^I = \alpha^\textup{CI} + \alpha^\textup{EA},
@@ -210,7 +212,9 @@ where $\alpha^\textup{CI}$ and $\alpha^\textup{EA}$ are the ionization rates due
 \begin{equation}\label{eq:collisional_ionization}
     X_{k,i} + e \to X_{k+1,i^\prime} + 2e,
 \end{equation}
-where $i^\prime$ denotes the final energetic state of $X_{k+1}$. $\alpha_{CI}$ can be computed in a similar manner to $C^e_{ij}$, i.e. by integrating the velocity-weighted collision cross-section over a Maxwell-Boltzmann distribution. Using the result from \autoref{eq:rate_coefficient_e}, the ionization rate due to collisional ionization can be written as,
+where $i^\prime$ denotes the final energetic state of $X_{k+1}$. 
+
+$\alpha_{CI}$ can be computed in a similar manner to $C^e_{ij}$ by integrating the velocity-weighted collision cross-section over a Maxwell-Boltzmann distribution. Using the result from \autoref{eq:rate_coefficient_e}, the ionization rate due to collisional ionization can be written as,
 \begin{equation}
     \alpha^\textup{CI} = \sqrt{\frac{8}{\pi m_e}}(k_BT_e)^{-3/2}\int_I^{\infty}\textup{d}E\,E\sigma_{CI}(E)\exp{\left(-\frac{E}{k_BT_e}\right)}
 \end{equation}
@@ -228,6 +232,8 @@ Notice that both integrals have the same form and can be evaluated using Gauss-L
 where $x_i$ is zero of the $i$-th Laguerre polynomial and $w_i$ are the associated weights \citep[see Equation 25.4.45 of][]{abramowitz_handbook_1972}. As in the case of collisional excitation, evaluating the cross-section for collisional ionization $\sigma_\textup{CI}$ is non-trivial. For ions in the hydrogen and helium isoelectronic sequences (i.e. ions with the same number of electrons as hydrogen or helium), $\sigma_\textup{CI}$ can be evaluated using the fitting formula of \citet{fontes_fully_1999}. Additionally, \citet{dere_ionization_2007} computed fit coefficients for collisional ionization for a large number of ions using the method of \citet{burgess_analysis_1992}. Fit parameters for both of these methods are provided by the CHIANTI database and can be used to efficiently compute $\sigma_\textup{CI}$ as a function of $T_e$.
 
 \hilite{short paragraph about excitation autoionization}
+
+\subsubsection{Recombination}
 
 \hilite{Recombination: radiative recombination, dielectronic recombination}
 

@@ -152,7 +152,7 @@ In optically-thin, astrophysical plasmas, it is often assumed that the processes
 \end{equation}
 where the left-hand side corresponds to processes that populate $j$ and the right-hand side corresponds to processes that depopulate $j$. Taken together, these assumptions are often referred to as the \textit{coronal model approximation} \citep{bradshaw_collisional_2013,del_zanna_solar_2018}. 
 
-The coronal model approximation assumes a two-level system ($g$ and $j$) in which the only two competing processes are excitation by collisions and spontaneous radiative decay. However, an ion may have so-called \textit{metastable levels} where the probability of spontaneous radiative decay is very low such that depopulation by collisional deexcitation is not negligible \citet{phillips_ultraviolet_2008,del_zanna_solar_2018}. In this case, the level population calculation must account for transitions between excited states such that the two-level approximation is no longer appropriate. Thus, for a multi-level atom, the system of equations required to calculate the population of $n_j$ (temporarily droppping the $X,k$ subscripts),
+The coronal model approximation assumes a two-level system ($g$ and $j$) in which the only two competing processes are excitation by collisions and spontaneous radiative decay. However, an ion may have so-called \textit{metastable levels} where the probability of spontaneous radiative decay is very low such that depopulation by collisional deexcitation is not negligible \citep{phillips_ultraviolet_2008,del_zanna_solar_2018}. In this case, the level population calculation must account for transitions between excited states such that the two-level approximation is no longer appropriate. Thus, for a multi-level atom, the system of equations required to calculate the population of $n_j$ (temporarily dropping the $X,k$ subscripts),
 \begin{equation}\label{eq:level_pop}
 \sum_{i>j}n_iA_{ij} + n_e\sum_{i>j}n_iC_{ij}^d + n_e\sum_{i<j}n_iC_{ij}^e
 = n_j\left(\sum_{i<j}A_{ji} + n_e\sum_{i<j}C_{ji}^d + n_e\sum_{i>j}C_{ji}^e\right),
@@ -200,42 +200,44 @@ In addition to the relative populations of each energy level of the ion, one mus
 \begin{equation}\label{eq:population_fraction}
     \frac{d}{dt}f_k = n_e(\alpha_{k-1}^I f_{k-1} + \alpha_{k+1}^R f_{k+1} - \alpha_{k}^I f_k - \alpha_k^R f_k),
 \end{equation}
-where $\alpha_k^I$ and $\alpha_k^R$ are the ionization and recombination rates of charge state $k$, respectively \citep{del_zanna_solar_2018}. Note that ionization from lower charge states and recombination from higher charge states are source terms while ionization and recombination out of the current charge state are sinks. Solutions to \autoref{eq:population_fraction} are discussed in \autoref{subsec:ioneq_versus_nei}.
+where $\alpha_k^I$ and $\alpha_k^R$ are the ionization and recombination rates of charge state $k$, respectively, and the population fractions are subject to the constraint $\sum_kf_k=1$ \citep{del_zanna_solar_2018}. Note that ionization from lower charge states and recombination from higher charge states are source terms while ionization and recombination out of the current charge state are sinks. Solutions to \autoref{eq:population_fraction} are discussed in \autoref{subsec:ioneq_versus_nei}.
 
 \subsubsection{Ionization}
 
-In optically-thin astrophysical plasmas such as the solar corona, the dominant processes contributing to the total ionization rate are collisional (or direct) ionization and excitation-autoionization \citep{bradshaw_collisional_2013}. Thus, the total ionization rate can be written as,
+In optically-thin astrophysical plasmas such as the solar corona, the dominant processes contributing to the total ionization rate are \textit{collisional ionization} and \textit{excitation-autoionization} \citep{bradshaw_collisional_2013}. Thus, the total ionization rate can be written as,
 \begin{equation}\label{eq:total_ionization_rate}
     \alpha^I = \alpha^\textup{CI} + \alpha^\textup{EA},
 \end{equation}
-where $\alpha^\textup{CI}$ and $\alpha^\textup{EA}$ are the ionization rates due collisional ionization and excitation-autoionization, respectively. In the process of collisional ionization, a free electron collides with an ion $X_k$ and frees a bound electron. Following the notation of \citet{bradshaw_patterns_2016,mason_spectroscopic_1994}, this can be expressed as,
+where $\alpha^\textup{CI}$ and $\alpha^\textup{EA}$ are the ionization rates due collisional ionization and excitation-autoionization, respectively. 
+
+In the process of collisional ionization, a free electron collides with an ion $X_k$ and frees a bound electron. Following the notation of \citet{bradshaw_collisional_2013,mason_spectroscopic_1994}, this can be expressed as,
 \begin{equation}\label{eq:collisional_ionization}
     X_{k,i} + e \to X_{k+1,i^\prime} + 2e,
 \end{equation}
-where $i^\prime$ denotes the final energetic state of $X_{k+1}$. 
-
-$\alpha_{CI}$ can be computed in a similar manner to $C^e_{ij}$ by integrating the velocity-weighted collision cross-section over a Maxwell-Boltzmann distribution. Using the result from \autoref{eq:rate_coefficient_e}, the ionization rate due to collisional ionization can be written as,
+where $i^\prime$ denotes the final energetic state of $X_{k+1}$. $\alpha_{CI}$ can be computed in a similar manner to $C^e_{ij}$ by integrating the velocity-weighted collision cross-section over a Maxwell-Boltzmann distribution. Using the result from \autoref{eq:rate_coefficient_e}, the ionization rate due to collisional ionization can be written as,
 \begin{equation}
     \alpha^\textup{CI} = \sqrt{\frac{8}{\pi m_e}}(k_BT_e)^{-3/2}\int_I^{\infty}\textup{d}E\,E\sigma_{CI}(E)\exp{\left(-\frac{E}{k_BT_e}\right)}
 \end{equation}
 where $E$ is the energy of incident electron, $\sigma_{CI}$ is the collisional ionization cross-section and $I$ is the ionization energy of the initially-bound electron \citep{del_zanna_solar_2018}. Making the change of variables $x=(E-I)/k_BT_e$ gives,
 \begin{equation}\label{eq:collisional_ionization_x}
 \begin{aligned}
-    \alpha^\textup{CI} = \sqrt{\frac{8}{\pi m_e}}(k_BT_e)^{-1/2}\exp{\left(-\frac{I}{k_BT_e}\right)}&\left(k_BT_e\int_0^{\infty}\textup{d}x\,x\sigma_{CI}(k_BT_ex+I)e^{-x} \right. \\
-    &\left. + I\int_0^{\infty}\textup{d}x\,\sigma_{CI}(k_BT_ex+I)e^{-x}\right).
+    \alpha^\textup{CI} = \sqrt{\frac{8}{\pi m_e}}(k_BT_e)^{1/2}\exp{\left(-\frac{I}{k_BT_e}\right)}&\left(\int_0^{\infty}\textup{d}x\,x\sigma_{CI}(k_BT_ex+I)e^{-x} \right. \\
+    &\left. + \frac{I}{k_BT_e}\int_0^{\infty}\textup{d}x\,\sigma_{CI}(k_BT_ex+I)e^{-x}\right).
 \end{aligned}
 \end{equation}
 Notice that both integrals have the same form and can be evaluated using Gauss-Laguerre quadrature,
 \begin{equation}
     \int_0^\infty\textup{d}x\,f(x)e^{-x} \approx \sum_{i=1}^n w_if(x_i),
 \end{equation}
-where $x_i$ is zero of the $i$-th Laguerre polynomial and $w_i$ are the associated weights \citep[see Equation 25.4.45 of][]{abramowitz_handbook_1972}. As in the case of collisional excitation, evaluating the cross-section for collisional ionization $\sigma_\textup{CI}$ is non-trivial. For ions in the hydrogen and helium isoelectronic sequences (i.e. ions with the same number of electrons as hydrogen or helium), $\sigma_\textup{CI}$ can be evaluated using the fitting formula of \citet{fontes_fully_1999}. Additionally, \citet{dere_ionization_2007} computed fit coefficients for collisional ionization for a large number of ions using the method of \citet{burgess_analysis_1992}. Fit parameters for both of these methods are provided by the CHIANTI database and can be used to efficiently compute $\sigma_\textup{CI}$ as a function of $T_e$.
+where $x_i$ is zero of the $i$-th Laguerre polynomial and $w_i$ are the associated weights \citep[see Equation 25.4.45 of][]{abramowitz_handbook_1972}. Note that in both terms, evaluating $f(x_i)$ requires evaluating the collisional ionization cross-section, $\sigma_{CI}$.
 
-\hilite{short paragraph about excitation autoionization}
+As in the case of collisional excitation cross-section, evaluating $\sigma_\textup{CI}$ is non-trivial. For ions in the hydrogen and helium isoelectronic sequences (i.e. ions with the same number of electrons as hydrogen or helium), $\sigma_\textup{CI}$ can be calculated using the fitting formula of \citet{fontes_fully_1999}. Additionally, \citet{dere_ionization_2007} provide fit coefficients for collisional ionization cross-sections for a large number of ions using the method of \citet{burgess_analysis_1992}. Fit parameters for both of these methods are provided by the CHIANTI database and can be used to efficiently compute $\sigma_\textup{CI}$ as a function of $T_e$.
 
-\subsubsection{Recombination}
-
-\hilite{Recombination: radiative recombination, dielectronic recombination}
+In the case of excitation-autoionization, if an ion is collisionally excited to a level above the ionization threshold, it can autoionize, resulting in a free electron and an ion in a higher charge state, but lower energy state. This process can be written as,
+\begin{equation}\label{eq:excitation_autoionization}
+    X_{k,i^\prime} + e(E_1) \to X_{k,j} + e(E_2) \to X_{k+1,i} + e(E_2) + e^\prime(E),
+\end{equation}
+where $e^\prime$ is the recently freed electron \citep{phillips_ultraviolet_2008}. In the first step, $X_k$ is excited from $i^\prime$ to $j$ and the in the second step, $X_k$ decays from $j$ to $i$ and emits an electron $e^\prime$, producing a higher charge state $k+1$. This is only possible provided $E_1 - E_2$ is greater than the ionization threshold of $X_k$ \citep{bradshaw_collisional_2013}. The ionization rate due to excitation-autoionization, $\alpha^\textup{EA}$, can be computed using an expression analogous to \autoref{eq:rate_coefficient_final}, but replacing $\Upsilon$ with the appropriate effective collision strengths for excitation-autoionization. Scaled fit parameters to these collision strengths, as computed by \citet{dere_ionization_2007} using the method of \citet{burgess_analysis_1992}, are provided in the CHIANTI database. \autoref{fig:ionization-recombination-rates} shows the total (solid blue), collisional (dashed blue), and excitation-autoionization (dot-dashed blue) ionization rates as a function of temperature for Fe XVI.   
 
 % spell-checker: disable %
 \begin{pycode}[chapter3]
@@ -258,10 +260,34 @@ ax.set_xlabel(r'$T_e$ [K]')
 ax.set_ylabel(r'$\alpha$ [cm$^3$ s$^{-1}$]')
 ax.legend(loc=4,ncol=1,frameon=False)
 tfig = ch3.save_figure('ionization-recombination-rates', fext='.pgf')
-tfig.caption = r'Ionization (blue) and recombination (orange)rates as a function of electron temperature, $T_e$, for Fe XVI. Note that the recombination rate dominates at low $T_e$ while the ionization rate dominates at $T_e$ as expected.'
+tfig.caption = r'Ionization (blue) and recombination (orange) rates as a function of electron temperature, $T_e$, for Fe XVI. The constituent rates are denoted by dashed and dot-dashed lines. Note that the recombination rate dominates at low $T_e$ while the ionization rate dominates at high $T_e$, as expected.'
 \end{pycode}
 \py[chapter3]|tfig|
 % spell-checker: enable %
+
+\subsubsection{Recombination}
+
+Along with ionization, recombination, the capture of a free electron by the target ion, is the other primary process which determines the charge state of the ion. In an optically-thin plasma, the two dominant processes that contribute to the total recombination rate are \textit{radiative recombination} and \textit{dielectronic recombination} \citep{bradshaw_collisional_2013}. As in \autoref{eq:total_ionization_rate}, the total recombination rate can be written as,
+\begin{equation}\label{eq:total_recombination_rate}
+    \alpha^\textup{R} = \alpha^\textup{RR} + \alpha^\textup{DR},
+\end{equation}
+where $\alpha^\textup{RR}$ and $\alpha^\textup{DR}$ are the recombination rates due to radiative and dielectronic recombination, respectively.
+
+In the case of radiative recombination, a free electron is captured into a bound state and a photon is emitted. This process can be expressed as,
+\begin{equation}\label{eq:radiative_recombination}
+    X_{k+1,j} + e(E) \to X_{k,i} + h\nu_{ji}.
+\end{equation}
+Note that energy conservation requires that $h\nu_{ji}=E_j - E_i + E$ such that the energy of the emitted photon must be equal to that of the initial kinetic energy of the electron plus the energy differential between states $j$ and $i$. In general, computing $\alpha^\textup{RR}$ is nontrivial as it requires calculating the photoionization cross-section between $i$ and $j$ as well as the level population of excited state $j$ \citep[see Equation 4.47 of][]{phillips_ultraviolet_2008}. \citet{shull_ionization_1982} calculated $\alpha^\textup{RR}$ for C, N, I, Ne, Mg, Si, S, Ar, Ca, Fe, and Ni using a relatively simple fit function,
+\begin{equation}\label{eq:shull_radiative_recombination_rate}
+    \alpha^\textup{RR}(T_e) = A\left(\frac{T_e}{10^4}\right)^{-\eta},
+\end{equation}
+where $A$ and $\eta$ are determined by fitting \autoref{eq:shull_radiative_recombination_rate} to tabulated values of $\alpha^\textup{RR}$ from the literature. \citet{badnell_radiative_2006} later improved on this result by computing distorted-wave photoionization cross-sections for all ions up to and including Zn and calculating fit parameters from these results for a more sophisticated analytical fitting function for $\alpha^\textup{RR}$\citep[see Equation 4 of][]{verner_atomic_1996}. The CHIANTI database uses the results of both \citet{shull_ionization_1982} and \citet{badnell_radiative_2006} to efficiently compute $\alpha^\textup{RR}$ as a function of electron temperature.
+
+Dielectronic recombination is the inverse process of excitation-autoionization (\autoref{eq:excitation_autoionization}) and can be expressed as,
+\begin{equation}\label{eq:dielectronic_recombination}
+    X_{k+1,i^\prime} + e \to X_{k,j} \to X_{k,i} + h\nu_{ji}.
+\end{equation}
+Note that in the intermediate step of this process, $X_{k,j}$ is in a doubly-excited state wherein a free electron has been captured and an already-bound electron has been excited to a higher energy level $j$. When the ion decays from $j$ to $i$ and a photon is emitted, the captured electron $e$ remains in an excited energy level \citep{bradshaw_collisional_2013}. The recombination rate due to dielectronic recombination, $\alpha^\textup{DR}$, can be evaluated in a similar manner to $\alpha^\textup{RR}$. \citet{shull_ionization_1982} fit an analytical form for $\alpha^\textup{DR}(T_e)$ to data from the literature and provide fit parameters for the same set of ions as $\alpha^\textup{RR}$. Improved analytical forms and fit parameters for $\alpha^\textup{DR}$ to results obtained from a distorted-wave approximation calculation are provided in a series of 14 papers by \citet{badnell_dielectronic_2003}. As in the case of radiative recombination, the approaches of both \citet{shull_ionization_1982} and \citet{badnell_dielectronic_2003} are used to compute $\alpha^\textup{DR}(T_e)$ in CHIANTI. \autoref{fig:ionization-recombination-rates} shows the total (solid orange), radiative (dashed orange), and dielectronic (dot-dashed orange) recombination rates as a function of $T_e$ for Fe XVI. Note that dielectronic recombination dominates at high temperatures while radiative recombination is more important at low temperatures ($T_e\lesssim3\times10^4$ K).
 
 \subsection{Equilibrium versus Nonequilibrium Charge States}\label{subsec:ioneq_versus_nei}
 
@@ -269,7 +295,7 @@ tfig.caption = r'Ionization (blue) and recombination (orange)rates as a function
 
 \section{Continuum Emission}\label{sec:continuum}
 
-\hilite{Not sure if this section is needed since we don't deal with continuum much though it is still an important mechanism}
+\hilite{Not sure if this section is needed since we don't deal with continuum much though it is still an important mechanism; do this last}
 
 \subsection{Free-free Emission}
 
@@ -287,13 +313,17 @@ tfig.caption = r'Ionization (blue) and recombination (orange)rates as a function
 
 \section{Time-lag Analysis}\label{sec:timelag}
 
-\hilite{Theory, show example with Gaussian pulses, discuss AIA channel sensitivity, relate time lag to cooling time}
+\hilite{Theory, show example with Gaussian pulses}
 
 \subsection{Cross-correlation}
 
 \subsection{Temperature Sensitivity of the AIA Passbands}
 
+\hilite{Briefly discuss how temperature response functions are calculated, show plot}
+
 \subsection{Time lag between AIA Channel Pairs}
+
+\hilite{Discuss time lag in context of AIA; relate time lag to cooling time between channel pairs}
 
 \section{Summary}
 

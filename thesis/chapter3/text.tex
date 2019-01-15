@@ -293,6 +293,16 @@ Note that in the intermediate step of this process, $X_{k,j}$ is in a doubly-exc
 
 \hilite{Discuss breakdown of assumption of ionization equilibrium; show plot of equilibrium charge states; show plot of effective temperature for NEI charge states or population fraction(s) as a function of time for an example calculation in which IEQ != NEI}
 
+As noted in \autoref{subsec:ionization_recombination}, there are many methods for computing the ionization and recombination rate cofficients, primarily as a function of electron temperature, $T_e$. One can then use these rate coefficients to compute the relative population fraction of all ions of particular element as a function of temperature. When computing these population fractions for a high-temperature, low-density plasma such as the solar corona, it is often assumed that the charge state of the plasma is in \textit{ionization equilibrium} or that the processes which populate and depopulate a particular charge state are in balance. Under this assumption, \autoref{eq:population_fraction} becomes,
+\begin{equation}\label{eq:ionization_equilibrium}
+    n_e(\alpha_{k-1}^I f_{k-1} + \alpha_{k+1}^R f_{k+1} - \alpha_{k}^I f_k - \alpha_k^R f_k) = 0.
+\end{equation}
+For element $X$ with $K$ total charge states, \autoref{eq:ionization_equilibrium} represents a linear, homogeneous set of $K$ coupled equations and can be expressed in matrix form as,
+\begin{equation}\label{eq:ionization_equilibrium_matrix}
+    \mathbf{A}\,\mathbf{F} = \mathbf{0},
+\end{equation}
+where $\mathbf{F}=(f_1,f_2,\ldots,f_k,\ldots,f_K)$ is a column vector of length $K$ and $\mathbf{A}$ is the $K\times K$ matrix containing all of the ionization and recombination rates.
+
 \section{Continuum Emission}\label{sec:continuum}
 
 \hilite{Not sure if this section is needed since we don't deal with continuum much though it is still an important mechanism; do this last}

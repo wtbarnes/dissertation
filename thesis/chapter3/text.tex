@@ -221,7 +221,7 @@ where $i^\prime$ denotes the final energetic state of $X_{k+1}$. $\alpha_{CI}$ c
 where $E$ is the energy of incident electron, $\sigma_{CI}$ is the collisional ionization cross-section and $I$ is the ionization energy of the initially-bound electron \citep{del_zanna_solar_2018}. Making the change of variables $x=(E-I)/k_BT_e$ gives,
 \begin{equation}\label{eq:collisional_ionization_x}
 \begin{aligned}
-    \alpha^\textup{CI} = \sqrt{\frac{8}{\pi m_e}}(k_BT_e)^{1/2}\exp{\left(-\frac{I}{k_BT_e}\right)}&\left(\int_0^{\infty}\textup{d}x\,x\sigma_{CI}(k_BT_ex+I)e^{-x} \right. \\
+    \alpha^\textup{CI} = \sqrt{\frac{8k_BT_e}{\pi m_e}}\exp{\left(-\frac{I}{k_BT_e}\right)}&\left(\int_0^{\infty}\textup{d}x\,x\sigma_{CI}(k_BT_ex+I)e^{-x} \right. \\
     &\left. + \frac{I}{k_BT_e}\int_0^{\infty}\textup{d}x\,\sigma_{CI}(k_BT_ex+I)e^{-x}\right).
 \end{aligned}
 \end{equation}
@@ -291,17 +291,50 @@ Note that in the intermediate step of this process, $X_{k,j}$ is in a doubly-exc
 
 \subsection{Equilibrium versus Nonequilibrium Charge States}\label{subsec:ioneq_versus_nei}
 
-\hilite{Discuss breakdown of assumption of ionization equilibrium; show plot of equilibrium charge states; show plot of effective temperature for NEI charge states or population fraction(s) as a function of time for an example calculation in which IEQ != NEI}
-
-As noted in \autoref{subsec:ionization_recombination}, there are many methods for computing the ionization and recombination rate cofficients, primarily as a function of electron temperature, $T_e$. One can then use these rate coefficients to compute the relative population fraction of all ions of particular element as a function of temperature. When computing these population fractions for a high-temperature, low-density plasma such as the solar corona, it is often assumed that the charge state of the plasma is in \textit{ionization equilibrium} or that the processes which populate and depopulate a particular charge state are in balance. Under this assumption, \autoref{eq:population_fraction} becomes,
+As noted in \autoref{subsec:ionization_recombination}, there are many methods for computing the ionization and recombination rate cofficients, primarily as a function of electron temperature, $T_e$. One can then use these rate coefficients to compute the relative population fraction of all ions of particular element as a function of temperature. When computing these population fractions for a high-temperature, low-density plasma such as the solar corona, it is often assumed that the charge state of the plasma is in \textit{ionization equilibrium} or that the processes which populate and depopulate a particular charge state are in balance. Under this assumption, \autoref{eq:population_fraction} becomes (temporarily dropping the element label $X$),
 \begin{equation}\label{eq:ionization_equilibrium}
     n_e(\alpha_{k-1}^I f_{k-1} + \alpha_{k+1}^R f_{k+1} - \alpha_{k}^I f_k - \alpha_k^R f_k) = 0.
 \end{equation}
-For element $X$ with $K$ total charge states, \autoref{eq:ionization_equilibrium} represents a linear, homogeneous set of $K$ coupled equations and can be expressed in matrix form as,
+
+For element $X$ with $K$ total charge states, \autoref{eq:ionization_equilibrium} represents a system of $K$ linear, homogeneous equations and can be expressed in matrix form as,
 \begin{equation}\label{eq:ionization_equilibrium_matrix}
-    \mathbf{A}\,\mathbf{F} = \mathbf{0},
+    \mathbf{A}\mathbf{F} = \mathbf{0},
 \end{equation}
-where $\mathbf{F}=(f_1,f_2,\ldots,f_k,\ldots,f_K)$ is a column vector of length $K$ and $\mathbf{A}$ is the $K\times K$ matrix containing all of the ionization and recombination rates.
+where $\mathbf{F}=(f_1,f_2,\ldots,f_k,\ldots,f_K)$ is a column vector of length $K$, $\mathbf{A}$ is a $K{\times}K$ matrix containing all of the ionization and recombination rates, and $\mathbf{0}$ is the zero vector with $K$ entries. For a given element $X$ and electron temperature $T_e$, one can compute $\alpha^\textup{I}$ and $\alpha^\textup{R}$ (e.g. using CHIANTI) for all $k$ to find $\mathbf{A}$. To solve \autoref{eq:ionization_equilibrium_matrix}, consider the singular value decomposition (SVD) of $\mathbf{A}$,
+\begin{equation}
+    \mathbf{A} = \mathbf{U}\mathbf{W}\mathbf{V}^T,
+\end{equation}
+where $\mathbf{W}$ is a $K{\times}K$ diagonal matrix with singular values ($w_k$) along the diagonal and $\mathbf{U}$ and $\mathbf{V}$ are  square $K{\times}K$ matrices whose columns are orthonormal. Provided $\mathbf{A}$ is singular (i.e. $\det{(\mathbf{A})}=0$), any column of $\mathbf{V}$ for which the corresponding $w_k=0$ is a solution of \autoref{eq:ionization_equilibrium_matrix} \citep{press_numerical_1992}. 
+
+\autoref{fig:ionization-equilibrium} shows the population fractions, $f_{X,k}$ for every ionization state of Fe as a function of electron temperature. As the electron temperature increases, the populations of increasingly higher charge states are populated because the free electrons are more energetic and are capable of releasing more tightly-bound electrons. Conversely, at lower $T_e$, the free electrons have lower energy and recombine into the outer bound states of the target ions such that the lower charge states become more populated \citep{bradshaw_collisional_2013}. Note that the temperature at which each population fraction peaks is the point at which the ionization and recombination rates for that charge state are equal (see \autoref{eq:population_fraction}).
+
+% spell-checker: disable %
+\begin{pycode}[chapter3]
+fe = fiasco.Element('Fe',np.logspace(4,9,1000)*u.K)
+ioneq = fe.equilibrium_ionization()
+fig = plt.figure(figsize=texfigure.figsize(pytex,scale=0.95,height_ratio=0.5))
+ax = fig.gca()
+for i in fe:
+    ax.plot(fe.temperature, ioneq[:,i.charge_state],
+            color=PALETTE[i.charge_state],)
+    z = i.ionization_stage
+    if (1 <= z <= 10) or (16 <= z <= 19) or z >= 24:
+        ax.text(fe.temperature[np.argmax(ioneq[:,i.charge_state])].value,
+                np.max(ioneq[:,i.charge_state]).value,
+                f'{fe.atomic_symbol} {roman.toRoman(i.ionization_stage)}',
+                horizontalalignment='center', rotation=0,
+                fontsize=8)
+ax.set_xscale('log')
+ax.set_xlim(fe.temperature[[0,-1]].value)
+ax.set_ylim(0,1.01)
+ax.yaxis.set_major_locator(matplotlib.ticker.FixedLocator(np.arange(0.2,1.2,0.2)))
+ax.set_xlabel(r'$T_e$ [K]')
+ax.set_ylabel(r'$f_{X,k}$')
+tfig = ch3.save_figure('ionization-equilibrium', fext='.pgf')
+tfig.caption = r'Ion population fractions for every ionization state of Fe as a function of $T_e$. The population fractions were computed assuming ionization equilibrium using \autoref{eq:ionization_equilibrium_matrix}. Note that increasingly higher ionization states become populated with increasing electron temperature and vice versa.'
+\end{pycode}
+\py[chapter3]|tfig|
+% spell-checker: enable %
 
 \section{Continuum Emission}\label{sec:continuum}
 

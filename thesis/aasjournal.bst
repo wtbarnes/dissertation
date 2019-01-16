@@ -1,5 +1,9 @@
+%% spell-checker: disable %%
 %%
 %% $Log: apj.bst,v $
+
+%% Revision 1.15 2019/1/15 Will Barnes
+%% Added italicize function; italicize name of journal
 
 %% Revision 1.14 2016/10/5 Amy Hendrickson
 %% Changed bbl.version so that there is no longer a trailing `.'
@@ -270,6 +274,9 @@ FUNCTION {field.or.null}
 
 FUNCTION {emphasize}
 { skip$ }
+
+FUNCTION {italicize}
+{ "\emph{" swap$ * "}" * }
 
 FUNCTION {capitalize}
 { "u" change.case$ "t" change.case$ }
@@ -1157,7 +1164,7 @@ FUNCTION {article}
   format.date "year" output.check
   date.block
   crossref missing$
-    { journal
+    { journal italicize
       "journal" output.check
       format.vol.num.pages output
     }

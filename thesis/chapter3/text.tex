@@ -1,4 +1,4 @@
-% Text for chapter 1
+% Text for chapter 3
 \chapter{Emission Diagnostics of Coronal Heating}\label{ch:diagnostics}
 
 % Figure manager for Chapter 3
@@ -111,7 +111,7 @@ In general, computing cross-sections for excitations by collisions with free-ele
 
 % spell-checker: disable %
 \begin{pycode}[chapter3]
-fig = plt.figure(figsize=texfigure.figsize(pytex,scale=0.75,))
+fig = plt.figure(figsize=texfigure.figsize(pytex,scale=1,))
 ax = fig.gca()
 T = np.logspace(5.5,7.5,100) * u.K
 ion = fiasco.Ion('Fe 12', T)
@@ -176,7 +176,7 @@ def make_level_label(i):
     )
     return f"{ion[i].level}: {' '.join(ion[i].configuration.split('.'))} {spec}"
 
-fig = plt.figure(figsize=texfigure.figsize(pytex,scale=0.75,))
+fig = plt.figure(figsize=texfigure.figsize(pytex,scale=1,))
 ax = fig.gca()
 num_levels = 5
 for i in range(num_levels):
@@ -200,7 +200,7 @@ In addition to the relative populations of each energy level of the ion, one mus
 \begin{equation}\label{eq:population_fraction}
     \frac{d}{dt}f_k = n_e(\alpha_{k-1}^I f_{k-1} + \alpha_{k+1}^R f_{k+1} - \alpha_{k}^I f_k - \alpha_k^R f_k),
 \end{equation}
-where $\alpha_k^I$ and $\alpha_k^R$ are the ionization and recombination rates of charge state $k$, respectively, and the population fractions are subject to the constraint $\sum_kf_k=1$ \citep{del_zanna_solar_2018}. Note that ionization from lower charge states and recombination from higher charge states are source terms while ionization and recombination out of the current charge state are sinks. Solutions to \autoref{eq:population_fraction} are discussed in \autoref{subsec:ioneq_versus_nei}.
+where $\alpha_k^I$ and $\alpha_k^R$ are the ionization and recombination rates of charge state $k$, respectively, and the population fractions are subject to the constraint $\sum_kf_k=1$ \citep{del_zanna_solar_2018}. In general, the derivative on the left-hand side is a total derivative such that $\frac{d}{dt}=\partial/\partial t + v\partial/\partial s$. Note that ionization from lower charge states and recombination from higher charge states are source terms while ionization and recombination out of the current charge state are sinks. Solutions to \autoref{eq:population_fraction} are discussed in \autoref{subsec:ioneq_versus_nei}.
 
 \subsubsection{Ionization}
 
@@ -242,7 +242,7 @@ where $e^\prime$ is the recently freed electron \citep{phillips_ultraviolet_2008
 % spell-checker: disable %
 \begin{pycode}[chapter3]
 ion = fiasco.Ion('Fe 16', np.logspace(4,9,100)*u.K)
-fig = plt.figure(figsize=texfigure.figsize(pytex,scale=0.75,))
+fig = plt.figure(figsize=texfigure.figsize(pytex,scale=1,))
 ax = fig.gca()
 # ionization
 ax.plot(ion.temperature,ion.ionization_rate(),color=PALETTE[0],ls='-',label=r'$\alpha^I$')
@@ -291,7 +291,7 @@ Note that in the intermediate step of this process, $X_{k,j}$ is in a doubly-exc
 
 \subsection{Equilibrium versus Nonequilibrium Charge States}\label{subsec:ioneq_versus_nei}
 
-As noted in \autoref{subsec:ionization_recombination}, there are many methods for computing the ionization and recombination rate cofficients, primarily as a function of electron temperature, $T_e$. One can then use these rate coefficients to compute the relative population fraction of all ions of particular element as a function of temperature. When computing these population fractions for a high-temperature, low-density plasma such as the solar corona, it is often assumed that the charge state of the plasma is in \textit{ionization equilibrium} or that the processes which populate and depopulate a particular charge state are in balance. Under this assumption, \autoref{eq:population_fraction} becomes (temporarily dropping the element label $X$),
+As noted in \autoref{subsec:ionization_recombination}, there are many methods for computing the ionization and recombination rate coefficients, primarily as a function of electron temperature, $T_e$. One can then use these rate coefficients to compute the relative population fraction of all ions of particular element as a function of temperature. When computing these population fractions for a high-temperature, low-density plasma such as the solar corona, it is often assumed that the charge state of the plasma is in \textit{ionization equilibrium} or that the processes which populate and depopulate a particular charge state are in balance. Under this assumption, \autoref{eq:population_fraction} becomes (temporarily dropping the element label $X$),
 \begin{equation}\label{eq:ionization_equilibrium}
     n_e(\alpha_{k-1}^I f_{k-1} + \alpha_{k+1}^R f_{k+1} - \alpha_{k}^I f_k - \alpha_k^R f_k) = 0.
 \end{equation}
@@ -312,7 +312,7 @@ where $\mathbf{W}$ is a $K{\times}K$ diagonal matrix with singular values ($w_k$
 \begin{pycode}[chapter3]
 fe = fiasco.Element('Fe',np.logspace(4,9,1000)*u.K)
 ioneq = fe.equilibrium_ionization()
-fig = plt.figure(figsize=texfigure.figsize(pytex,scale=0.95,height_ratio=0.5))
+fig = plt.figure(figsize=texfigure.figsize(pytex,scale=1,height_ratio=0.5))
 ax = fig.gca()
 for i in fe:
     ax.plot(fe.temperature, ioneq[:,i.charge_state],
@@ -335,6 +335,63 @@ tfig.caption = r'Ion population fractions for every ionization state of Fe as a 
 \end{pycode}
 \py[chapter3]|tfig|
 % spell-checker: enable %
+
+The population fraction, $f_k$, as a function of $T_e$ can be accurately determined by solving \autoref{eq:ionization_equilibrium} provided that the charge states the are in equilibrium with the electron temperature of the plasma. This is a reasonable approximation provided that the electron temperature of the plasma changes sufficiently slowly as some finite amount time is required for the charge states to rearrange themselves following a dramatic change in temperature \citep{bradshaw_collisional_2013}. The time required for a charge state $k$ to reach equilibrium following a change in temperature from $T_0$ to $T_1$ in a plasma of density $n_e$ can be expressed as,
+\begin{equation}\label{eq:cie_timescale}
+    \tau_\textup{CIE} = \frac{1}{n_e(\alpha_{k-1}^I(T_1) f_{k-1}(T_0) + \alpha_{k+1}^R(T_1) f_{k+1}(T_0) - \alpha_{k}^I(T_1) f_k(T_0) - \alpha_k^R(T_1) f_k(T_0))},
+\end{equation}
+where $\tau_\textup{CIE}$ is often called the collisional ionization equilibration timescale (CIE). If $T_e$ changes from $T_0$ to $T_1$ in a time less than $\tau_\textup{CIE}$, then the charge state $k$ is out of equilibrium and $f_k$ must be computed by solving the full time-dependent population fraction equation (\autoref{eq:population_fraction}). \citet{smith_ionization_2010} computed the maximum $\tau_\textup{CIE}$ for several different elements and found that for a plasma of density $n_e=10^9$ cm$^{-3}$, the time needed to equilibrate to within 10\% of the equilibrium population fractions of Fe was at least $\ge200$ s for $T_e\ge10^6$ K and approached several thousand seconds for much higher temperatures ($10^9$ K).
+
+In a low-density, high-temperature plasma such as the solar corona which can undergo temperature changes on timescales of a few hundred or even tens of seconds (e.g. flares, heating by nanoflares), the temperature implied by the equilibrium charge states may not be representative of the actual electron temperature. As such, correctly accounting for nonequilibrium ionization (NEI) is critical for understanding the radiative losses from the coronal plasma. \citet{macneice_numerical_1984} solved the full time-dependent ionization/recombination equations, including effects due to radiative and collisional excitation and deexcitation, in order to accurately model the spectrum of Ca in a flaring loop heated by an electron beam. Later, \citet{bradshaw_numerical_2009} developed a robust, explicit numerical scheme for solving \autoref{eq:population_fraction} and provided an exhaustive set of test cases for various temperature and density gradients. Many workers \citep[e.g.][]{hansteen_new_1993,reale_nonequilibrium_2008,bradshaw_radiative_2003,bradshaw_explosive_2006,bradshaw_what_2011,bradshaw_quantifying_2019} have also found that NEI is a critically important when attempting to accurately predict spectral intensities of an impulsively heated, low-density plasma. In particular, effects due to nonequilibrium ionization are likely to limit the observability of ``very hot'' plasma, one of the primary observable signatures of nanoflare heating (see \autoref{ch:inferring_hot_plasma}).
+
+% spell-checker: disable %
+\begin{pycode}[chapter3]
+# Setup temperature and density profiles
+t = np.arange(0,100,0.05) * u.s
+thalf = t[-1]/2
+Tmax = 1e7*u.K
+Tmin = 1e5*u.K
+T = np.where(t <= thalf, Tmin + t*(Tmax-Tmin)/(thalf),
+             Tmax + (t - thalf)*(Tmin - Tmax)/(t[-1] - thalf))*Tmax.unit
+n = 1e9*u.cm**(-3) * np.ones(t.shape)
+# Compute NEI
+el = synthesizAR.atomic.Element('iron', np.logspace(4,9,1000)*u.K)
+nei = el.non_equilibrium_ionization(t,T,n)
+# Interpolate IEQ populations
+ioneq = el.equilibrium_ionization()
+ioneq_interp = interp1d(el.temperature.value, ioneq.value.T, 
+                        kind='cubic',fill_value='extrapolate')(T.value).T
+# Plot
+fig = plt.figure(figsize=texfigure.figsize(pytex,scale=1,height_ratio=0.55))
+## Population fractions
+ax = fig.gca()
+for i in range(9,15):
+    ax.plot(t, ioneq_interp[:,i], color=PALETTE[i],ls='--')
+    ax.plot(t, nei[:,i], color=PALETTE[i],ls='-',
+            label=f'{el.atomic_symbol} {roman.toRoman(el[i].ionization_stage)}')
+ax.set_ylim(1e-6,1)
+ax.set_yscale('log')
+ax.set_xlim(t[[0,-1]].value)
+ax.set_xlabel(r'$t$ [s]')
+ax.set_ylabel(r'$f_{X,k}$')
+ax.yaxis.set_major_locator(matplotlib.ticker.LogLocator(numticks=4))
+ax.tick_params(axis='x', which='both', pad=6)
+## Temperature
+ax2 = ax.twinx()
+ax2.plot(t,T,color='k',ls='-',alpha=0.5)
+ax2.set_xlim(t[[0,-1]].value)
+ax2.set_ylim(Tmin.value,Tmax.value)
+ax2.set_yscale('log')
+ax2.set_ylabel(r'$T_e$ [K]')
+ax2.tick_params(axis='y', which='both', pad=6)
+ax.legend(ncol=3,bbox_to_anchor=(0.5,1),frameon=False,loc='lower center')
+tfig = ch3.save_figure('nonequilibrium-ionization', fext='.pgf')
+tfig.caption = r'Equilibrium (dashed) and nonequilibrium (solid) population fractions as a function of time, $t$, for Fe X through Fe XV. The time-dependent temperature profile, $T_e$, is shown on the right axis in black. The density is held constant at $n_e=10^9$ cm$^{-3}$ for the entire simulation interval.'
+\end{pycode}
+\py[chapter3]|tfig|
+% spell-checker: enable %
+
+\autoref{fig:nonequilibrium-ionization} shows the population fractions of Fe X through Fe XV in equilibrium (dashed) and nonequilibrium (solid). In this simple example, the electron temperature (black) increases linearly from $10^5$ K to $10^7$ K over 50 s and then decreases linearly back to $10^5$ K over 50 s. The density is held constant at $10^9$ cm$^{-3}$ for the entire 100 s. Note that for all 6 ions shown, the population fractions are out of equilibrium for the entire 100 s and may differ by many orders of magnitude. In particular, the peaks of the nonequilibrium population fractions lag those of the equilibrium populations as a finite amount of time is required for the charge state to form following a change in $T_e$. Additionally, unlike the equilibrium populations, which track the electron temperature exactly, the nonequilibrium populations are not symmetric about the peak in $T_e$. The equilibrium populations were determined by computing the SVD of the matrix $\mathbf{A}$ in \autoref{eq:ionization_equilibrium_matrix} and the nonequilibrium populations were computed by solving \autoref{eq:population_fraction} using an implicit method (see \autoref{ap:nonequilibrium_implicit}).
 
 \section{Continuum Emission}\label{sec:continuum}
 

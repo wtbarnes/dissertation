@@ -42,6 +42,7 @@ pytex.formatter = texfigure.repr_latex_formatter
 texfigure.configure_latex_plots(pytex, font_size=12)
 
 import numpy as np
+from scipy.interpolate import interp1d
 import matplotlib
 #matplotlib.use('pdf')
 import matplotlib.pyplot as plt
@@ -54,6 +55,7 @@ from astropy.coordinates import SkyCoord
 from astropy.visualization import ImageNormalize,AsinhStretch,SqrtStretch
 import fiasco
 import synthesizAR
+import synthesizAR.atomic
 import roman
 
 # Directory names for all chapters

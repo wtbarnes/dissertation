@@ -1,4 +1,5 @@
-{   "latex-workshop.latex.autoBuild.cleanAndRetry.enabled": true,
+{   // LaTeX Workshop
+    "latex-workshop.latex.autoBuild.cleanAndRetry.enabled": true,
     "latex-workshop.latex.tools": [
         {
             "name": "pdflatex",
@@ -98,5 +99,10 @@
         "*.pytxcode",
         "*/*.aux",
         "*/figures/Chapter*-Figure*",
-    ]
+    ],
+    // Spell Checker
+    "cSpell.enabledLanguageIds": [
+        "markdown",
+        "latex"
+    ],
 }

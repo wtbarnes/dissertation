@@ -200,7 +200,7 @@ In addition to the relative populations of each energy level of the ion, one mus
 \begin{equation}\label{eq:population_fraction}
     \frac{d}{dt}f_k = n_e(\alpha_{k-1}^I f_{k-1} + \alpha_{k+1}^R f_{k+1} - \alpha_{k}^I f_k - \alpha_k^R f_k),
 \end{equation}
-where $\alpha_k^I$ and $\alpha_k^R$ are the ionization and recombination rates of charge state $k$, respectively, and the population fractions are subject to the constraint $\sum_kf_k=1$ \citep{del_zanna_solar_2018}. In general, the derivative on the left-hand side is a total derivative such that $\frac{d}{dt}=\partial/\partial t + v\partial/\partial s$. Note that ionization from lower charge states and recombination from higher charge states are source terms while ionization and recombination out of the current charge state are sinks. Solutions to \autoref{eq:population_fraction} are discussed in \autoref{subsec:ioneq_versus_nei}.
+where $\alpha_k^I$ and $\alpha_k^R$ are the ionization and recombination rates of charge state $k$, respectively, and the population fractions are subject to the constraint $\sum_kf_k=1$ \citep{del_zanna_solar_2018}. In general, the derivative on the left-hand side is the comoving derivative such that $\frac{d}{dt}=\partial/\partial t + v\partial/\partial s$. Note that ionization from lower charge states and recombination from higher charge states are source terms while ionization and recombination out of the current charge state are sinks. Solutions to \autoref{eq:population_fraction} are discussed in \autoref{subsec:ioneq_versus_nei}.
 
 \subsubsection{Ionization}
 
@@ -296,15 +296,15 @@ As noted in \autoref{subsec:ionization_recombination}, there are many methods fo
     n_e(\alpha_{k-1}^I f_{k-1} + \alpha_{k+1}^R f_{k+1} - \alpha_{k}^I f_k - \alpha_k^R f_k) = 0.
 \end{equation}
 
-For element $X$ with $K$ total charge states, \autoref{eq:ionization_equilibrium} represents a system of $K$ linear, homogeneous equations and can be expressed in matrix form as,
+For element $X$ with $Z+1$ total charge states, where $Z$ is the atomic number of $X$, \autoref{eq:ionization_equilibrium} represents a system of $Z+1$ linear, homogeneous equations and can be expressed in matrix form as,
 \begin{equation}\label{eq:ionization_equilibrium_matrix}
     \mathbf{A}\mathbf{F} = \mathbf{0},
 \end{equation}
-where $\mathbf{F}=(f_1,f_2,\ldots,f_k,\ldots,f_K)$ is a column vector of length $K$, $\mathbf{A}$ is a $K{\times}K$ matrix containing all of the ionization and recombination rates, and $\mathbf{0}$ is the zero vector with $K$ entries. For a given element $X$ and electron temperature $T_e$, one can compute $\alpha^\textup{I}$ and $\alpha^\textup{R}$ (e.g. using CHIANTI) for all $k$ to find $\mathbf{A}$. To solve \autoref{eq:ionization_equilibrium_matrix}, consider the singular value decomposition (SVD) of $\mathbf{A}$,
+where $\mathbf{F}=(f_1,f_2,\ldots,f_k,\ldots,f_{Z+1})$ is a column vector of length $Z+1$, $\mathbf{A}$ is a $Z+1{\times}Z+1$ matrix containing all of the ionization and recombination rates, and $\mathbf{0}$ is the zero vector with $Z+1$ entries. For a given element $X$ and electron temperature $T_e$, one can compute $\alpha^\textup{I}$ and $\alpha^\textup{R}$ (e.g. using CHIANTI) for all $k$ to find $\mathbf{A}$. To solve \autoref{eq:ionization_equilibrium_matrix}, consider the singular value decomposition (SVD) of $\mathbf{A}$,
 \begin{equation}
     \mathbf{A} = \mathbf{U}\mathbf{W}\mathbf{V}^T,
 \end{equation}
-where $\mathbf{W}$ is a $K{\times}K$ diagonal matrix with singular values ($w_k$) along the diagonal and $\mathbf{U}$ and $\mathbf{V}$ are  square $K{\times}K$ matrices whose columns are orthonormal. Provided $\mathbf{A}$ is singular (i.e. $\det{(\mathbf{A})}=0$), any column of $\mathbf{V}$ for which the corresponding $w_k=0$ is a solution of \autoref{eq:ionization_equilibrium_matrix} \citep{press_numerical_1992}. 
+where $\mathbf{W}$ is a $Z+1{\times}Z+1$ diagonal matrix with singular values ($w_k$) along the diagonal and $\mathbf{U}$ and $\mathbf{V}$ are  square $Z+1{\times}Z+1$ matrices whose columns are orthonormal. Provided $\mathbf{A}$ is singular (i.e. $\det{(\mathbf{A})}=0$), any column of $\mathbf{V}$ for which the corresponding $w_k=0$ is a solution of \autoref{eq:ionization_equilibrium_matrix} \citep{press_numerical_1992}. 
 
 \autoref{fig:ionization-equilibrium} shows the population fractions, $f_{X,k}$ for every ionization state of Fe as a function of electron temperature. As the electron temperature increases, the populations of increasingly higher charge states are populated because the free electrons are more energetic and are capable of releasing more tightly-bound electrons. Conversely, at lower $T_e$, the free electrons have lower energy and recombine into the outer bound states of the target ions such that the lower charge states become more populated \citep{bradshaw_collisional_2013}. Note that the temperature at which each population fraction peaks is the point at which the ionization and recombination rates for that charge state are equal (see \autoref{eq:population_fraction}).
 
@@ -413,17 +413,79 @@ tfig.caption = r'Equilibrium (dashed) and nonequilibrium (solid) population frac
 
 \section{Time-lag Analysis}\label{sec:timelag}
 
-\hilite{Theory, show example with Gaussian pulses}
+% spell-checker: disable %
+\begin{pycode}[chapter3timelag]
+name = 'chapter3'
+ch3_timelag = texfigure.Manager(
+    pytex,
+    os.path.join('.', name),
+    number=3,
+    **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
+)
+from synthesizAR.analysis import cross_correlation
+\end{pycode}
+% spell-checker: enable %
 
 \subsection{Cross-correlation}
 
+The \textit{cross-correlation} measures the similarity between two signals as a function of the offset betwen them. Given two signals $f_A$ and $f_B$ that are a function of time $t$, the cross-correlation, $\mathcal{C}_{AB}$, can be written as,
+\begin{equation}
+    \mathcal{C}(\tau) = (f_A\star f_B)(\tau) = \int_{-\infty}^\infty\textup{d}t\,f_A^{\ast}(t)f_B(t + \tau),
+\end{equation}
+where $\tau$ is the temporal offset between $f_A$ and $f_B$ and $f_A^{\ast}$ denotes the complex conjugate of $f_A$. Alternatively, $\mathcal{C}$ can be expressed in terms of the convolution,
+\begin{equation}\label{eq:cross_correlation_convolution}
+    \mathcal{C}(\tau) = f_A(-t) \ast f_B(t),
+\end{equation}
+where $\ast$ denotes the convolution operator. Taking the Fourier transform of both sides of \autoref{eq:cross_correlation_convolution} and using the convolution theorem \citep[section 20.4]{arfken_mathematical_2013} gives,
+\begin{align}\label{eq:cross_correlation_final}
+    \fourier{\mathcal{C}(\tau)} &= \fourier{f_A(-t) \ast f_B(t)}, \nonumber \\
+    \fourier{\mathcal{C}(\tau)} &= \fourier{f_A(-t)}\fourier{f_B(t)}, \nonumber \\
+    \mathcal{C}(\tau) &= \inversefourier{\fourier{f_A(-t)}\fourier{f_B(t)}},
+\end{align}
+where $\mathcal{F}$ denotes the Fourier transform. \autoref{eq:cross_correlation_final} defines the cross-correlation $\mathcal{C}$ between two signals $f_A$ and $f_B$ as a function of temporal offset $\tau$ in terms of the Fourier transform. Defining the cross-correlation in this manner allows one to efficiently compute $\mathcal{C}(\tau)$ using highly-optimized fast Fourier transform algorithms \citep[e.g. the widely-used algorithm developed by][]{cooley_algorithm_1965}. 
+
+% spell-checker: disable %
+\begin{pycode}[chapter3timelag]
+# Compute cross-correlation between Gaussian pulses
+def gaussian_pulse(x,x0,sigma):
+    return np.exp(-(x - x0)**2/(2*sigma**2))
+t = np.linspace(-100,100,100000)*u.s
+fA = gaussian_pulse(t,0.25*u.s,0.05*u.s)
+fB = gaussian_pulse(t,0.75*u.s,0.05*u.s)
+lag,cc = cross_correlation(t,fA,fB)
+# Plot
+fig,axes = plt.subplots(1,2,figsize=texfigure.figsize(pytex,scale=1,height_ratio=0.5))
+## Gaussian pulses
+axes[0].plot(t,fA,label='$f_A$', color=PALETTE[0])
+axes[0].plot(t,fB,label='$f_B$', color=PALETTE[1])
+axes[0].legend(loc='upper center',frameon=False)
+axes[0].set_xlim(0,1)
+axes[0].set_ylim(0,1.05)
+axes[0].set_xlabel(r'$t$')
+axes[0].set_ylabel(r'$f(t)$')
+axes[0].yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(prune='lower',nbins=6))
+## Cross-correlation
+axes[1].plot(lag, cc, color=PALETTE[0])
+axes[1].axvline(x=0, ls='--', color='k',lw=1)
+axes[1].set_xlabel(r'$\tau$')
+axes[1].set_ylabel(r'$\mathcal{C}$',labelpad=0)
+axes[1].set_xlim(-1,1)
+axes[1].set_ylim(0,1.05)
+axes[1].yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(nbins=6,prune='lower'))
+plt.subplots_adjust(wspace=0.3)
+tfig = ch3_timelag.save_figure('cross-correlation-example', fext='.pgf')
+tfig.caption = r'The left panel shows two Gaussian signals $f_A$ and $f_B$ with peaks at $t=0.25$ (blue) and $t=0.75$ (orange), respectively. The right panel shows the cross-correlation $\mathcal{C}$ between $f_A$ and $f_B$ as a function of the offset $\tau$. The dashed black line denotes $\tau=0$. Note that $\mathcal{C}$ peaks at $\tau=0.5$, the separation in $t$ between the peaks of $f_A$ and $f_B$.'
+\end{pycode}
+\py[chapter3timelag]|tfig|
+% spell-checker: enable %
+
 \subsection{Temperature Sensitivity of the AIA Passbands}
 
-\hilite{Briefly discuss how temperature response functions are calculated, show plot}
+% Briefly discuss how temperature response functions are calculated, show plot
 
 \subsection{Time lag between AIA Channel Pairs}
 
-\hilite{Discuss time lag in context of AIA; relate time lag to cooling time between channel pairs}
+% Discuss time lag in context of AIA; relate time lag to cooling time between channel pairs
 
 \section{Summary}
 
@@ -439,3 +501,5 @@ tfig.caption = r'Equilibrium (dashed) and nonequilibrium (solid) population frac
 \nomenclature[a-te]{$T_e$}{electron temperature}
 \nomenclature[a-ne]{$n_e$}{electron density}
 \nomenclature[a-kb]{$k_B$}{Boltzmann constant}
+\nomenclature[x-fourier]{$\mathcal{F}$}{Fourier transform}
+\nomenclature[x-crosscorrelation]{$\mathcal{C}$}{cross-correlation}

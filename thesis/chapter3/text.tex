@@ -442,7 +442,9 @@ where $\ast$ denotes the convolution operator. Taking the Fourier transform of b
     \fourier{\mathcal{C}(\tau)} &= \fourier{f_A(-t)}\fourier{f_B(t)}, \nonumber \\
     \mathcal{C}(\tau) &= \inversefourier{\fourier{f_A(-t)}\fourier{f_B(t)}},
 \end{align}
-where $\mathcal{F}$ denotes the Fourier transform. \autoref{eq:cross_correlation_final} defines the cross-correlation $\mathcal{C}$ between two signals $f_A$ and $f_B$ as a function of temporal offset $\tau$ in terms of the Fourier transform. Defining the cross-correlation in this manner allows one to efficiently compute $\mathcal{C}(\tau)$ using highly-optimized fast Fourier transform algorithms \citep[e.g. the widely-used algorithm developed by][]{cooley_algorithm_1965}. 
+where $\mathcal{F}$ denotes the Fourier transform. \autoref{eq:cross_correlation_final} defines the cross-correlation $\mathcal{C}$ between two signals $f_A$ and $f_B$ as a function of temporal offset $\tau$ in terms of the Fourier transform. Defining the cross-correlation in this manner allows one to efficiently compute $\mathcal{C}(\tau)$ using highly-optimized fast Fourier transform algorithms \citep[e.g. the widely-used algorithm developed by][]{cooley_algorithm_1965}.
+
+% Discuss the figure, give a more conceptual explanation of cross-correlation and discuss the time lag
 
 % spell-checker: disable %
 \begin{pycode}[chapter3timelag]
@@ -481,7 +483,9 @@ tfig.caption = r'The left panel shows two Gaussian signals $f_A$ and $f_B$ with 
 
 \subsection{Temperature Sensitivity of the AIA Passbands}
 
-% Briefly discuss how temperature response functions are calculated, show plot
+% Briefly discuss how temperature response functions are calculated
+% show plot of temperature response
+% show wavelength response as well?
 
 \subsection{Time lag between AIA Channel Pairs}
 

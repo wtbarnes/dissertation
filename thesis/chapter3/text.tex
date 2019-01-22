@@ -201,7 +201,7 @@ In addition to the relative populations of each energy level of the ion, one mus
 \begin{equation}\label{eq:population_fraction}
     \frac{d}{dt}f_k = n_e(\alpha_{k-1}^I f_{k-1} + \alpha_{k+1}^R f_{k+1} - \alpha_{k}^I f_k - \alpha_k^R f_k),
 \end{equation}
-where $\alpha_k^I$ and $\alpha_k^R$ are the ionization and recombination rates of charge state $k$, respectively, and the population fractions are subject to the constraint $\sum_kf_k=1$ \citep{del_zanna_solar_2018}. In general, the derivative on the left-hand side is the comoving derivative such that $\frac{d}{dt}=\partial/\partial t + v\partial/\partial s$. Note that ionization from lower charge states and recombination from higher charge states are source terms while ionization and recombination out of the current charge state are sinks. Solutions to \autoref{eq:population_fraction} are discussed in \autoref{subsec:ioneq_versus_nei}.
+where $\alpha_k^I$ and $\alpha_k^R$ are the ionization and recombination rates of charge state $k$, respectively, and the population fractions are subject to the constraint $\sum_kf_k=1$ \citep{del_zanna_solar_2018}. In general, the derivative on the left-hand side is the comoving derivative such that $\frac{d}{dt}=\frac{\partial}{\partial t} + v\frac{\partial}{\partial s}$. Note that ionization from lower charge states and recombination from higher charge states are source terms while ionization and recombination out of the current charge state are sinks. Solutions to \autoref{eq:population_fraction} are discussed in \autoref{subsec:ioneq_versus_nei}.
 
 \subsubsection{Ionization}
 
@@ -555,7 +555,7 @@ While $R_c$ is only a function of the properties of the instrument, the temperat
 \begin{equation}\label{eq:temperature_response_discrete}
     K_c = \int_0^\infty\textup{d}\lambda\,P_{\textup{cont.}}(\lambda)R_c(\lambda)  + \sum_{\{ji\}}\,\frac{G_{ji}}{hc/\lambda_{ji}}R_c(\lambda_{ji}),
 \end{equation}
-where $P_{\textup{cont.}}$ is the continuum emissivity and $G_{ji}$ is the contribution function for an atomic transition $\lambda_{ji}$ (\autoref{eq:contribution_function}) and the sum is taken over $\{ji\}$, the set of all known atomic transitions for the relevant wavelength range of channel $c$. Note that $hc/\lambda_{ji}$ is the energy per photon of wavelength $\lambda_{ji}$ such that $G_{ji}/(hc/\lambda_{ji})$ has units of photon $\si{\cm}^3$ $\si{\second}^{-1}$. The set of relevant atomic transitions, $\{ji\}$, can be obtained from the CHIANTI database such that accurately determining the temperature sensitivity of the passbands depends critically on knowledge of the relevant atomic transitions in the bandpass of each channel. The temperature response functions for the EUV channels of AIA are shown in \autoref{fig:aia-temperature-response}. Combined, the six response functions provide temperature coverage over the range $3\times10^5\lesssim T\lesssim2\times10^7$ \si{\kelvin}. Note that several of the response functions, particulary the \SI{94}{\angstrom} and \SI{131}{\angstrom} channels, are doubly-peaked in temperature. This degeneracy, combined with the finite width of the temperature response functions, makes associating intensities of particular channels with specific temperatures very difficult.
+where $P_{\textup{cont.}}$ is the continuum emissivity and $G_{ji}$ is the contribution function for an atomic transition $\lambda_{ji}$ (\autoref{eq:contribution_function}) and the sum is taken over $\{ji\}$, the set of all known atomic transitions for the relevant wavelength range of channel $c$. Note that $hc/\lambda_{ji}$ is the energy per photon of wavelength $\lambda_{ji}$ such that $G_{ji}/(hc/\lambda_{ji})$ has units of photon $\si{\cm}^3$ $\si{\second}^{-1}$. The set of relevant atomic transitions, $\{ji\}$, can be obtained from the CHIANTI database such that accurately determining the temperature sensitivity of the passbands depends critically on knowledge of the relevant atomic transitions in the bandpass of each channel.
 
 % spell-checker: disable %
 \begin{pycode}[chapter3timelag]
@@ -580,6 +580,8 @@ tfig.caption = r'Temperature response functions for the six EUV channels of AIA 
 \end{pycode}
 \py[chapter3timelag]|tfig|
 % spell-checker: enable %
+
+The temperature response functions for the EUV channels of AIA are shown in \autoref{fig:aia-temperature-response}. Combined, the six response functions provide temperature coverage over the range $3\times10^5\lesssim T\lesssim2\times10^7$ \si{\kelvin}. Note that several of the response functions, particulary the \SI{94}{\angstrom} and \SI{131}{\angstrom} channels, are double-peaked in temperature due to the finite width of the wavelength responses. This degeneracy makes associating observations with specific temperatures very difficult as, in the case of the \SI{131}{\angstrom} channel, an intensity enhancement may correspond to very hot $>10^7$ \si{\kelvin} plasma or much cooler $<10^6$ \si{\kelvin} plasma.
 
 \subsection{Time lag between AIA Channel Pairs}\label{subsec:timelag_aia}
 

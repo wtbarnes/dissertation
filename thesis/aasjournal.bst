@@ -275,6 +275,9 @@ FUNCTION {field.or.null}
 FUNCTION {emphasize}
 { skip$ }
 
+FUNCTION {bold}
+{ "\textbf{" swap$ * "}" * }
+
 FUNCTION {italicize}
 { "\emph{" swap$ * "}" * }
 
@@ -1166,7 +1169,7 @@ FUNCTION {article}
   crossref missing$
     { journal italicize
       "journal" output.check
-      format.vol.num.pages output
+      format.vol.num.pages bold output
     }
     { format.article.crossref output.nonnull
       format.pages output

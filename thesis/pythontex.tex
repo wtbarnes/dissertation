@@ -42,7 +42,7 @@ pytex.formatter = texfigure.repr_latex_formatter
 texfigure.configure_latex_plots(pytex, font_size=12)
 
 import numpy as np
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, splev
 import matplotlib
 #matplotlib.use('pdf')
 import matplotlib.pyplot as plt
@@ -56,6 +56,7 @@ from astropy.visualization import ImageNormalize,AsinhStretch,SqrtStretch
 import fiasco
 import synthesizAR
 import synthesizAR.atomic
+from synthesizAR.instruments import InstrumentSDOAIA
 import roman
 
 # Directory names for all chapters
@@ -65,10 +66,12 @@ manager_opts = {'python_dir': 'python', 'fig_dir': 'figures', 'data_dir': 'data'
 PALETTE = seaborn.color_palette('colorblind', 100)
 
 # Set some plot styling here
-plt.rcParams['text.latex.preamble'] = r'\usepackage{fourier}'
-plt.rcParams['font.family'] = 'serif'
-plt.rcParams['font.serif'] = 'Utopia'
+plt.rcParams['pgf.preamble'] = [r'\usepackage{siunitx}']
 plt.rcParams['text.usetex'] = True
+plt.rcParams['font.family'] = 'serif'
+plt.rcParams['font.serif'] = [] # Leave blank to inherit from document
+plt.rcParams['font.sans-serif'] = [] # Leave blank to inherit from document
+plt.rcParams['font.monospace'] = [] # Leave blank to inherit from document
 #plt.rcParams['axes.titlesize'] = 12
 #plt.rcParams['axes.labelsize'] = 12
 plt.rcParams['legend.fontsize'] = 10

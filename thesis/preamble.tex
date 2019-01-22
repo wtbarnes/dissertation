@@ -26,7 +26,7 @@
 \ifsetCustomFont
   % Set your custom font here and use `customfont' in options. Leave empty to
   % load computer modern font (default LaTeX font).
-  \RequirePackage{}
+  \RequirePackage{mathpazo}
 
   % For use with XeLaTeX
   %  \setmainfont[
@@ -49,6 +49,7 @@
 \usepackage{proofread}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{siunitx}
 
 % ********************Captions and Hyperreferencing / URL **********************
 
@@ -84,7 +85,7 @@
 
 %\usepackage{multicol}
 %\usepackage{longtable}
-%\usepackage{tabularx}
+\usepackage{tabularx}
 
 % ******************************* Line Spacing *********************************
 
@@ -199,6 +200,12 @@
 
 % *****************************************************************************
 % ******************* Custom Macros *******************************************
+% Math
 \newcommand{\fourier}[1]{\mathcal{F}\left\{#1\right\}}
 \newcommand{\inversefourier}[1]{\mathcal{F}^{-1}\left\{#1\right\}}
+\newcommand{\crosscor}[1][AB]{\mathcal{C}_{#1}(\tau)}
+% Abbreviations
+\newcommand{\AR}{active region}
+% Table
+\newcolumntype{C}{>{\centering\arraybackslash}X} % centered "X" column
 

@@ -32,7 +32,7 @@ where $X_k$ is an ion of element $X$ in ionization stage $k$, $\nu_{ji}$ is the 
 
 The intensity of a spectral line for an atomic transition of wavelength $\lambda_{ji}=c/\nu_{ji}$, where $c$ is the speed of light in a vacuum, is given by,
 \begin{equation}\label{eq:intensity}
-    I(\lambda_{ji}) = \frac{1}{4\pi}\int\textup{d}h\,P(\lambda_{ji}),
+    I(\lambda_{ji}) = \frac{1}{4\pi}\int_\textup{LOS}\textup{d}h\,P(\lambda_{ji}),
 \end{equation}
 where the integration is taken along the line-of-sight (LOS) between the observer the emission site and $P(\lambda_{ji})$ is the \textit{emissivity}, or the radiative power per unit volume. The emissivity is given by,
 \begin{equation}\label{eq:emissivity}
@@ -118,7 +118,7 @@ ion = fiasco.Ion('Fe 12', T)
 ups = ion.effective_collision_strength()
 index = np.where(np.logical_and(ups[0,:] < 1,ups[-1,:]>1e-3))[0][:100]
 ax.plot(T, ups[:, index], color=PALETTE[0], alpha=0.25)
-ax.set_xlabel(r'$T_e$ [K]')
+ax.set_xlabel(r'$T_e$ $[\si{\kelvin}]$')
 ax.set_ylabel(r'$\Upsilon$')
 ax.set_xscale('log')
 ax.set_yscale('log')
@@ -185,8 +185,9 @@ ax.set_xscale('log')
 ax.set_yscale('log')
 ax.set_ylim(1e-3,2)
 ax.set_xlim(n[0].value,n[-1].value)
-ax.set_xlabel(r'$n_e$ [cm$^{-3}$]')
+ax.set_xlabel(r'$n_e$ $[\si{\cm}^{-3}]$')
 ax.set_ylabel(r'$N_j$')
+ax.xaxis.set_major_locator(matplotlib.ticker.LogLocator(numticks=5))
 ax.legend(loc=4,frameon=False,ncol=2)
 tfig = ch3.save_figure('level-pop', fext='.pgf')
 tfig.caption = r'Level population of the first five levels of O II as a function of electron density, $n_e$, at $T_e=10^6$ K. Note that the ground state is the most abundant for all $n_e$. The level population is normalized to the total number of O II ions such that $\sum_jN_j=1$. Adapted from Fig. 4.3 of \citet{phillips_ultraviolet_2008}.'
@@ -256,8 +257,8 @@ ax.set_xscale('log')
 ax.set_yscale('log')
 ax.set_ylim(1e-12,1e-9)
 ax.set_xlim(ion.temperature[[0,-1]].value)
-ax.set_xlabel(r'$T_e$ [K]')
-ax.set_ylabel(r'$\alpha$ [cm$^3$ s$^{-1}$]')
+ax.set_xlabel(r'$T_e$ $[\si{\kelvin}]$')
+ax.set_ylabel(r'$\alpha$ $[\si{\cm}^3\,\si{\second}^{-1}]$')
 ax.legend(loc=4,ncol=1,frameon=False)
 tfig = ch3.save_figure('ionization-recombination-rates', fext='.pgf')
 tfig.caption = r'Ionization (blue) and recombination (orange) rates as a function of electron temperature, $T_e$, for Fe XVI. The constituent rates are denoted by dashed and dot-dashed lines. Note that the recombination rate dominates at low $T_e$ while the ionization rate dominates at high $T_e$, as expected.'
@@ -318,7 +319,7 @@ for i in fe:
     ax.plot(fe.temperature, ioneq[:,i.charge_state],
             color=PALETTE[i.charge_state],)
     z = i.ionization_stage
-    if (1 <= z <= 10) or (16 <= z <= 19) or z >= 24:
+    if (2 <= z <= 10) or (16 <= z <= 18) or (24 <= z <= 26):
         ax.text(fe.temperature[np.argmax(ioneq[:,i.charge_state])].value,
                 np.max(ioneq[:,i.charge_state]).value,
                 f'{fe.atomic_symbol} {roman.toRoman(i.ionization_stage)}',
@@ -328,7 +329,7 @@ ax.set_xscale('log')
 ax.set_xlim(fe.temperature[[0,-1]].value)
 ax.set_ylim(0,1.01)
 ax.yaxis.set_major_locator(matplotlib.ticker.FixedLocator(np.arange(0.2,1.2,0.2)))
-ax.set_xlabel(r'$T_e$ [K]')
+ax.set_xlabel(r'$T_e$ $[\si{\kelvin}]$')
 ax.set_ylabel(r'$f_{X,k}$')
 tfig = ch3.save_figure('ionization-equilibrium', fext='.pgf')
 tfig.caption = r'Ion population fractions for every ionization state of Fe as a function of $T_e$. The population fractions were computed assuming ionization equilibrium using \autoref{eq:ionization_equilibrium_matrix}. Note that increasingly higher ionization states become populated with increasing electron temperature and vice versa.'
@@ -372,7 +373,7 @@ for i in range(9,15):
 ax.set_ylim(1e-6,1)
 ax.set_yscale('log')
 ax.set_xlim(t[[0,-1]].value)
-ax.set_xlabel(r'$t$ [s]')
+ax.set_xlabel(r'$t$ $[\si{\second}]$')
 ax.set_ylabel(r'$f_{X,k}$')
 ax.yaxis.set_major_locator(matplotlib.ticker.LogLocator(numticks=4))
 ax.tick_params(axis='x', which='both', pad=6)
@@ -382,11 +383,11 @@ ax2.plot(t,T,color='k',ls='-',alpha=0.5)
 ax2.set_xlim(t[[0,-1]].value)
 ax2.set_ylim(Tmin.value,Tmax.value)
 ax2.set_yscale('log')
-ax2.set_ylabel(r'$T_e$ [K]')
+ax2.set_ylabel(r'$T_e$ $[\si{\kelvin}]$')
 ax2.tick_params(axis='y', which='both', pad=6)
 ax.legend(ncol=3,bbox_to_anchor=(0.5,1),frameon=False,loc='lower center')
 tfig = ch3.save_figure('nonequilibrium-ionization', fext='.pgf')
-tfig.caption = r'Equilibrium (dashed) and nonequilibrium (solid) population fractions as a function of time, $t$, for Fe X through Fe XV. The time-dependent temperature profile, $T_e$, is shown on the right axis in black. The density is held constant at $n_e=10^9$ cm$^{-3}$ for the entire simulation interval.'
+tfig.caption = r'Equilibrium (dashed) and nonequilibrium (solid) population fractions as a function of time, $t$, for Fe X through Fe XV. The time-dependent temperature profile, $T_e$, is shown on the right axis in black. The density is held constant at $n_e=10^9$ $\si{\cm}^{-3}$ for the entire simulation interval.'
 \end{pycode}
 \py[chapter3]|tfig|
 % spell-checker: enable %
@@ -404,6 +405,16 @@ tfig.caption = r'Equilibrium (dashed) and nonequilibrium (solid) population frac
 \section{The Differential Emission Measure Distribution}\label{sec:dem}
 
 \hilite{Write intensity in terms of contribution function; define contribution function; define DEM}
+
+\autoref{eq:intensity}, the intensity for a transition $\lambda_{ji}$, can be alternatively expressed as,
+\begin{equation}
+    I(\lambda_{ji}) = \int_\textup{LOS}\textup{d}h\,n_Hn_eG_{ji},
+\end{equation}
+where $G_{ji}$, the so-called \textit{contribution function}, is given by,
+\begin{equation}\label{eq:contribution_function}
+    G_{ji} = \frac{1}{4\pi n_e}\frac{hc}{\lambda_{ji}}\textup{Ab}(X)f_{X,k}N_{X,k,j}A_{ji}.
+\end{equation}
+Note that several variants of $G_{ji}$ exist in the literature such as dropping the factor of $\frac{1}{4\pi}$, including the $n_H/n_e\approx0.83$ term, or dropping the abundance factor $\textup{Ab}(X)$ \citep[see section 3.1 of][]{del_zanna_solar_2018}.
 
 \subsection{Inversion Methods}
 
@@ -426,25 +437,26 @@ from synthesizAR.analysis import cross_correlation
 \end{pycode}
 % spell-checker: enable %
 
-\subsection{Cross-correlation}
+% Need some intro here that describes in brief what time lag analysis is and why we would use it.
+% Just a few sentences is fine. All details will go below
 
-The \textit{cross-correlation} measures the similarity between two signals as a function of the offset betwen them. Given two signals $f_A$ and $f_B$ that are a function of time $t$, the cross-correlation, $\mathcal{C}_{AB}$, can be written as,
+\subsection{Cross-correlation}\label{subsec:cross_correlation}
+
+The \textit{cross-correlation} measures the similarity between two signals as a function of the offset betwen them. Given two signals $f_A$ and $f_B$ that are a function of time $t$, the cross-correlation, $\crosscor$, can be written as,
 \begin{equation}
-    \mathcal{C}(\tau) = (f_A\star f_B)(\tau) = \int_{-\infty}^\infty\textup{d}t\,f_A^{\ast}(t)f_B(t + \tau),
+    \crosscor = (f_A\star f_B)(\tau) = \int_{-\infty}^\infty\textup{d}t\,f_A^{\ast}(t)f_B(t + \tau),
 \end{equation}
-where $\tau$ is the temporal offset between $f_A$ and $f_B$ and $f_A^{\ast}$ denotes the complex conjugate of $f_A$. Alternatively, $\mathcal{C}$ can be expressed in terms of the convolution,
+where $\tau$ is the temporal offset between $f_A$ and $f_B$ and $f_A^{\ast}$ denotes the complex conjugate of $f_A$. Alternatively, $\crosscor$ can be expressed in terms of the convolution,
 \begin{equation}\label{eq:cross_correlation_convolution}
-    \mathcal{C}(\tau) = f_A(-t) \ast f_B(t),
+    \crosscor = f_A(-t) \ast f_B(t),
 \end{equation}
 where $\ast$ denotes the convolution operator. Taking the Fourier transform of both sides of \autoref{eq:cross_correlation_convolution} and using the convolution theorem \citep[section 20.4]{arfken_mathematical_2013} gives,
 \begin{align}\label{eq:cross_correlation_final}
-    \fourier{\mathcal{C}(\tau)} &= \fourier{f_A(-t) \ast f_B(t)}, \nonumber \\
-    \fourier{\mathcal{C}(\tau)} &= \fourier{f_A(-t)}\fourier{f_B(t)}, \nonumber \\
-    \mathcal{C}(\tau) &= \inversefourier{\fourier{f_A(-t)}\fourier{f_B(t)}},
+    \fourier{\crosscor} &= \fourier{f_A(-t) \ast f_B(t)}, \nonumber \\
+    \fourier{\crosscor} &= \fourier{f_A(-t)}\fourier{f_B(t)}, \nonumber \\
+    \crosscor &= \inversefourier{\fourier{f_A(-t)}\fourier{f_B(t)}},
 \end{align}
-where $\mathcal{F}$ denotes the Fourier transform. \autoref{eq:cross_correlation_final} defines the cross-correlation $\mathcal{C}$ between two signals $f_A$ and $f_B$ as a function of temporal offset $\tau$ in terms of the Fourier transform. Defining the cross-correlation in this manner allows one to efficiently compute $\mathcal{C}(\tau)$ using highly-optimized fast Fourier transform algorithms \citep[e.g. the widely-used algorithm developed by][]{cooley_algorithm_1965}.
-
-% Discuss the figure, give a more conceptual explanation of cross-correlation and discuss the time lag
+where $\mathcal{F}$ denotes the Fourier transform. \autoref{eq:cross_correlation_final} defines the cross-correlation $\crosscor$ between two signals $f_A$ and $f_B$ as a function of temporal offset $\tau$ in terms of the Fourier transform. Defining the cross-correlation in this manner allows one to efficiently compute $\crosscor$ using highly-optimized fast Fourier transform (FFT) algorithms \citep[e.g. the widely-used FFT algorithm developed by][]{cooley_algorithm_1965}. Note that $f_A$ and $f_B$ are standardized such that both signals have zero mean and unit standard deviation (i.e. $\mu_{A,B}=0$, $\sigma_{A,B}=1$). Additionally, $\crosscor$ is scaled by the length of the signal such that the cross-correlation is always between $-1$ (perfectly anti-correlated) and $+1$ (perfectly correlated).
 
 % spell-checker: disable %
 \begin{pycode}[chapter3timelag]
@@ -458,38 +470,121 @@ lag,cc = cross_correlation(t,fA,fB)
 # Plot
 fig,axes = plt.subplots(1,2,figsize=texfigure.figsize(pytex,scale=1,height_ratio=0.5))
 ## Gaussian pulses
-axes[0].plot(t,fA,label='$f_A$', color=PALETTE[0])
-axes[0].plot(t,fB,label='$f_B$', color=PALETTE[1])
+axes[0].plot(t,fA,label='$f_1$', color=PALETTE[0])
+axes[0].plot(t,fB,label='$f_2$', color=PALETTE[1])
 axes[0].legend(loc='upper center',frameon=False)
 axes[0].set_xlim(0,1)
 axes[0].set_ylim(0,1.05)
-axes[0].set_xlabel(r'$t$')
-axes[0].set_ylabel(r'$f(t)$')
+axes[0].set_xlabel(r'$t$ $[\si{\second}]$')
+axes[0].set_ylabel(r'$f$ $[\textup{arb. unit}]$')
 axes[0].yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(prune='lower',nbins=6))
 ## Cross-correlation
 axes[1].plot(lag, cc, color=PALETTE[0])
 axes[1].axvline(x=0, ls='--', color='k',lw=1)
-axes[1].set_xlabel(r'$\tau$')
-axes[1].set_ylabel(r'$\mathcal{C}$',labelpad=0)
+axes[1].set_xlabel(r'$\tau$ $[\si{\second}]$')
+axes[1].set_ylabel(r'$\mathcal{C}_{12}$',)
 axes[1].set_xlim(-1,1)
 axes[1].set_ylim(0,1.05)
 axes[1].yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(nbins=6,prune='lower'))
 plt.subplots_adjust(wspace=0.3)
 tfig = ch3_timelag.save_figure('cross-correlation-example', fext='.pgf')
-tfig.caption = r'The left panel shows two Gaussian signals $f_A$ and $f_B$ with peaks at $t=0.25$ (blue) and $t=0.75$ (orange), respectively. The right panel shows the cross-correlation $\mathcal{C}$ between $f_A$ and $f_B$ as a function of the offset $\tau$. The dashed black line denotes $\tau=0$. Note that $\mathcal{C}$ peaks at $\tau=0.5$, the separation in $t$ between the peaks of $f_A$ and $f_B$.'
+tfig.caption = r'The left panel shows two Gaussian signals $f_1$ and $f_2$ with peaks at \SI{0.25}{\second} (blue) and \SI{0.75}{\second} (orange), respectively. The right panel shows the cross-correlation $\crosscor[12]$ between $f_1$ and $f_2$ as a function of the offset $\tau$. The dashed black line denotes $\tau=0$ \si{\second}. Note that $\crosscor[12]$ peaks at $\tau=0.5$ \si{\second}, the separation in $t$ between the peaks of $f_1$ and $f_2$.'
 \end{pycode}
 \py[chapter3timelag]|tfig|
 % spell-checker: enable %
 
-\subsection{Temperature Sensitivity of the AIA Passbands}
+A simple example of the cross-correlation is illustrated in \autoref{fig:cross-correlation-example} for two Gaussian pulses, $f_1$ and $f_2$. The right panel shows the two pulses as a function of $t$, with $f_1$ and $f_2$ peaking at \SI{0.25}{\second} and \SI{0.75}{\second}, respectively. The right panel shows the cross-correlation, $\crosscor[12]$, as computed by \autoref{eq:cross_correlation_final}. $\crosscor[12]$ peaks at $\tau=0.5$ \si{\second}, the separation in $t$ between the peaks of $f_1$ and $f_2$. For a more conceptual understanding of $\crosscor[12]$, consider fixing $f_2$ and shifting $f_1$ forward and backward in $t$. The degree to which $f_1$ and $f_2$ overlap or the ``similarity'' between the two signals is analogous to $\crosscor[12]$. $\crosscor[12]$ peaks at $\tau=0.5$ \si{\second} because $f_1$ and $f_2$ are most overlapping when $f_1$ is shifted by \SI{0.5}{\second} relative to its initial position. Throughout the rest of this thesis, I will refer to the value of $\tau$ which maximizes the cross-correlation as the \textit{time lag}. In this example, the time lag between $f_1$ and $f_2$ is 0.5 s. Note that for $\crosscor[21]$ (i.e. $f_1$ and $f_2$ reversed), the time lag would be -0.5 s as $f_2$ would need to be shifted 0.5 s to the left in order to maximize the similarity between the two signals. Thus, the order of the two signals in \autoref{eq:cross_correlation_final} will determine the sign of the timelag.
+
+\subsection{Temperature Sensitivity of the AIA Passbands}\label{subsec:aia_response}
 
 % Briefly discuss how temperature response functions are calculated
 % show plot of temperature response
 % show wavelength response as well?
 
-\subsection{Time lag between AIA Channel Pairs}
+Before discussing the time lag in the context of AIA observations, it is important to understand the temperature sensitivity of the EUV passbands of the AIA instrument. The AIA instrument onboard the SDO spacecraft is comprised of four dual-channel normal-incidence telescopes which have continuously observed the full Sun (\SI{41}{\arcminute} field of view) since 29 April 2010 at a cadence of \SIrange{10}{12}{\second} and spatial resolution of $\approx\SI{0.6}{\arcsecond}$ per pixel \citep{lemen_atmospheric_2012,boerner_initial_2012}. In addition to two ultraviolet (UV, \SIlist{1600;1700}{\angstrom}) channels and one visible (\SI{4500}{\angstrom}) channel, AIA has seven extreme ultraviolet (EUV) channels: \SIlist{94;131;171;193;211;304;335}{\angstrom}. Unlike the other EUV channels which are primarily sensitive to hot ($T\ge10^{5.8}$ \si{\kelvin}) lines in high ionization states of Fe, the \SI{304}{\angstrom} channel is dominated by the much cooler \SI{303.784}{\angstrom} He II line \citep[see Table 1 of][]{lemen_atmospheric_2012}. This line forms primarily in the chromosphere and is optically-thick, meaning its observed intensity is not well-modeled by \autoref{eq:intensity} and data in the CHIANTI database \citep{boerner_initial_2012,warren_solar_2005}. Because the primary focus of this thesis is the dynamics of hot plasma in \AR s, diagnostics will be limited to the six remaining channels: \SIlist{94;131;171;193;211;335}{\angstrom}. \autoref{tab:aia_channels} summarizes the solar features, dominant Fe ions, and characteristic temperature of each of the channels.
+
+\begin{table}
+    \centering
+    \caption{Primary ions observed by the six AIA EUV channels of interest. Adapted from Table 1 of \citet{lemen_atmospheric_2012}.\label{tab:aia_channels}}
+    \begin{tabularx}{\columnwidth}{cclC}
+        \toprule
+        Channel $[\si{\angstrom}]$ & Primary ion(s) & Solar feature & Characteristic temperature $[\si{\kelvin}]$ \\
+        \midrule
+        94 & Fe XVIII & flaring corona & $10^{6.8}$ \\
+        131 & Fe VIII, XXI & TR, flaring corona & $10^{5.6},10^7$ \\
+        171 & Fe IX & quiet corona, upper TR & $10^{5.8}$ \\
+        193 & Fe XII, XXIV & corona, hot flare plasma & $10^{6.2},10^{7.3}$ \\
+        211 & Fe XIV & active region & $10^{6.3}$ \\
+        335 & Fe XVI & active region & $10^{6.4}$ \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
+
+For any of the aforementioned EUV channels of AIA, the intensity as observed by a particular channel $c$ can be written as,
+\begin{equation}\label{eq:aia_intensity}
+    p_c = \int_\textup{LOS}\textup{d}h\,n_Hn_eK_c(T_e),
+\end{equation}
+where $K_c$ is the temperature response function of channel $c$ and is given by,
+\begin{equation}\label{eq:temperature_response}
+    K_c = \int_0^\infty\mathrm{d}\lambda\,G(\lambda)R_c(\lambda),
+\end{equation}
+where $G(\lambda)$ is the total contribution function of all ions and $R_c$ is the wavelength response of channel $c$ \citep{boerner_initial_2012}. Note that \autoref{eq:aia_intensity} gives the intensity in units of DN pixel$^{-1}$ \si{\second}$^{-1}$ such that $K_c$ has units DN pixel$^{-1}$ \si{\second}$^{-1}$ \si{\cm}$^{5}$ and $R_c$ has units $\si{\cm}^2$ DN photon$^{-1}$ $\si{\steradian}$ pixel$^{-1}$. The wavelength response function incorporates all of the properties of the telescope channel, including the geometrical collecting area, the reflectance of the mirrors, the transmission efficiency of the filters, the quantum efficiency of the CCD, and the plate scale \citep[see Section 2 and Table 2 of][]{boerner_initial_2012}. An additional correction is applied to account for the degradation of the instrument over time. The wavelength response functions for the six EUV channels of interest are shown in \autoref{fig:aia-wavelength-response}.
+
+% spell-checker: disable %
+\begin{pycode}[chapter3timelag]
+aia = InstrumentSDOAIA([0,1]*u.s, None)
+fig,axes = plt.subplots(2,3,sharey=True,
+                        figsize=texfigure.figsize(pytex,scale=1,height_ratio=2/3))
+for c,ax in zip(aia.channels, axes.flatten()):
+    wave = np.linspace(c['wavelength'].value-10, c['wavelength'].value+10, 100)*u.angstrom
+    r = splev(wave.value, c['wavelength_response_spline'])
+    ax.plot(wave, r/r.max())
+    ax.set_xlim(c['wavelength'].value-10, c['wavelength'].value+10)
+    ax.text(c['wavelength'].value+4, 0.85, f'{c["wavelength"].value:.0f} '+ r'$\si{\angstrom}$',
+            fontsize=plt.rcParams['legend.fontsize'])
+axes[1,0].set_xlabel(r'$\lambda$ $[\si{\angstrom}]$')
+axes[1,0].set_ylabel(r'$R_c/\max{R_c}$')
+axes[1,0].set_ylim(0,1.05)
+tfig = ch3_timelag.save_figure('aia-wavelength-response', fext='.pgf')
+tfig.caption = r'AIA wavelength response functions for the six primary EUV channels. For each channel, the response function is shown at $\pm\SI{10}{\angstrom}$ of the nominal wavelength. Each response function is normalized to the maximum value of $R_c$ over this interval.'
+\end{pycode}
+\py[chapter3timelag]|tfig|
+% spell-checker: enable %
+
+While $R_c$ is only a function of the properties of the instrument, the temperature sensitivity of each channel, $K_c$ (\autoref{eq:temperature_response}), has an explicit dependence on the atomic data through the total contribution function, $G(\lambda)$. $G(\lambda)$ includes components from both line and continuum emission such that \autoref{eq:temperature_response} can be expressed more practically as,
+\begin{equation}\label{eq:temperature_response_discrete}
+    K_c = \int_0^\infty\textup{d}\lambda\,P_{\textup{cont.}}(\lambda)R_c(\lambda)  + \sum_{\{ji\}}\,\frac{G_{ji}}{hc/\lambda_{ji}}R_c(\lambda_{ji}),
+\end{equation}
+where $P_{\textup{cont.}}$ is the continuum emissivity and $G_{ji}$ is the contribution function for an atomic transition $\lambda_{ji}$ (\autoref{eq:contribution_function}) and the sum is taken over $\{ji\}$, the set of all known atomic transitions for the relevant wavelength range of channel $c$. Note that $hc/\lambda_{ji}$ is the energy per photon of wavelength $\lambda_{ji}$ such that $G_{ji}/(hc/\lambda_{ji})$ has units of photon $\si{\cm}^3$ $\si{\second}^{-1}$. The set of relevant atomic transitions, $\{ji\}$, can be obtained from the CHIANTI database such that accurately determining the temperature sensitivity of the passbands depends critically on knowledge of the relevant atomic transitions in the bandpass of each channel. The temperature response functions for the EUV channels of AIA are shown in \autoref{fig:aia-temperature-response}. Combined, the six response functions provide temperature coverage over the range $3\times10^5\lesssim T\lesssim2\times10^7$ \si{\kelvin}. Note that several of the response functions, particulary the \SI{94}{\angstrom} and \SI{131}{\angstrom} channels, are doubly-peaked in temperature. This degeneracy, combined with the finite width of the temperature response functions, makes associating intensities of particular channels with specific temperatures very difficult.
+
+% spell-checker: disable %
+\begin{pycode}[chapter3timelag]
+fig = plt.figure(figsize=texfigure.figsize(pytex,scale=1,))
+ax = fig.gca()
+T = np.logspace(4,9,1000)*u.K
+for i,c in enumerate(aia.channels):
+    r = splev(T.value,c['temperature_response_spline'])
+    ax.plot(
+        T, r,
+        label=f'{c["wavelength"].value:.0f} '+ r'$\si{\angstrom}$',
+        color=PALETTE[i])
+ax.set_xscale('log')
+ax.set_yscale('log')
+ax.set_xlim(1e5,1e8)
+ax.set_ylim(1e-28,2e-24)
+ax.set_xlabel(r'$T$ $[\si{\kelvin}]$')
+ax.set_ylabel(r'$K_c$ $[\textup{DN}\,\si{\cm}^5\,\si{\second}^{-1}\,\textup{pixel}^{-1}]$')
+ax.legend(loc=1,frameon=False,ncol=2)
+tfig = ch3_timelag.save_figure('aia-temperature-response', fext='.pgf')
+tfig.caption = r'Temperature response functions for the six EUV channels of AIA listed in \autoref{tab:aia_channels} as computed by \autoref{eq:temperature_response_discrete}. Together, these six channels provide observational coverage over the temperature range $3\times10^5\lesssim T\lesssim2\times10^7$ \si{\kelvin}.'
+\end{pycode}
+\py[chapter3timelag]|tfig|
+% spell-checker: enable %
+
+\subsection{Time lag between AIA Channel Pairs}\label{subsec:timelag_aia}
 
 % Discuss time lag in context of AIA; relate time lag to cooling time between channel pairs
+% Show example with a AIA lightcurves synthesized from a cooling loop; show timelags for all 15 channel pairs (or a subset)
 
 \section{Summary}
 
@@ -499,6 +594,7 @@ tfig.caption = r'The left panel shows two Gaussian signals $f_A$ and $f_B$ with 
 \nomenclature[a-h]{$h$}{Planck constant}
 \nomenclature[a-c]{$c$}{speed of light in a vacuum}
 \nomenclature[g-nu]{$\nu$}{photon frequency}
+\nomenclature[g-lambda]{$\lambda$}{wavelength}
 \nomenclature[s-k]{$k$}{ionization stage}
 \nomenclature[z-los]{LOS}{line-of-sight}
 \nomenclature[z-nei]{NEI}{nonequilibrium ionization}
@@ -507,3 +603,8 @@ tfig.caption = r'The left panel shows two Gaussian signals $f_A$ and $f_B$ with 
 \nomenclature[a-kb]{$k_B$}{Boltzmann constant}
 \nomenclature[x-fourier]{$\mathcal{F}$}{Fourier transform}
 \nomenclature[x-crosscorrelation]{$\mathcal{C}$}{cross-correlation}
+\nomenclature[z-fft]{FFT}{fast Fourier transform}
+\nomenclature[z-arcmin]{\si{\arcminute}}{arcminute}
+\nomenclature[z-arcsec]{\si{\arcsecond}}{arcsecond}
+\nomenclature[z-euv]{EUV}{extreme ultraviolet}
+\nomenclature[z-dn]{DN}{digital number, equivalent to counts}

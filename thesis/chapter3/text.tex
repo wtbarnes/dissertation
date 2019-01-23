@@ -434,15 +434,18 @@ ch3_timelag = texfigure.Manager(
     **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
 )
 from synthesizAR.analysis import cross_correlation
+from run_ebtel import run_ebtel
 \end{pycode}
 % spell-checker: enable %
 
 % Need some intro here that describes in brief what time lag analysis is and why we would use it.
 % Just a few sentences is fine. All details will go below
 
+Besides the emission measure distribution, additional diagnostics are needed in order to place tighter constraints on coronal heating properties. The time-lag method of \citet{viall_evidence_2012} is a powerful and efficient tool for understanding the large-scale cooling patterns across an entire \AR{} from narrowband imager observations like those from the AIA instrument. Unlike the emission measure distribution, it does not rely a non-unique solution to an inversion problem and inherently accounts for the time-dependence of the observed emission. In the following sections, I will outline the time-lag analysis technique and explain why it is useful in discerning the underlying thermodynamic behaviour of the plasma from the observed narrowband intensity. 
+
 \subsection{Cross-correlation}\label{subsec:cross_correlation}
 
-The \textit{cross-correlation} measures the similarity between two signals as a function of the offset betwen them. Given two signals $f_A$ and $f_B$ that are a function of time $t$, the cross-correlation, $\crosscor$, can be written as,
+Broadly speaking, the time-lag method involves computing the \textit{cross-correlation} between pairs of AIA light curves. The cross-correlation measures the similarity between two signals as a function of the offset betwen them. Given two signals $f_A$ and $f_B$ that are a function of time $t$, the cross-correlation, $\crosscor$, can be written as,
 \begin{equation}
     \crosscor = (f_A\star f_B)(\tau) = \int_{-\infty}^\infty\textup{d}t\,f_A^{\ast}(t)f_B(t + \tau),
 \end{equation}
@@ -493,7 +496,11 @@ tfig.caption = r'The left panel shows two Gaussian signals $f_1$ and $f_2$ with 
 \py[chapter3timelag]|tfig|
 % spell-checker: enable %
 
-A simple example of the cross-correlation is illustrated in \autoref{fig:cross-correlation-example} for two Gaussian pulses, $f_1$ and $f_2$. The right panel shows the two pulses as a function of $t$, with $f_1$ and $f_2$ peaking at \SI{0.25}{\second} and \SI{0.75}{\second}, respectively. The right panel shows the cross-correlation, $\crosscor[12]$, as computed by \autoref{eq:cross_correlation_final}. $\crosscor[12]$ peaks at $\tau=0.5$ \si{\second}, the separation in $t$ between the peaks of $f_1$ and $f_2$. For a more conceptual understanding of $\crosscor[12]$, consider fixing $f_2$ and shifting $f_1$ forward and backward in $t$. The degree to which $f_1$ and $f_2$ overlap or the ``similarity'' between the two signals is analogous to $\crosscor[12]$. $\crosscor[12]$ peaks at $\tau=0.5$ \si{\second} because $f_1$ and $f_2$ are most overlapping when $f_1$ is shifted by \SI{0.5}{\second} relative to its initial position. Throughout the rest of this thesis, I will refer to the value of $\tau$ which maximizes the cross-correlation as the \textit{time lag}. In this example, the time lag between $f_1$ and $f_2$ is 0.5 s. Note that for $\crosscor[21]$ (i.e. $f_1$ and $f_2$ reversed), the time lag would be -0.5 s as $f_2$ would need to be shifted 0.5 s to the left in order to maximize the similarity between the two signals. Thus, the order of the two signals in \autoref{eq:cross_correlation_final} will determine the sign of the timelag.
+A simple example of the cross-correlation is illustrated in \autoref{fig:cross-correlation-example} for two Gaussian pulses, $f_1$ and $f_2$. The right panel shows the two pulses as a function of $t$, with $f_1$ and $f_2$ peaking at \SI{0.25}{\second} and \SI{0.75}{\second}, respectively. The right panel shows the cross-correlation, $\crosscor[12]$, as computed by \autoref{eq:cross_correlation_final}. $\crosscor[12]$ peaks at $\tau=0.5$ \si{\second}, the separation in $t$ between the peaks of $f_1$ and $f_2$. For a more conceptual understanding of $\crosscor[12]$, consider fixing $f_2$ and shifting $f_1$ forward and backward in $t$. The degree to which $f_1$ and $f_2$ overlap or the ``similarity'' between the two signals is analogous to $\crosscor[12]$. $\crosscor[12]$ peaks at $\tau=0.5$ \si{\second} because $f_1$ and $f_2$ are most overlapping when $f_1$ is shifted by \SI{0.5}{\second} relative to its initial position. Throughout the rest of this thesis, I will refer to the value of $\tau$ which maximizes the cross-correlation as the \textit{time lag}. The time lag can be defined mathematically as,
+\begin{equation}\label{eq:timelag}
+    \tau_{AB} = \argmax_{\tau}\crosscor.
+\end{equation}
+In this example, the time lag between $f_1$ and $f_2$ is $\tau_{12}=\SI{0.5}{\second}$. Note that for $\crosscor[21]$ (i.e. $f_1$ and $f_2$ reversed), the time lag would be $\tau_{21}=\SI{-0.5}{\second}$ as $f_2$ would need to be shifted 0.5 s to the left in order to maximize the similarity between the two signals. Thus, the order of the two signals in \autoref{eq:cross_correlation_final} will determine the sign of the time lag.
 
 \subsection{Temperature Sensitivity of the AIA Passbands}\label{subsec:aia_response}
 
@@ -528,7 +535,7 @@ where $K_c$ is the temperature response function of channel $c$ and is given by,
 \begin{equation}\label{eq:temperature_response}
     K_c = \int_0^\infty\mathrm{d}\lambda\,G(\lambda)R_c(\lambda),
 \end{equation}
-where $G(\lambda)$ is the total contribution function of all ions and $R_c$ is the wavelength response of channel $c$ \citep{boerner_initial_2012}. Note that \autoref{eq:aia_intensity} gives the intensity in units of DN pixel$^{-1}$ \si{\second}$^{-1}$ such that $K_c$ has units DN pixel$^{-1}$ \si{\second}$^{-1}$ \si{\cm}$^{5}$ and $R_c$ has units $\si{\cm}^2$ DN photon$^{-1}$ $\si{\steradian}$ pixel$^{-1}$. The wavelength response function incorporates all of the properties of the telescope channel, including the geometrical collecting area, the reflectance of the mirrors, the transmission efficiency of the filters, the quantum efficiency of the CCD, and the plate scale \citep[see Section 2 and Table 2 of][]{boerner_initial_2012}. An additional correction is applied to account for the degradation of the instrument over time. The wavelength response functions for the six EUV channels of interest are shown in \autoref{fig:aia-wavelength-response}.
+where $G(\lambda)$ is the total contribution function of all ions and $R_c$ is the wavelength response of channel $c$ \citep{boerner_initial_2012}. Note that \autoref{eq:aia_intensity} gives the intensity in units of \si{\dn\per\pixel\per\second} such that $K_c$ has units \si{\dn\per\pixel\per\second\cm\tothe{5}} and $R_c$ has units \si{\cm\squared\dn\per\photon\steradian\per\pixel}. The wavelength response function incorporates all of the properties of the telescope channel, including the geometrical collecting area, the reflectance of the mirrors, the transmission efficiency of the filters, the quantum efficiency of the CCD, and the plate scale \citep[see Section 2 and Table 2 of][]{boerner_initial_2012}. An additional correction is applied to account for the degradation of the instrument over time. The wavelength response functions for the six EUV channels of interest are shown in \autoref{fig:aia-wavelength-response}.
 
 % spell-checker: disable %
 \begin{pycode}[chapter3timelag]
@@ -555,7 +562,7 @@ While $R_c$ is only a function of the properties of the instrument, the temperat
 \begin{equation}\label{eq:temperature_response_discrete}
     K_c = \int_0^\infty\textup{d}\lambda\,P_{\textup{cont.}}(\lambda)R_c(\lambda)  + \sum_{\{ji\}}\,\frac{G_{ji}}{hc/\lambda_{ji}}R_c(\lambda_{ji}),
 \end{equation}
-where $P_{\textup{cont.}}$ is the continuum emissivity and $G_{ji}$ is the contribution function for an atomic transition $\lambda_{ji}$ (\autoref{eq:contribution_function}) and the sum is taken over $\{ji\}$, the set of all known atomic transitions for the relevant wavelength range of channel $c$. Note that $hc/\lambda_{ji}$ is the energy per photon of wavelength $\lambda_{ji}$ such that $G_{ji}/(hc/\lambda_{ji})$ has units of photon $\si{\cm}^3$ $\si{\second}^{-1}$. The set of relevant atomic transitions, $\{ji\}$, can be obtained from the CHIANTI database such that accurately determining the temperature sensitivity of the passbands depends critically on knowledge of the relevant atomic transitions in the bandpass of each channel.
+where $P_{\textup{cont.}}$ is the continuum emissivity and $G_{ji}$ is the contribution function for an atomic transition $\lambda_{ji}$ (\autoref{eq:contribution_function}) and the sum is taken over $\{ji\}$, the set of all known atomic transitions for the relevant wavelength range of channel $c$. Note that $hc/\lambda_{ji}$ is the energy per photon of wavelength $\lambda_{ji}$ such that $G_{ji}/(hc/\lambda_{ji})$ has units of \si{\photon\cubic\cm\per\second}. The set of relevant atomic transitions, $\{ji\}$, can be obtained from the CHIANTI database such that accurately determining the temperature sensitivity of the passbands depends critically on knowledge of the relevant atomic transitions in the bandpass of each channel.
 
 % spell-checker: disable %
 \begin{pycode}[chapter3timelag]
@@ -573,7 +580,7 @@ ax.set_yscale('log')
 ax.set_xlim(1e5,1e8)
 ax.set_ylim(1e-28,2e-24)
 ax.set_xlabel(r'$T$ $[\si{\kelvin}]$')
-ax.set_ylabel(r'$K_c$ $[\textup{DN}\,\si{\cm}^5\,\si{\second}^{-1}\,\textup{pixel}^{-1}]$')
+ax.set_ylabel(r'$K_c$ $[\si{\dn\per\pixel\per\second\cm\tothe{5}}]$')
 ax.legend(loc=1,frameon=False,ncol=2)
 tfig = ch3_timelag.save_figure('aia-temperature-response', fext='.pgf')
 tfig.caption = r'Temperature response functions for the six EUV channels of AIA listed in \autoref{tab:aia_channels} as computed by \autoref{eq:temperature_response_discrete}. Together, these six channels provide observational coverage over the temperature range $3\times10^5\lesssim T\lesssim2\times10^7$ \si{\kelvin}.'
@@ -581,12 +588,106 @@ tfig.caption = r'Temperature response functions for the six EUV channels of AIA 
 \py[chapter3timelag]|tfig|
 % spell-checker: enable %
 
-The temperature response functions for the EUV channels of AIA are shown in \autoref{fig:aia-temperature-response}. Combined, the six response functions provide temperature coverage over the range $3\times10^5\lesssim T\lesssim2\times10^7$ \si{\kelvin}. Note that several of the response functions, particulary the \SI{94}{\angstrom} and \SI{131}{\angstrom} channels, are double-peaked in temperature due to the finite width of the wavelength responses. This degeneracy makes associating observations with specific temperatures very difficult as, in the case of the \SI{131}{\angstrom} channel, an intensity enhancement may correspond to very hot $>10^7$ \si{\kelvin} plasma or much cooler $<10^6$ \si{\kelvin} plasma.
+The temperature response functions for the EUV channels of AIA are shown in \autoref{fig:aia-temperature-response}. Combined, the six response functions provide temperature coverage over the range $3\times10^5\lesssim T\lesssim2\times10^7$ \si{\kelvin}. Note that several of the response functions, particulary the \SI{94}{\angstrom} and \SI{131}{\angstrom} channels, are double-peaked in temperature due to the finite width of the wavelength responses. This degeneracy makes associating observations with specific temperatures very difficult as, in the case of the \SI{131}{\angstrom} channel, an intensity enhancement may correspond to very hot, \SI{> e7}{\kelvin} plasma or much cooler, \SI{< e6}{\kelvin} plasma.
 
 \subsection{Time lag between AIA Channel Pairs}\label{subsec:timelag_aia}
 
 % Discuss time lag in context of AIA; relate time lag to cooling time between channel pairs
-% Show example with a AIA lightcurves synthesized from a cooling loop; show timelags for all 15 channel pairs (or a subset)
+% Show example with a AIA  s synthesized from a cooling loop; show timelags for all 15 channel pairs (or a subset)
+
+The thermodynamic ambiguity inherent to observations from narrowband imaging instruments like AIA can be partially mediated by computing the cross-correlation (\autoref{eq:cross_correlation_final}) and time lag (\autoref{eq:timelag}) from observations from pairs of channels. An example for a set of simulated AIA light curves is shown in \autoref{fig:aia-timelags}. A loop of half-length \SI{40}{\mega\m} cooling from $\approx\SI{5}{\mega\kelvin}$ down to $\approx\SI{0.2}{\mega\kelvin}$ is simulated using the EBTEL model (see \autoref{sec:ebtel}) and intensities from each of the six AIA channels are computed from \autoref{eq:aia_intensity} using the tabulated temperature response functions. The top panel shows the light curve for each channel (left axis) and the electron temperature (right axis, black). Note that the intensity peaks in successively ``cooler'' channels as the loop cools into and out of the temperature bandpass of each channel (see \autoref{fig:aia-temperature-response}).
+
+The bottom panel shows the cross-correlation as a function of temporal offset, $\tau$, for six different pairs of light curves. The time lag, $\tau_{AB}$ for each cross-correlation is denoted by the dotted line and the dot at the peak of the curve. The 94,171 pair has the longest time lag, \SI{> 2e3}{\second}, because the intensity of the \SI{94}{\angstrom} channel, which is most sensitive to $\sim\SI{8}{\mega\kelvin}$ plasma, peaks at $t=\SI{0}{\second}$ and the \SI{171}{\angstrom} intensity does not peak until $t\approx\SI{2.4e3}{\second}$ because the \SI{171}{\angstrom} channel is most sensitive to $\sim\SI{1}{\mega\kelvin}$ plasma. 
+
+% spell-checker: disable %
+\begin{pycode}[chapter3timelag]
+# Run ebtel++ simulation
+config = {
+    'total_time': 1e4,
+    'tau': 1.0,
+    'tau_max': 10.0,
+    'loop_length': 4e9,
+    'saturation_limit': 1,
+    'force_single_fluid': False,
+    'use_c1_loss_correction': True,
+    'use_c1_grav_correction': True,
+    'use_power_law_radiative_losses': True,
+    'use_flux_limiting': True,
+    'calculate_dem': False,
+    'save_terms': False,
+    'use_adaptive_solver': True,
+    'adaptive_solver_error': 1e-6,
+    'adaptive_solver_safety': 0.5,
+    'c1_cond0': 2.0,
+    'c1_rad0': 0.6,
+    'helium_to_hydrogen_ratio': 0.075,
+    'surface_gravity': 1.0,
+    'heating': OrderedDict({
+        'partition': 1.,
+        'background': 1e-6,
+        'events': [{'event': {'rise_start': 0.0,
+                              'rise_end': 0.0,
+                              'decay_start': 1.0,
+                              'decay_end': 1.0, 
+                              'magnitude': 0.01}}]
+    }),
+}
+res = run_ebtel(config, EBTEL_DIR)
+t = np.arange(res['time'][0].value, res['time'][-1].value, 1)*res['time'].unit
+Te = interp1d(res['time'].value, res['electron_temperature'].value)(t.value)*res['electron_temperature'].unit
+n = interp1d(res['time'].value, res['density'].value)(t.value)*res['density'].unit
+# Plot normalized intensities for each AIA channel
+fig = plt.figure(figsize=texfigure.figsize(pytex,scale=1,height_ratio=1))
+ax = fig.add_subplot(211)
+intensity = {}
+for i,c in enumerate(aia.channels):
+    K = splev(Te.value, c['temperature_response_spline'])
+    I = config['loop_length']*K*(n**2)
+    intensity[c['name']] = I
+    ax.plot(t, I/I.max(),
+            label=f'{c["wavelength"].value:.0f} '+ r'$\si{\angstrom}$',
+            color=PALETTE[i])
+ax2 = ax.twinx()
+ax2.plot(t, Te.to(u.MK), color='k', alpha=0.5)
+# Limits
+ax.set_xlim(1,3.25e3)
+ax.set_ylim(0,1.05)
+ax2.set_ylim(0.1,5.5)
+# Labels
+ax.set_xlabel(r'$t$ $[\si{\second}]$')
+ax.set_ylabel(r'$I_c/\max{I_c}$')
+ax2.set_ylabel(r'$T_e$ $[\si{\mega\kelvin}]$')
+ax.legend(loc=1,frameon=False)
+# Plot cross-correlation
+ax = fig.add_subplot(212)
+pairs = [
+    (94,171),
+    (94,211),
+    (335,171),
+    (211,193),
+    (193,171),
+    (171,131),
+]
+for i,(a,b) in enumerate(pairs):
+    tl,cc = cross_correlation(t, intensity[f'{a}'], intensity[f'{b}'])
+    ax.plot(tl, cc, label=f'{a},{b}', color=PALETTE[i])
+    ax.plot(tl[np.argmax(cc)], cc.max(), marker='o', ls='', color=PALETTE[i])
+    ax.vlines(tl[np.argmax(cc)].value, -1, cc.max(), linestyles='dotted', lw=1, color=PALETTE[i])
+ax.axvline(x=0,ls='--',color='k',lw=1)
+ax.set_xlim(-2.5e3,2.5e3)
+ax.set_ylim(-0.2,1.05)
+ax.set_xlabel(r'$\tau$ $[\si{\second}]$')
+ax.set_ylabel(r'$\mathcal{C}_{AB}$')
+ax.legend(loc=2,frameon=False,ncol=2)
+plt.subplots_adjust(hspace=0.3)
+# Save
+tfig = ch3_timelag.save_figure('aia-timelags', fext='.pgf')
+tfig.caption = r'\textit{Top panel:} Simulated light curves (normalized to the peak value) for the six EUV channels of AIA (left axis) and electron temperature (black line, right axis) for a loop of half-length \SI{40}{\mega\m} cooling from $\approx\SI{5}{\mega\kelvin}$ to $\approx\SI{0.2}{\mega\kelvin}$. The hydrodynamic evolution of the loop was simulated using the EBTEL model and the six light curves were computed using $T_e$ and $n_e$ from the simulation. \textit{Bottom panel:} Cross-correlation as a function of temporal shift, $\tau$, computed from the light curves shown in the top panel for six selected channel pairs. The dashed, black line indicates a temporal shift of $\tau=\SI{0}{\second}$. The dotted lines and dots at the peak of each curve denote the time lag for that channel pair.'
+\end{pycode}
+\py[chapter3timelag]|tfig|
+% spell-checker: enable %
+
+% discuss viall and klimchuk, bradshaw and viall papers here
 
 \section{Summary}
 

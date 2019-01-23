@@ -35,6 +35,7 @@
 %% Setup PythonTeX and TeXFigure
 \begin{pythontexcustomcode}{py}
 import os
+from collections import OrderedDict
 from fractions import Fraction
 
 import texfigure
@@ -65,8 +66,20 @@ manager_opts = {'python_dir': 'python', 'fig_dir': 'figures', 'data_dir': 'data'
 # Define color palette(s)
 PALETTE = seaborn.color_palette('colorblind', 100)
 
+# Set location of ebtel++ code
+if 'EBTEL_DIR' not in os.environ:
+	EBTEL_DIR = '/Users/willbarnes/Documents/work/codes/ebtelPlusPlus/'
+else:
+	EBTEL_DIR = os.environ['EBTEL_DIR']
+
 # Set some plot styling here
 plt.rcParams['pgf.preamble'] = [r'\usepackage{siunitx}']
+plt.rcParams['pgf.preamble'] += [
+	r'\DeclareSIUnit[number-unit-product={}]\erg{erg}',
+	r'\DeclareSIUnit[number-unit-product={}]\dn{DN}',
+	r'\DeclareSIUnit[number-unit-product={}]\pixel{pixel}',
+	r'\DeclareSIUnit[number-unit-product={}]\photon{photon}',
+]
 plt.rcParams['text.usetex'] = True
 plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = [] # Leave blank to inherit from document

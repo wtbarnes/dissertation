@@ -1,5 +1,5 @@
 % Text for chapter 3
-\chapter{Emission Diagnostics of Coronal Heating}\label{ch:diagnostics}
+\chapter{Emission Mechanisms and Diagnostics of Coronal Heating}\label{ch:diagnostics}
 
 % Figure manager for Chapter 3
 % spell-checker: disable %
@@ -32,7 +32,7 @@ where $X_k$ is an ion of element $X$ in ionization stage $k$, $\nu_{ji}$ is the 
 
 The intensity of a spectral line for an atomic transition of wavelength $\lambda_{ji}=c/\nu_{ji}$, where $c$ is the speed of light in a vacuum, is given by,
 \begin{equation}\label{eq:intensity}
-    I(\lambda_{ji}) = \frac{1}{4\pi}\int_\textup{LOS}\textup{d}h\,P(\lambda_{ji}),
+    I(\lambda_{ji}) = \frac{1}{4\pi}\int_\textup{LOS}\dd{h}P(\lambda_{ji}),
 \end{equation}
 where the integration is taken along the line-of-sight (LOS) between the observer the emission site and $P(\lambda_{ji})$ is the \textit{emissivity}, or the radiative power per unit volume. The emissivity is given by,
 \begin{equation}\label{eq:emissivity}
@@ -63,13 +63,13 @@ where $e$ denotes the free electron and $E_{\textup{initial}}$ and $E_{\textup{f
 \end{equation*}
 Conversely, if $E_i>E_j$, $X_k$ is \textit{collisionally deexcited} from $i$ to $j$ and the free electron gains an amount of energy equal to $E_i - E_j$.
 
-\hilite{Production of satellite lines via dielectronic recombination important for levels above the ionization potential}
+% Production of satellite lines via dielectronic recombination important for levels above the ionization potential
 
 In order to understand how energy levels are populated and depopulated by collisions, it is necessary to compute the rate at which collisions occur in a plasma with electron temperature $T_e$ for an ion $X_k$. I will now derive the excitation and deexcitation rate coefficients. This derivation closely follows the treatment in sections 3.2 and 3.3 of \citet{del_zanna_solar_2018} as well as section 4.2 of \citet{phillips_ultraviolet_2008}.  
 
 The rate coefficient for collisional excitation is given by,
 \begin{equation}\label{eq:rate_coefficient}
-    C^e_{ij} = \int_{v_0}^{\infty}\textup{d}v\,v\sigma_{ij}(v)f(v),
+    C^e_{ij} = \int_{v_0}^{\infty}\dd{v}v\sigma_{ij}(v)f(v),
 \end{equation}
 where $v$ is the electron velocity, $\sigma_{ij}(v)$ is the cross-section for inelastic collisions between the ion and electron, and $f(v)$ is the velocity distribution function of the electrons. Additionally, $v_0$ is the threshold velocity such that $m_ev_0^2/2 = E_j - E_i$, where $m_e$ is the mass of the electron. Any electron with $v<v_0$ will not be able to excite atom from level $i$ to $j$. It is commonly assumed that the distribution of free electrons in the solar atmosphere is in thermodynamic equilibrium such that it is well-described by a Maxwell-Boltzmann distribution\footnote{Observations of non-thermal particles \citep[e.g][]{dzifcakova_diagnostics_2011} suggest that the distribution of free electrons in the solar corona may be better described by a $\kappa$-distribution. For more details see \citet{cranmer_suprathermal_2014} or the comprehensive review by \citet{dudik_nonequilibrium_2017}.},
 \begin{equation}\label{eq:maxwellian}
@@ -77,13 +77,13 @@ where $v$ is the electron velocity, $\sigma_{ij}(v)$ is the cross-section for in
 \end{equation}
 where $k_B$ is the Boltzmann constant. Plugging \autoref{eq:maxwellian} into \autoref{eq:rate_coefficient},
 \begin{equation*}
-    C^e_{ij} =  4\pi\left(\frac{m_e}{2\pi k_BT_e}\right)^{3/2}\int_{v_0}^{\infty}\textup{d}v\,v^3\sigma_{ij}(v)\exp{\left(-\frac{m_ev^2}{2k_BT_e}\right)},
+    C^e_{ij} =  4\pi\left(\frac{m_e}{2\pi k_BT_e}\right)^{3/2}\int_{v_0}^{\infty}\dd{v}v^3\sigma_{ij}(v)\exp{\left(-\frac{m_ev^2}{2k_BT_e}\right)},
 \end{equation*}
 and making the change of variables $E=m_ev^2/2$,
 \begin{align}\label{eq:rate_coefficient_e}
-    C^e_{ij} &= 4\pi\left(\frac{m_e}{2\pi k_BT_e}\right)^{3/2}\int_{E_0}^{\infty}\textup{d}E\,\frac{2E}{m_e^2}\sigma_{ij}(E)\exp{\left(-\frac{E}{k_BT_e}\right)},\nonumber\\
-    &= \sqrt{\frac{8}{\pi m_e}}(k_BT_e)^{-3/2}\int_{E_0}^{\infty}\textup{d}E\,E\sigma_{ij}(E)\exp{\left(-\frac{E}{k_BT_e}\right)},\nonumber\\
-    &= \sqrt{\frac{8k_BT_e}{\pi m_e}}\int_{E_0}^{\infty}\textup{d}\left(\frac{E}{k_BT_e}\right)\,\frac{E}{k_BT_e}\sigma_{ij}(E)\exp{\left(-\frac{E}{k_BT_e}\right)},
+    C^e_{ij} &= 4\pi\left(\frac{m_e}{2\pi k_BT_e}\right)^{3/2}\int_{E_0}^{\infty}\dd{E}\frac{2E}{m_e^2}\sigma_{ij}(E)\exp{\left(-\frac{E}{k_BT_e}\right)},\nonumber\\
+    &= \sqrt{\frac{8}{\pi m_e}}(k_BT_e)^{-3/2}\int_{E_0}^{\infty}\dd{E}E\sigma_{ij}(E)\exp{\left(-\frac{E}{k_BT_e}\right)},\nonumber\\
+    &= \sqrt{\frac{8k_BT_e}{\pi m_e}}\int_{E_0}^{\infty}\dd{\left(\frac{E}{k_BT_e}\right)}\frac{E}{k_BT_e}\sigma_{ij}(E)\exp{\left(-\frac{E}{k_BT_e}\right)},
 \end{align}
 where $E_0=mv_0^2/2=E_j-E_i$ is the minimum electron energy required to excite the ion from $i$ to $j$.
 
@@ -93,17 +93,17 @@ The cross-section for excitation by inelastic collisions can be expressed as,
 \end{equation}
 where $a_0$ is the Bohr radius, $I_H$ is the ionization potential of hydrogen, $\omega_i$ is the statistical weight of level $i$, and $\Omega_{ij}$ is the dimensionless collision strength. It should be noted that $\Omega_{ij}$ is symmetric such that $\Omega_{ij}(E)=\Omega(E^{\prime})$, where $E^{\prime}=E - E_{ij} = E - (E_j - E_i)$ is the final energy of the electron after it has been scattered. Plugging \autoref{eq:cross_section} into \autoref{eq:rate_coefficient_e},
 \begin{equation}
-    C^e_{ij} = I_Ha_0^2\sqrt{\frac{8\pi}{k_Bm_e}}\omega_i^{-1}T_e^{-1/2}\int_{E_0}^{\infty}\textup{d}\left(\frac{E}{k_BT_e}\right)\,\Omega_{ij}(E)\exp{\left(-\frac{E}{k_BT_e}\right)}.
+    C^e_{ij} = I_Ha_0^2\sqrt{\frac{8\pi}{k_Bm_e}}\omega_i^{-1}T_e^{-1/2}\int_{E_0}^{\infty}\dd{\left(\frac{E}{k_BT_e}\right)}\Omega_{ij}(E)\exp{\left(-\frac{E}{k_BT_e}\right)}.
 \end{equation}
 Exploiting the symmetry of $\Omega_{ij}$ and making a change of variables to $E^{\prime}$ gives,
 \begin{align}\label{eq:rate_coefficient_final}
-    C^e_{ij} &= I_Ha_0^2\sqrt{\frac{8\pi}{k_Bm_e}}\omega_i^{-1}T_e^{-1/2}\int_{E_0}^{\infty}\textup{d}\left(\frac{E}{k_BT_e}\right)\,\Omega_{ji}(E^\prime)\exp{\left(-\frac{E}{k_BT_e}\right)} \nonumber\\
-    &= I_Ha_0^2\sqrt{\frac{8\pi}{k_Bm_e}}\omega_i^{-1}T_e^{-1/2}\int_{0}^{\infty}\textup{d}\left(\frac{E^\prime}{k_BT_e}\right)\,\Omega_{ji}(E^\prime)\exp{\left(-\frac{E^\prime + E_{ij}}{k_BT_e}\right)} \nonumber\\
+    C^e_{ij} &= I_Ha_0^2\sqrt{\frac{8\pi}{k_Bm_e}}\omega_i^{-1}T_e^{-1/2}\int_{E_0}^{\infty}\dd{\left(\frac{E}{k_BT_e}\right)}\Omega_{ji}(E^\prime)\exp{\left(-\frac{E}{k_BT_e}\right)} \nonumber\\
+    &= I_Ha_0^2\sqrt{\frac{8\pi}{k_Bm_e}}\omega_i^{-1}T_e^{-1/2}\int_{0}^{\infty}\dd{\left(\frac{E^\prime}{k_BT_e}\right)}\Omega_{ji}(E^\prime)\exp{\left(-\frac{E^\prime + E_{ij}}{k_BT_e}\right)} \nonumber\\
     &= I_Ha_0^2\sqrt{\frac{8\pi}{k_Bm_e}}T_e^{-1/2}\frac{\Upsilon_{ij}}{\omega_i}\exp{\left(-\frac{E_{ij}}{k_BT_e}\right)}
 \end{align}
 where the term $\Upsilon_{ij}$, originally introduced by \citet{seaton_electron_1953}, is called the effective collision strength (or alternatively the Maxwellian-averaged collision strength) and is defined as,
 \begin{equation}\label{eq:effective_collision_strength}
-    \Upsilon_{ij} = \int_{0}^{\infty}\textup{d}\left(\frac{E}{k_BT_e}\right)\,\Omega_{ji}(E)\exp{\left(-\frac{E}{k_BT_e}\right)},
+    \Upsilon_{ij} = \int_{0}^{\infty}\dd{\left(\frac{E}{k_BT_e}\right)}\Omega_{ji}(E)\exp{\left(-\frac{E}{k_BT_e}\right)},
 \end{equation}
 where $E$ is now the final energy of the electron after the collision.
 
@@ -217,18 +217,18 @@ In the process of collisional ionization, a free electron collides with an ion $
 \end{equation}
 where $i^\prime$ denotes the final energetic state of $X_{k+1}$. $\alpha_{CI}$ can be computed in a similar manner to $C^e_{ij}$ by integrating the velocity-weighted collision cross-section over a Maxwell-Boltzmann distribution. Using the result from \autoref{eq:rate_coefficient_e}, the ionization rate due to collisional ionization can be written as,
 \begin{equation}
-    \alpha^\textup{CI} = \sqrt{\frac{8}{\pi m_e}}(k_BT_e)^{-3/2}\int_I^{\infty}\textup{d}E\,E\sigma_{CI}(E)\exp{\left(-\frac{E}{k_BT_e}\right)}
+    \alpha^\textup{CI} = \sqrt{\frac{8}{\pi m_e}}(k_BT_e)^{-3/2}\int_I^{\infty}\dd{E}E\sigma_{CI}(E)\exp{\left(-\frac{E}{k_BT_e}\right)}
 \end{equation}
 where $E$ is the energy of incident electron, $\sigma_{CI}$ is the collisional ionization cross-section and $I$ is the ionization energy of the initially-bound electron \citep{del_zanna_solar_2018}. Making the change of variables $x=(E-I)/k_BT_e$ gives,
 \begin{equation}\label{eq:collisional_ionization_x}
 \begin{aligned}
-    \alpha^\textup{CI} = \sqrt{\frac{8k_BT_e}{\pi m_e}}\exp{\left(-\frac{I}{k_BT_e}\right)}&\left(\int_0^{\infty}\textup{d}x\,x\sigma_{CI}(k_BT_ex+I)e^{-x} \right. \\
-    &\left. + \frac{I}{k_BT_e}\int_0^{\infty}\textup{d}x\,\sigma_{CI}(k_BT_ex+I)e^{-x}\right).
+    \alpha^\textup{CI} = \sqrt{\frac{8k_BT_e}{\pi m_e}}\exp{\left(-\frac{I}{k_BT_e}\right)}&\left(\int_0^{\infty}\dd{x}x\sigma_{CI}(k_BT_ex+I)e^{-x} \right. \\
+    &\left. + \frac{I}{k_BT_e}\int_0^{\infty}\dd{x}\sigma_{CI}(k_BT_ex+I)e^{-x}\right).
 \end{aligned}
 \end{equation}
 Notice that both integrals have the same form and can be evaluated using Gauss-Laguerre quadrature,
 \begin{equation}
-    \int_0^\infty\textup{d}x\,f(x)e^{-x} \approx \sum_{i=1}^n w_if(x_i),
+    \int_0^\infty\dd{x}f(x)e^{-x} \approx \sum_{i=1}^n w_if(x_i),
 \end{equation}
 where $x_i$ is zero of the $i$-th Laguerre polynomial and $w_i$ are the associated weights \citep[see Equation 25.4.45 of][]{abramowitz_handbook_1972}. Note that in both terms, evaluating $f(x_i)$ requires evaluating the collisional ionization cross-section, $\sigma_{CI}$.
 
@@ -396,11 +396,57 @@ tfig.caption = r'Equilibrium (dashed) and nonequilibrium (solid) population frac
 
 \section{Continuum Emission}\label{sec:continuum}
 
-\hilite{Not sure if this section is needed since we don't deal with continuum much though it is still an important mechanism; do this last}
-
 \subsection{Free-free Emission}
 
+While the coronal EUV spectrum is dominated by spectral line emission, continuum emission becomes important for wavelengths in the X-ray band (\SIrange{1}{100}{\angstrom}). There are two main types of continuum emission: free-free and and free-bound. Free-free emisssion, also known as \textit{bremsstrahlung} (or ``braking radiation''), is produced when an ion interacts with a free electron, reduces the momentum of the free electron, and, by conservation of energy and momentum, produces a photon. This process can be expressed as,
+\begin{equation}\label{eq:free_free_process}
+    X_k + e(E_1) \to X_k + e(E_2) + h\nu,
+\end{equation}
+where $E_1$ and $E_2$ are the initial and final energies of the electron \citep{del_zanna_solar_2018}. Bremsstrahlung is the primary mechanism for producing hard X-ray emission in hot (\SI{\ge e7}{\kelvin}) flare plasma. The emission per unit time, per unit volume, and per unit wavelength produced by the free-free process for an electron with a velocity $v$ in \autoref{eq:free_free_process} is given by,
+\begin{equation}\label{eq:bremsstrahlung_single}
+    P_{ff}(\lambda,v) = \frac{16\pi e^6Z^2}{3^{3/2}c^2m_e^2v\lambda^2}n_en_ig_{ff}(\lambda,v),
+\end{equation}
+where $n_i$ is the number density of the ions and $g_{ff}$ is the so-called free-free Gaunt factor which is a correction factor for the integral over the interaction cross-section \citep{rybicki_radiative_1979}.
+
+Because the coronal plasma is often assumed to be thermal (see \autoref{subsec:collisional_excitation}), the distribution of electron velocities can be approximated by a Maxwell-Boltzmann distribution. Integrating \autoref{eq:bremsstrahlung_single} over \autoref{eq:maxwellian} gives the free-free emission produced by a thermal distribution of electrons as a function of temperature,
+\begin{equation}\label{eq:bremsstrahlung}
+    P_{ff}(\lambda,T_e) = \frac{32\pi e^6}{3m_ec^3}\left(\frac{2\pi}{3k_Bm_e}\right)^{1/2}\frac{Z^2}{\lambda^2T_e^{1/2}}n_en_i\exp{\left(-\frac{hc}{\lambda k_BT_e}\right)}\langle g_{ff}\rangle,
+\end{equation}
+where $\langle g_{ff}\rangle$ is the velocity-averaged Gaunt factor and is, in general, nontrivial to calculate \citep{rybicki_radiative_1979}. \citet{itoh_relativistic_2000} provide an analytical fitting formula for the relativistic, velocity-averaged Gaunt factor which can be used to evaluate $\langle g_{ff}\rangle$ for the conditions $10^6\le T_e\le10^{8.5}$ \si{\kelvin} and $-4\le\log{(hc/\lambda k_BT_e)}\le1$. Otherwise, the non-relativistic Gaunt factors of \citet{sutherland_accurate_1998} can be used. \autoref{fig:free-free} shows the free-free emission summed over all the ions of Fe as a function of $\lambda$ for three different temperatures: \SIlist{1;10;100}{\mega\kelvin}. Note that $P_{ff}$ decays exponentially with increasing $\lambda$ and increases with increasing $T_e$.
+
+% spell-checker: disable %
+\begin{pycode}[chapter3]
+fe = fiasco.Element('Fe',[1e6,1e7,1e8]*u.K)
+w = np.logspace(-1.5,3,1000)*u.angstrom
+brem = fe.free_free(w)
+fig = plt.figure(figsize=texfigure.figsize(pytex,scale=1,))
+ax = fig.gca()
+for i in range(brem.shape[0]):
+    ax.plot(w, brem[i,:], 
+            label=f'\SI{{{fe.temperature[i].to(u.MK).value:.0f}}}{{\mega\kelvin}}',
+            color=PALETTE[i])
+ax.set_yscale('log')
+ax.set_ylim(1e-30,2e-26)
+ax.set_xscale('log')
+ax.set_xlim(w[[0,-1]].value)
+ax.set_xlabel(r'$\lambda$ $[\si{\angstrom}]$')
+ax.set_ylabel(r'$P_{ff}$ $[\si{\erg\cubic\cm\per\second\per\angstrom}]$')
+ax.legend(frameon=False,loc=1)
+tfig = ch3.save_figure('free-free', fext='.pgf')
+tfig.caption = r'Free-free emission summed over all ions of Fe as a function of wavelength. The different curves correspond to \SI{1}{\mega\kelvin} (blue), \SI{10}{\mega\kelvin} (orange), and \SI{100}{\mega\kelvin} (green). The factor $n_en_i$ is not included here such that $P_{ff}$ has no density dependence.'
+\end{pycode}
+\py[chapter3]|tfig|
+% spell-checker: enable %
+
 \subsection{Free-bound Emission}
+
+In addition to bremsstrahlung, \textit{free-bound} emission, wherein a free electron is captured by an ion and produces a photon, can also contribute to the continuum. This mechanism can be expressed as,
+\begin{equation}\label{eq:free_bound_process}
+    X_{k+1} + e(E) \to X_{k} + h\nu.
+\end{equation}
+Note that the photon produced has energy $h\nu=E+I$, where $I$ is the ionization energy of the bound state of the captured electron \citep{del_zanna_solar_2018}. The emissivity due to free-bound emission assuming a Maxwellian distribution of electron velocities is given by Equation 12 of \citet{young_chianti-atomic_2003}. The free-bound continuum spectra is characterized by sharp discontinuities at the ionization threshold of the ion because an electron with energy greater than the ionization threshold will not be captured by the ion. 
+
+Two-photon decay processes in ions in the H and He isoelectronic sequences may also contribute to the total continuum emission \citep{young_chianti-atomic_2003}. However, compared to bremsstrahlung and free-found emission, the contribution of the two-photon decay process to the total continuum emission is relatively small for $T_e\SI{\le 1e4}{\kelvin}$ \citep{del_zanna_solar_2018}. The continuum emission due to free-free, free-bound, and two-photon decay processes can all be computed using data and associated software provided by CHIANTI.
 
 \section{The Differential Emission Measure Distribution}\label{sec:dem}
 
@@ -408,7 +454,7 @@ tfig.caption = r'Equilibrium (dashed) and nonequilibrium (solid) population frac
 
 \autoref{eq:intensity}, the intensity for a transition $\lambda_{ji}$, can be alternatively expressed as,
 \begin{equation}
-    I(\lambda_{ji}) = \int_\textup{LOS}\textup{d}h\,n_Hn_eG_{ji},
+    I(\lambda_{ji}) = \int_\textup{LOS}\dd{h}n_Hn_eG_{ji},
 \end{equation}
 where $G_{ji}$, the so-called \textit{contribution function}, is given by,
 \begin{equation}\label{eq:contribution_function}
@@ -447,7 +493,7 @@ Besides the emission measure distribution, additional diagnostics are needed in 
 
 Broadly speaking, the time-lag method involves computing the \textit{cross-correlation} between pairs of AIA light curves. The cross-correlation measures the similarity between two signals as a function of the offset betwen them. Given two signals $f_A$ and $f_B$ that are a function of time $t$, the cross-correlation, $\crosscor$, can be written as,
 \begin{equation}
-    \crosscor = (f_A\star f_B)(\tau) = \int_{-\infty}^\infty\textup{d}t\,f_A^{\ast}(t)f_B(t + \tau),
+    \crosscor = (f_A\star f_B)(\tau) = \int_{-\infty}^\infty\dd{t}f_A^{\ast}(t)f_B(t + \tau),
 \end{equation}
 where $\tau$ is the temporal offset between $f_A$ and $f_B$ and $f_A^{\ast}$ denotes the complex conjugate of $f_A$. Alternatively, $\crosscor$ can be expressed in terms of the convolution,
 \begin{equation}\label{eq:cross_correlation_convolution}
@@ -459,7 +505,7 @@ where $\ast$ denotes the convolution operator. Taking the Fourier transform of b
     \fourier{\crosscor} &= \fourier{f_A(-t)}\fourier{f_B(t)}, \nonumber \\
     \crosscor &= \inversefourier{\fourier{f_A(-t)}\fourier{f_B(t)}},
 \end{align}
-where $\mathcal{F}$ denotes the Fourier transform. \autoref{eq:cross_correlation_final} defines the cross-correlation $\crosscor$ between two signals $f_A$ and $f_B$ as a function of temporal offset $\tau$ in terms of the Fourier transform. Defining the cross-correlation in this manner allows one to efficiently compute $\crosscor$ using highly-optimized fast Fourier transform (FFT) algorithms \citep[e.g. the widely-used FFT algorithm developed by][]{cooley_algorithm_1965}. Note that $f_A$ and $f_B$ are standardized such that both signals have zero mean and unit standard deviation (i.e. $\mu_{A,B}=0$, $\sigma_{A,B}=1$). Additionally, $\crosscor$ is scaled by the length of the signal such that the cross-correlation is always between $-1$ (perfectly anti-correlated) and $+1$ (perfectly correlated).
+where $\mathcal{F}$ denotes the Fourier transform. \autoref{eq:cross_correlation_final} defines the cross-correlation $\crosscor$ between two signals $f_A$ and $f_B$ as a function of temporal offset $\tau$ in terms of the Fourier transform. Defining the cross-correlation in this manner allows one to efficiently compute $\crosscor$ using highly-optimized fast Fourier transform (FFT) algorithms \citep[e.g. the widely-used FFT algorithm developed by][]{cooley_algorithm_1965}. Note that $f_A$ and $f_B$ are standardized such that both signals have zero mean and unit standard deviation. Additionally, $\crosscor$ is scaled by the length of the signal such that the cross-correlation is always between $-1$ (perfectly anti-correlated) and $+1$ (perfectly correlated).
 
 % spell-checker: disable %
 \begin{pycode}[chapter3timelag]
@@ -529,11 +575,11 @@ Before discussing the time lag in the context of AIA observations, it is importa
 
 For any of the aforementioned EUV channels of AIA, the intensity as observed by a particular channel $c$ can be written as,
 \begin{equation}\label{eq:aia_intensity}
-    p_c = \int_\textup{LOS}\textup{d}h\,n_Hn_eK_c(T_e),
+    p_c = \int_\textup{LOS}\dd{h}n_Hn_eK_c(T_e),
 \end{equation}
 where $K_c$ is the temperature response function of channel $c$ and is given by,
 \begin{equation}\label{eq:temperature_response}
-    K_c = \int_0^\infty\mathrm{d}\lambda\,G(\lambda)R_c(\lambda),
+    K_c = \int_0^\infty\dd{\lambda}G(\lambda)R_c(\lambda),
 \end{equation}
 where $G(\lambda)$ is the total contribution function of all ions and $R_c$ is the wavelength response of channel $c$ \citep{boerner_initial_2012}. Note that \autoref{eq:aia_intensity} gives the intensity in units of \si{\dn\per\pixel\per\second} such that $K_c$ has units \si{\dn\per\pixel\per\second\cm\tothe{5}} and $R_c$ has units \si{\cm\squared\dn\per\photon\steradian\per\pixel}. The wavelength response function incorporates all of the properties of the telescope channel, including the geometrical collecting area, the reflectance of the mirrors, the transmission efficiency of the filters, the quantum efficiency of the CCD, and the plate scale \citep[see Section 2 and Table 2 of][]{boerner_initial_2012}. An additional correction is applied to account for the degradation of the instrument over time. The wavelength response functions for the six EUV channels of interest are shown in \autoref{fig:aia-wavelength-response}.
 
@@ -560,9 +606,9 @@ tfig.caption = r'AIA wavelength response functions for the six primary EUV chann
 
 While $R_c$ is only a function of the properties of the instrument, the temperature sensitivity of each channel, $K_c$ (\autoref{eq:temperature_response}), has an explicit dependence on the atomic data through the total contribution function, $G(\lambda)$. $G(\lambda)$ includes components from both line and continuum emission such that \autoref{eq:temperature_response} can be expressed more practically as,
 \begin{equation}\label{eq:temperature_response_discrete}
-    K_c = \int_0^\infty\textup{d}\lambda\,P_{\textup{cont.}}(\lambda)R_c(\lambda)  + \sum_{\{ji\}}\,\frac{G_{ji}}{hc/\lambda_{ji}}R_c(\lambda_{ji}),
+    K_c = \int_0^\infty\dd{\lambda}P_{\textup{cont.}}(\lambda)R_c(\lambda)  + \sum_{\{ji\}}\,\frac{G_{ji}}{hc/\lambda_{ji}}R_c(\lambda_{ji}),
 \end{equation}
-where $P_{\textup{cont.}}$ is the continuum emissivity and $G_{ji}$ is the contribution function for an atomic transition $\lambda_{ji}$ (\autoref{eq:contribution_function}) and the sum is taken over $\{ji\}$, the set of all known atomic transitions for the relevant wavelength range of channel $c$. Note that $hc/\lambda_{ji}$ is the energy per photon of wavelength $\lambda_{ji}$ such that $G_{ji}/(hc/\lambda_{ji})$ has units of \si{\photon\cubic\cm\per\second}. The set of relevant atomic transitions, $\{ji\}$, can be obtained from the CHIANTI database such that accurately determining the temperature sensitivity of the passbands depends critically on knowledge of the relevant atomic transitions in the bandpass of each channel.
+where $P_{\textup{cont.}}$ is the continuum emissivity (see \autoref{sec:continuum}) and $G_{ji}$ is the contribution function for an atomic transition $\lambda_{ji}$ (\autoref{eq:contribution_function}) and the sum is taken over $\{ji\}$, the set of all known atomic transitions for the relevant wavelength range of channel $c$. Note that $hc/\lambda_{ji}$ is the energy per photon of wavelength $\lambda_{ji}$ such that $G_{ji}/(hc/\lambda_{ji})$ has units of \si{\photon\cubic\cm\per\second}. The set of relevant atomic transitions, $\{ji\}$, can be obtained from the CHIANTI database such that accurately determining the temperature sensitivity of the passbands depends critically on knowledge of the relevant atomic transitions in the bandpass of each channel.
 
 % spell-checker: disable %
 \begin{pycode}[chapter3timelag]
@@ -592,12 +638,7 @@ The temperature response functions for the EUV channels of AIA are shown in \aut
 
 \subsection{Time lag between AIA Channel Pairs}\label{subsec:timelag_aia}
 
-% Discuss time lag in context of AIA; relate time lag to cooling time between channel pairs
-% Show example with a AIA  s synthesized from a cooling loop; show timelags for all 15 channel pairs (or a subset)
-
-The thermodynamic ambiguity inherent to observations from narrowband imaging instruments like AIA can be partially mediated by computing the cross-correlation (\autoref{eq:cross_correlation_final}) and time lag (\autoref{eq:timelag}) from observations from pairs of channels. An example for a set of simulated AIA light curves is shown in \autoref{fig:aia-timelags}. A loop of half-length \SI{40}{\mega\m} cooling from $\approx\SI{5}{\mega\kelvin}$ down to $\approx\SI{0.2}{\mega\kelvin}$ is simulated using the EBTEL model (see \autoref{sec:ebtel}) and intensities from each of the six AIA channels are computed from \autoref{eq:aia_intensity} using the tabulated temperature response functions. The top panel shows the light curve for each channel (left axis) and the electron temperature (right axis, black). Note that the intensity peaks in successively ``cooler'' channels as the loop cools into and out of the temperature bandpass of each channel (see \autoref{fig:aia-temperature-response}).
-
-The bottom panel shows the cross-correlation as a function of temporal offset, $\tau$, for six different pairs of light curves. The time lag, $\tau_{AB}$ for each cross-correlation is denoted by the dotted line and the dot at the peak of the curve. The 94,171 pair has the longest time lag, \SI{> 2e3}{\second}, because the intensity of the \SI{94}{\angstrom} channel, which is most sensitive to $\sim\SI{8}{\mega\kelvin}$ plasma, peaks at $t=\SI{0}{\second}$ and the \SI{171}{\angstrom} intensity does not peak until $t\approx\SI{2.4e3}{\second}$ because the \SI{171}{\angstrom} channel is most sensitive to $\sim\SI{1}{\mega\kelvin}$ plasma. 
+The thermodynamic ambiguity inherent to observations from narrowband imaging instruments like AIA can be partially mediated by computing the cross-correlation (\autoref{eq:cross_correlation_final}) and time lag (\autoref{eq:timelag}) from observations from pairs of channels. Because $\tau_{AB}$ measures the time delay between peaks in different channels and the temperature sensitivy of each channel is approximately known (see \autoref{fig:aia-temperature-response}), the time lag for a channel pair $A,B$ provides a proxy for the loop plasma cooling time between the nominal temperatures of channels $A$ and $B$. For the six channels of interest, there are fifteen possible channel pairs. Recall that changing the order of the channels only changes the sign of the time lag such that $\tau_{AB}=-\tau_{BA}$.
 
 % spell-checker: disable %
 \begin{pycode}[chapter3timelag]
@@ -626,10 +667,10 @@ config = {
         'partition': 1.,
         'background': 1e-6,
         'events': [{'event': {'rise_start': 0.0,
-                              'rise_end': 0.0,
-                              'decay_start': 1.0,
-                              'decay_end': 1.0, 
-                              'magnitude': 0.01}}]
+                                'rise_end': 0.0,
+                                'decay_start': 1.0,
+                                'decay_end': 1.0, 
+                                'magnitude': 0.01}}]
     }),
 }
 res = run_ebtel(config, EBTEL_DIR)
@@ -687,7 +728,11 @@ tfig.caption = r'\textit{Top panel:} Simulated light curves (normalized to the p
 \py[chapter3timelag]|tfig|
 % spell-checker: enable %
 
-% discuss viall and klimchuk, bradshaw and viall papers here
+An example for a set of simulated AIA light curves is shown in \autoref{fig:aia-timelags}. A loop of half-length \SI{40}{\mega\m} cooling from $\approx\SI{5}{\mega\kelvin}$ down to $\approx\SI{0.2}{\mega\kelvin}$ is simulated using the EBTEL model (see \autoref{sec:ebtel}) and intensities from each of the six AIA channels are computed from \autoref{eq:aia_intensity} using the tabulated temperature response functions. The top panel shows the light curve for each channel (left axis) and the electron temperature (right axis, black). Note that the intensity peaks in successively ``cooler'' channels as the loop cools into and out of the temperature bandpass of each channel (see \autoref{fig:aia-temperature-response}).The bottom panel shows the cross-correlation as a function of temporal offset, $\tau$, for six different pairs of light curves. The time lag, $\tau_{AB}$ for each cross-correlation is denoted by the dotted line and the dot at the peak of the curve. The 94,171 pair has the longest time lag, \SI{> 2e3}{\second}, because the intensity of the \SI{94}{\angstrom} channel, which is most sensitive to $\sim\SI{8}{\mega\kelvin}$ plasma, peaks at $t=\SI{0}{\second}$ while the intensity of the \SI{171}{\angstrom} channel, which is most sensitive to $\sim\SI{1}{\mega\kelvin}$ plasma, does not peak until $t\approx\SI{2.4e3}{\second}$. Conversely, the 171,131 channel pair has the shortest time lag because the \SI{171}{\angstrom} and the cool component of the \SI{131}{\angstrom} temperature response function are heavily overlapping (see \autoref{fig:aia-temperature-response}). 
+
+Note that for a loop which is purely cooling, as is the case in \autoref{fig:aia-timelags}, all of the time lags are positive. Using the convention of \citet{viall_evidence_2012}, the channel pairs are ordered such that the ``hotter'' channel is first and the ``cooler'' channel is second such that \textit{a positive time lag implies cooling plasma}. In other words, if the hot emission precedes the cooler emission, the hotter light curve will have to be shifted in the positive direction in $\tau$ in order to maximize $\crosscor$. However, negative time lags may also be produced by cooling plasma if a channel is sensitive to both hot and cool plasma (i.e double-peaked in $T_e$, see \autoref{fig:aia-temperature-response}). Additionally, note that a zero time lag, $\tau_{AB}=\SI{0}{\second}$, does not imply a steady light curve or a steady $T_e$; it only implies that variability in channels $A$ and $B$ is coincident \citep{viall_transition_2015,viall_signatures_2016}.
+
+Using 24 hours of AIA observations of \AR{} NOAA 11082, \citet{viall_evidence_2012} compute time lags in every pixel of the \AR{} for all fifteen channel pairs. By computing $\tau_{AB}$ in each pixel, they build up a map of the cooling pattern across the entire \AR{} and find persistent positive time lags in all channel pairs, indicative of cooling plasma. \citet{viall_survey_2017} extend this same technique to the catalogue of \AR s compiled by \citet{warren_systematic_2012} and find similar results for all fiften \AR s. Additionally, \citet{bradshaw_patterns_2016} apply the time lag analysis to a set of forward-modeled AIA intensities for a range of different heating models. In \autoref{ch:modeling_observables} and \autoref{ch:classifying_observables}, I apply the time lag analysis to simulated and observed AIA data and make detailed comparisons between the simulated and real data using a random forest classification model.
 
 \section{Summary}
 

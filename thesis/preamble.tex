@@ -50,6 +50,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{siunitx}
+\usepackage{mathrsfs}
 
 % ********************Captions and Hyperreferencing / URL **********************
 
@@ -201,13 +202,15 @@
 % *****************************************************************************
 % ******************* Custom Macros *******************************************
 % Math
-\newcommand{\fourier}[1]{\mathcal{F}\left\{#1\right\}}
-\newcommand{\inversefourier}[1]{\mathcal{F}^{-1}\left\{#1\right\}}
+\newcommand{\fourier}[1]{\mathscr{F}\left\{#1\right\}}
+\newcommand{\inversefourier}[1]{\mathscr{F}^{-1}\left\{#1\right\}}
 \newcommand{\crosscor}[1][AB]{\mathcal{C}_{#1}(\tau)}
 \DeclareMathOperator*{\argmax}{argmax}
 \newcommand{\dd}[1]{\textup{d}#1\,} % differential
 % Abbreviations
 \newcommand{\AR}{active region}
+\newcommand{\dem}[1][T_e]{\textup{DEM}(#1)}
+\newcommand{\emd}[1][T_e]{\textup{EM}(#1)}
 % Table
 \newcolumntype{C}{>{\centering\arraybackslash}X} % centered "X" column
 % Units

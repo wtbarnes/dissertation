@@ -450,23 +450,38 @@ Two-photon decay processes in ions in the H and He isoelectronic sequences may a
 
 \section{The Differential Emission Measure Distribution}\label{sec:dem}
 
-\hilite{Write intensity in terms of contribution function; define contribution function; define DEM}
-
 \autoref{eq:intensity}, the intensity for a transition $\lambda_{ji}$, can be alternatively expressed as,
 \begin{equation}
-    I(\lambda_{ji}) = \int_\textup{LOS}\dd{h}n_Hn_eG_{ji},
+    I(\lambda_{ji}) = \int\dd{T_e}\dem G_{ji},
 \end{equation}
-where $G_{ji}$, the so-called \textit{contribution function}, is given by,
+where $G_{ji}$, the so-called contribution function\footnote{Several variants of $G_{ji}$ exist in the literature such as dropping the factor of $1/4\pi$, including the $n_H/n_e\approx0.83$ term, or dropping the abundance factor $\textup{Ab}(X)$. See section 3.1 of \citet{del_zanna_solar_2018}.}, is given by,
 \begin{equation}\label{eq:contribution_function}
-    G_{ji} = \frac{1}{4\pi n_e}\frac{hc}{\lambda_{ji}}\textup{Ab}(X)f_{X,k}N_{X,k,j}A_{ji}.
+    G_{ji} = \frac{1}{4\pi}\frac{hc}{\lambda_{ji}}\textup{Ab}(X)\frac{f_{X,k}N_{X,k,j}A_{ji}}{n_e}.
 \end{equation}
-Note that several variants of $G_{ji}$ exist in the literature such as dropping the factor of $\frac{1}{4\pi}$, including the $n_H/n_e\approx0.83$ term, or dropping the abundance factor $\textup{Ab}(X)$ \citep[see section 3.1 of][]{del_zanna_solar_2018}.
+$\dem$ is the \textit{differential emission measure distribution} and is defined as,
+\begin{equation}\label{eq:dem}
+    \dem = n_en_H\left(\frac{dT_e}{dh}\right)^{-1},
+\end{equation}
+where $\frac{dT_e}{dh}$ is the temperature gradient along the LOS. Qualitatively, the $\dem$ measures the amount of material along the LOS between temperatures $T_e$ and $dT_e$ \citep{withbroe_thermal_1978}. Additionally, for a particular temperature interval $\Delta$, the \textit{emission measure distribution} at a particular temperature $T_{e,j}$ is defined as,
+\begin{equation}\label{eq:em}
+    \emd[T_{e,j}] = \int_{T_{e,j} - \Delta/2}^{T_{e,j} + \Delta/2}\dd{T_e}\dem,
+\end{equation}
+\citep{del_zanna_solar_2018}. For an unresolved point source (e.g. a star other than the Sun), the integration in \autoref{eq:intensity} is often taken over a volume $V$ such that $\dem$ and $\emd$ are defined in terms of $dV$ rather than $dh$. Because of this ambiguity, \autoref{eq:dem} and \autoref{eq:em} are sometimes referred to as the column differential emission measure and column emission measure, respectively.
 
-\subsection{Inversion Methods}
+\subsection{Determining the DEM from Observations}
+
+% note difficulties involved (ambiguities of integration along LOS as well)
+% EM loci
+% summarize various other approaches
+% focus on HK12 method; show example for a single Gaussian DEM with AIA integration
+
+The $\dem$ is a useful diagnostic for understanding the temperature distribution of the coronal plasma and, by extension, the underlying energy deposition. However, calculating this quantity from observations is difficult for several reasons.
 
 \subsection{The Emission Measure Slope}
 
-\subsection{Inferring the Presence of Very Hot Plasma}
+% show example for single nanoflare and high-frequency heating
+% adapt table from Bradshaw et al with updated results
+% discuss hot DEM slope as well; defer most discussion to chapter 4
 
 \section{Time-lag Analysis}\label{sec:timelag}
 
@@ -484,14 +499,11 @@ from run_ebtel import run_ebtel
 \end{pycode}
 % spell-checker: enable %
 
-% Need some intro here that describes in brief what time lag analysis is and why we would use it.
-% Just a few sentences is fine. All details will go below
-
-Besides the emission measure distribution, additional diagnostics are needed in order to place tighter constraints on coronal heating properties. The time-lag method of \citet{viall_evidence_2012} is a powerful and efficient tool for understanding the large-scale cooling patterns across an entire \AR{} from narrowband imager observations like those from the AIA instrument. Unlike the emission measure distribution, it does not rely a non-unique solution to an inversion problem and inherently accounts for the time-dependence of the observed emission. In the following sections, I will outline the time-lag analysis technique and explain why it is useful in discerning the underlying thermodynamic behaviour of the plasma from the observed narrowband intensity. 
+Besides the emission measure distribution, additional diagnostics are needed in order to place tighter constraints on coronal heating properties. The time-lag method of \citet{viall_evidence_2012} is a powerful and efficient tool for understanding the large-scale cooling patterns across an entire \AR{} from narrowband observations like those from the AIA instrument. Unlike the emission measure distribution, it does not rely a non-unique solution to an inversion problem and inherently accounts for the time-dependence of the observed emission. In the following sections, I will outline the time-lag analysis technique and explain why it is useful in discerning the underlying thermodynamic behavior of the plasma from the observed narrowband intensity. 
 
 \subsection{Cross-correlation}\label{subsec:cross_correlation}
 
-Broadly speaking, the time-lag method involves computing the \textit{cross-correlation} between pairs of AIA light curves. The cross-correlation measures the similarity between two signals as a function of the offset betwen them. Given two signals $f_A$ and $f_B$ that are a function of time $t$, the cross-correlation, $\crosscor$, can be written as,
+Broadly speaking, the time-lag method involves computing the \textit{cross-correlation} between pairs of AIA light curves. The cross-correlation measures the similarity between two signals as a function of the offset between them. Given two signals $f_A$ and $f_B$ that are a function of time $t$, the cross-correlation, $\crosscor$, can be written as,
 \begin{equation}
     \crosscor = (f_A\star f_B)(\tau) = \int_{-\infty}^\infty\dd{t}f_A^{\ast}(t)f_B(t + \tau),
 \end{equation}
@@ -505,7 +517,7 @@ where $\ast$ denotes the convolution operator. Taking the Fourier transform of b
     \fourier{\crosscor} &= \fourier{f_A(-t)}\fourier{f_B(t)}, \nonumber \\
     \crosscor &= \inversefourier{\fourier{f_A(-t)}\fourier{f_B(t)}},
 \end{align}
-where $\mathcal{F}$ denotes the Fourier transform. \autoref{eq:cross_correlation_final} defines the cross-correlation $\crosscor$ between two signals $f_A$ and $f_B$ as a function of temporal offset $\tau$ in terms of the Fourier transform. Defining the cross-correlation in this manner allows one to efficiently compute $\crosscor$ using highly-optimized fast Fourier transform (FFT) algorithms \citep[e.g. the widely-used FFT algorithm developed by][]{cooley_algorithm_1965}. Note that $f_A$ and $f_B$ are standardized such that both signals have zero mean and unit standard deviation. Additionally, $\crosscor$ is scaled by the length of the signal such that the cross-correlation is always between $-1$ (perfectly anti-correlated) and $+1$ (perfectly correlated).
+where $\mathscr{F}$ denotes the Fourier transform. \autoref{eq:cross_correlation_final} defines the cross-correlation $\crosscor$ between two signals $f_A$ and $f_B$ as a function of temporal offset $\tau$ in terms of the Fourier transform. Defining the cross-correlation in this manner allows one to efficiently compute $\crosscor$ using highly-optimized fast Fourier transform (FFT) algorithms \citep[e.g. the widely-used FFT algorithm developed by][]{cooley_algorithm_1965}. Note that $f_A$ and $f_B$ are standardized such that both signals have zero mean and unit standard deviation. Additionally, $\crosscor$ is scaled by the length of the signal such that the cross-correlation is always between $-1$ (perfectly anti-correlated) and $+1$ (perfectly correlated).
 
 % spell-checker: disable %
 \begin{pycode}[chapter3timelag]
@@ -549,10 +561,6 @@ A simple example of the cross-correlation is illustrated in \autoref{fig:cross-c
 In this example, the time lag between $f_1$ and $f_2$ is $\tau_{12}=\SI{0.5}{\second}$. Note that for $\crosscor[21]$ (i.e. $f_1$ and $f_2$ reversed), the time lag would be $\tau_{21}=\SI{-0.5}{\second}$ as $f_2$ would need to be shifted 0.5 s to the left in order to maximize the similarity between the two signals. Thus, the order of the two signals in \autoref{eq:cross_correlation_final} will determine the sign of the time lag.
 
 \subsection{Temperature Sensitivity of the AIA Passbands}\label{subsec:aia_response}
-
-% Briefly discuss how temperature response functions are calculated
-% show plot of temperature response
-% show wavelength response as well?
 
 Before discussing the time lag in the context of AIA observations, it is important to understand the temperature sensitivity of the EUV passbands of the AIA instrument. The AIA instrument onboard the SDO spacecraft is comprised of four dual-channel normal-incidence telescopes which have continuously observed the full Sun (\SI{41}{\arcminute} field of view) since 29 April 2010 at a cadence of \SIrange{10}{12}{\second} and spatial resolution of $\approx\SI{0.6}{\arcsecond}$ per pixel \citep{lemen_atmospheric_2012,boerner_initial_2012}. In addition to two ultraviolet (UV, \SIlist{1600;1700}{\angstrom}) channels and one visible (\SI{4500}{\angstrom}) channel, AIA has seven extreme ultraviolet (EUV) channels: \SIlist{94;131;171;193;211;304;335}{\angstrom}. Unlike the other EUV channels which are primarily sensitive to hot ($T\ge10^{5.8}$ \si{\kelvin}) lines in high ionization states of Fe, the \SI{304}{\angstrom} channel is dominated by the much cooler \SI{303.784}{\angstrom} He II line \citep[see Table 1 of][]{lemen_atmospheric_2012}. This line forms primarily in the chromosphere and is optically-thick, meaning its observed intensity is not well-modeled by \autoref{eq:intensity} and data in the CHIANTI database \citep{boerner_initial_2012,warren_solar_2005}. Because the primary focus of this thesis is the dynamics of hot plasma in \AR s, diagnostics will be limited to the six remaining channels: \SIlist{94;131;171;193;211;335}{\angstrom}. \autoref{tab:aia_channels} summarizes the solar features, dominant Fe ions, and characteristic temperature of each of the channels.
 
@@ -608,7 +616,7 @@ While $R_c$ is only a function of the properties of the instrument, the temperat
 \begin{equation}\label{eq:temperature_response_discrete}
     K_c = \int_0^\infty\dd{\lambda}P_{\textup{cont.}}(\lambda)R_c(\lambda)  + \sum_{\{ji\}}\,\frac{G_{ji}}{hc/\lambda_{ji}}R_c(\lambda_{ji}),
 \end{equation}
-where $P_{\textup{cont.}}$ is the continuum emissivity (see \autoref{sec:continuum}) and $G_{ji}$ is the contribution function for an atomic transition $\lambda_{ji}$ (\autoref{eq:contribution_function}) and the sum is taken over $\{ji\}$, the set of all known atomic transitions for the relevant wavelength range of channel $c$. Note that $hc/\lambda_{ji}$ is the energy per photon of wavelength $\lambda_{ji}$ such that $G_{ji}/(hc/\lambda_{ji})$ has units of \si{\photon\cubic\cm\per\second}. The set of relevant atomic transitions, $\{ji\}$, can be obtained from the CHIANTI database such that accurately determining the temperature sensitivity of the passbands depends critically on knowledge of the relevant atomic transitions in the bandpass of each channel.
+where $P_{\textup{cont.}}$ is the continuum emissivity (see \autoref{sec:continuum}) and $G_{ji}$ is the contribution function for an atomic transition $\lambda_{ji}$ (\autoref{eq:contribution_function}). The sum is taken over $\{ji\}$, the set of all known atomic transitions for the relevant wavelength range of channel $c$. Note that $hc/\lambda_{ji}$ is the energy per photon of wavelength $\lambda_{ji}$ such that $G_{ji}/(hc/\lambda_{ji})$ has units of \si{\photon\cubic\cm\per\second}. The set of relevant atomic transitions, $\{ji\}$, can be obtained from the CHIANTI database such that accurately determining the temperature sensitivity of the passbands depends critically on knowledge of the relevant atomic transitions in the bandpass of each channel.
 
 % spell-checker: disable %
 \begin{pycode}[chapter3timelag]
@@ -634,11 +642,11 @@ tfig.caption = r'Temperature response functions for the six EUV channels of AIA 
 \py[chapter3timelag]|tfig|
 % spell-checker: enable %
 
-The temperature response functions for the EUV channels of AIA are shown in \autoref{fig:aia-temperature-response}. Combined, the six response functions provide temperature coverage over the range $3\times10^5\lesssim T\lesssim2\times10^7$ \si{\kelvin}. Note that several of the response functions, particulary the \SI{94}{\angstrom} and \SI{131}{\angstrom} channels, are double-peaked in temperature due to the finite width of the wavelength responses. This degeneracy makes associating observations with specific temperatures very difficult as, in the case of the \SI{131}{\angstrom} channel, an intensity enhancement may correspond to very hot, \SI{> e7}{\kelvin} plasma or much cooler, \SI{< e6}{\kelvin} plasma.
+The temperature response functions for the EUV channels of AIA are shown in \autoref{fig:aia-temperature-response}. Combined, the six response functions provide temperature coverage over the range $3\times10^5\lesssim T\lesssim2\times10^7$ \si{\kelvin}. Note that several of the response functions, particularly the \SI{94}{\angstrom} and \SI{131}{\angstrom} channels, are double-peaked in temperature due to the finite width of the wavelength responses. This degeneracy makes associating observations with specific temperatures very difficult. For example, intensity in the \SI{131}{\angstrom} channel may correspond to very hot, \SI{> e7}{\kelvin} plasma or much cooler, \SI{< e6}{\kelvin} plasma.
 
 \subsection{Time lag between AIA Channel Pairs}\label{subsec:timelag_aia}
 
-The thermodynamic ambiguity inherent to observations from narrowband imaging instruments like AIA can be partially mediated by computing the cross-correlation (\autoref{eq:cross_correlation_final}) and time lag (\autoref{eq:timelag}) from observations from pairs of channels. Because $\tau_{AB}$ measures the time delay between peaks in different channels and the temperature sensitivy of each channel is approximately known (see \autoref{fig:aia-temperature-response}), the time lag for a channel pair $A,B$ provides a proxy for the loop plasma cooling time between the nominal temperatures of channels $A$ and $B$. For the six channels of interest, there are fifteen possible channel pairs. Recall that changing the order of the channels only changes the sign of the time lag such that $\tau_{AB}=-\tau_{BA}$.
+The thermodynamic ambiguity inherent to observations from narrowband imaging instruments like AIA can be partially mediated by computing the cross-correlation (\autoref{eq:cross_correlation_final}) and time lag (\autoref{eq:timelag}) from observations from pairs of channels. Because $\tau_{AB}$ measures the time delay between peaks in different channels and the temperature sensitivity of each channel is approximately known (see \autoref{fig:aia-temperature-response}), the time lag for a channel pair $A,B$ provides a proxy for the loop plasma cooling time between the nominal temperatures of channels $A$ and $B$. For the six channels of interest, there are fifteen possible channel pairs. Recall that changing the order of the channels only changes the sign of the time lag such that $\tau_{AB}=-\tau_{BA}$.
 
 % spell-checker: disable %
 \begin{pycode}[chapter3timelag]
@@ -732,7 +740,7 @@ An example for a set of simulated AIA light curves is shown in \autoref{fig:aia-
 
 Note that for a loop which is purely cooling, as is the case in \autoref{fig:aia-timelags}, all of the time lags are positive. Using the convention of \citet{viall_evidence_2012}, the channel pairs are ordered such that the ``hotter'' channel is first and the ``cooler'' channel is second such that \textit{a positive time lag implies cooling plasma}. In other words, if the hot emission precedes the cooler emission, the hotter light curve will have to be shifted in the positive direction in $\tau$ in order to maximize $\crosscor$. However, negative time lags may also be produced by cooling plasma if a channel is sensitive to both hot and cool plasma (i.e double-peaked in $T_e$, see \autoref{fig:aia-temperature-response}). Additionally, note that a zero time lag, $\tau_{AB}=\SI{0}{\second}$, does not imply a steady light curve or a steady $T_e$; it only implies that variability in channels $A$ and $B$ is coincident \citep{viall_transition_2015,viall_signatures_2016}.
 
-Using 24 hours of AIA observations of \AR{} NOAA 11082, \citet{viall_evidence_2012} compute time lags in every pixel of the \AR{} for all fifteen channel pairs. By computing $\tau_{AB}$ in each pixel, they build up a map of the cooling pattern across the entire \AR{} and find persistent positive time lags in all channel pairs, indicative of cooling plasma. \citet{viall_survey_2017} extend this same technique to the catalogue of \AR s compiled by \citet{warren_systematic_2012} and find similar results for all fiften \AR s. Additionally, \citet{bradshaw_patterns_2016} apply the time lag analysis to a set of forward-modeled AIA intensities for a range of different heating models. In \autoref{ch:modeling_observables} and \autoref{ch:classifying_observables}, I apply the time lag analysis to simulated and observed AIA data and make detailed comparisons between the simulated and real data using a random forest classification model.
+Using 24 hours of AIA observations of \AR{} NOAA 11082, \citet{viall_evidence_2012} compute time lags in every pixel of the \AR{} for all fifteen channel pairs. By computing $\tau_{AB}$ in each pixel, they build up a map of the cooling pattern across the entire \AR{} and find persistent positive time lags in all channel pairs, indicative of cooling plasma. \citet{viall_survey_2017} extend this same technique to the catalogue of \AR s compiled by \citet{warren_systematic_2012} and find similar results for all fifteen \AR s. Additionally, \citet{bradshaw_patterns_2016} apply the time lag analysis to a set of forward-modeled AIA intensities for a range of different heating models. In \autoref{ch:modeling_observables} and \autoref{ch:classifying_observables}, I apply the time lag analysis to simulated and observed AIA data and make detailed comparisons between the simulated and real data using a random forest classification model.
 
 \section{Summary}
 

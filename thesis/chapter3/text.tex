@@ -451,7 +451,7 @@ Two-photon decay processes in ions in the H and He isoelectronic sequences may a
 \section{The Differential Emission Measure Distribution}\label{sec:dem}
 
 \autoref{eq:intensity}, the intensity for a transition $\lambda_{ji}$, can be alternatively expressed as,
-\begin{equation}
+\begin{equation}\label{eq:intensity_dem}
     I(\lambda_{ji}) = \int\dd{T_e}\dem G_{ji},
 \end{equation}
 where $G_{ji}$, the so-called contribution function\footnote{Several variants of $G_{ji}$ exist in the literature such as dropping the factor of $1/4\pi$, including the $n_H/n_e\approx0.83$ term, or dropping the abundance factor $\textup{Ab}(X)$. See section 3.1 of \citet{del_zanna_solar_2018}.}, is given by,
@@ -471,15 +471,36 @@ where $\frac{dT_e}{dh}$ is the temperature gradient along the LOS. Qualitatively
 \subsection{Determining the DEM from Observations}
 
 % note difficulties involved (ambiguities of integration along LOS as well)
-% EM loci
 % summarize various other approaches
-% focus on HK12 method; show example for a single Gaussian DEM with AIA integration
 
-The $\dem$ is a useful diagnostic for understanding the temperature distribution of the coronal plasma and, by extension, the underlying energy deposition. However, calculating this quantity from observations is difficult for several reasons.
+The differential emission measure distribution is a useful diagnostic for understanding the temperature distribution of the coronal plasma and, by extension, the underlying energy deposition. However, deriving the $\dem$ from observed spectral line or narrowband intensities is difficult for a number of reasons. \autoref{eq:intensity_dem} is an inhomogeneous Fredholm equation of the first kind,
+\begin{equation}\label{eq:fredholm}
+    g(t) = \int_a^b\dd{s}K(t,s)f(s),
+\end{equation}
+where $g(t)$ is some known, measured value, $K(t,s)$ is the kernel, and $f(s)$ is unknown function to be determined \citep{press_numerical_1992}. Comparing with \autoref{eq:intensity_dem}, $s$ and $t$ correspond to the temperature and wavelength or channel, respectively. In principle, solving \autoref{eq:fredholm} to find $f$ requires inverting the kernel matrix provided $K$ is invertible. However, this is complicated by the fact that information about $f$ (or in the case of \autoref{eq:intensity_dem}, $\dem$) is lost when $f$ is ``smoothed'' by the kernel $K$ such that solutions to $f$ derived by inverting $K$ will be extremely sensitive to uncertainties in the input $g$ \citep{press_numerical_1992}. In applied mathematics, there exists a great deal of literature on solution methods for these so-called \textit{inverse problem}, of which \autoref{eq:fredholm} is a prime example.
+
+In solar astrophysics specifically, a great amount of effort has been focused on methods for solving \autoref{eq:intensity_dem} for the $\dem$ ($f$) given a set of observed EUV and/or X-ray intensities ($g$) using contribution functions or detector responses ($K$) derived from atomic data. These methods include, but are not limited to, Gaussian, multi-Gaussian, and spline fits via $\chi^2$-minimization \citep[e.g.][]{warren_observations_2013,ryan_compatibility_2014,caspi_constraining_2014}, Markov Chain Monte Carlo \citep[MCMC,][]{kashyap_markov-chain_1998}, regularized inversion \citep{hannah_differential_2012,plowman_fast_2013}, sparse basis pursuit \citep{cheung_thermal_2015}, and sparse Bayesian inference \citep{warren_sparse_2017}. Many of these methods have been designed to work well with specific observations and, due to the lack of a unique solution to \autoref{eq:intensity_dem}, tend to all give different $\dem$ for the same set of inputs $I$ \citep[see comparison of 15 different methods by][]{aschwanden_benchmark_2015}. 
+
+\subsubsection{Emission Measure Loci}
+
+Though inverting \autoref{eq:intensity_dem} to find a full solution for the $\dem$ is difficult, an upper bound on $\emd$ can estimated using the emission measure loci method first developed by \citet{veck_solar_1981}. For an isothermal plasma at temperature $T_c$, \autoref{eq:intensity_dem} becomes,
+\begin{equation}
+    I(\lambda_{ji}) = G_{ji}(T_c)\int_{LOS}\dd{h}n_e^2 = G_{ji}(T_c)\textup{EM}.
+\end{equation}
+Given this approximation, one can define a function called the emission measure loci,
+\begin{equation}\label{eq:em_loci}
+    \emd_{\textup{loci}} = \frac{I(\lambda_{ji})}{G_{ji}(T_e)}.
+\end{equation}
+$\emd_{\textup{loci}}$ depends strongly on $T_e$ because of the temperature-dependence of the contribution function, $G_{ji}(T_e)$ (see \autoref{eq:contribution_function}). Note that $\emd[T_c]_{\textup{loci}}=\textup{EM}$. By plotting \autoref{eq:em_loci} as a function of $T_e$ for multiple lines and finding where all of the emission measure loci curves intersect, one can find $T_c$, the temperature of the isothermal plasma and $\textup{EM}$. This is because for $T=T_c$, \autoref{eq:em_loci} should be equal for an isothermal plasma with uniform density. For a multithermal plasma, \autoref{eq:em_loci} still provides an estimate for the upper bound on $\emd$, but the $\emd_{\textup{loci}}$ will not all intersect at a single temperature \citep{phillips_ultraviolet_2008}.
+
+\subsubsection{Regularized Inversion}
+
+% focus on HK12 method; show example for a single Gaussian DEM with AIA integration
 
 \subsection{The Emission Measure Slope}
 
-% show example for single nanoflare and high-frequency heating
+% show example for single nanoflare and high-frequency heating, fit slope
+% mention ambiguities raised by Guennou
 % adapt table from Bradshaw et al with updated results
 % discuss hot DEM slope as well; defer most discussion to chapter 4
 
@@ -757,7 +778,7 @@ Using 24 hours of AIA observations of \AR{} NOAA 11082, \citet{viall_evidence_20
 \nomenclature[a-te]{$T_e$}{electron temperature}
 \nomenclature[a-ne]{$n_e$}{electron density}
 \nomenclature[a-kb]{$k_B$}{Boltzmann constant}
-\nomenclature[x-fourier]{$\mathcal{F}$}{Fourier transform}
+\nomenclature[x-fourier]{$\mathscr{F}$}{Fourier transform}
 \nomenclature[x-crosscorrelation]{$\mathcal{C}$}{cross-correlation}
 \nomenclature[z-fft]{FFT}{fast Fourier transform}
 \nomenclature[z-arcmin]{\si{\arcminute}}{arcminute}

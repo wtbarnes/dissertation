@@ -545,6 +545,7 @@ ch3_dem = texfigure.Manager(
 )
 import hissw
 from run_ebtel import run_ebtel
+from dem import calculate_em, fit_slope, plot_hist
 \end{pycode}
 % spell-checker: enable %
 
@@ -707,6 +708,98 @@ tfig.caption = r'An example of the regularized inversion method of \citet{hannah
 % adapt table from Bradshaw et al with updated results
 % discuss hot DEM slope as well; defer most discussion to chapter 4
 
+% spell-checker: disable %
+\begin{pycode}[chapter3dem]
+fig,ax = plt.subplots(
+    1,2,figsize=texfigure.figsize(pytex,scale=1,))
+# Configure EBTEL simulation
+Heq = 2e-3
+duration = 200.
+config = {
+    'total_time': 5e3,
+    'tau': 1,
+    'tau_max': 10,
+    'loop_length': 4e9,
+    'saturation_limit': 1,
+    'force_single_fluid': False,
+    'use_c1_loss_correction': True,
+    'use_c1_grav_correction': True,
+    'use_flux_limiting': True,
+    'use_power_law_radiative_losses': True,
+    'calculate_dem': False,
+    'save_terms': False,
+    'use_adaptive_solver': True,
+    'adaptive_solver_error': 1e-10,
+    'adaptive_solver_safety': 0.5,
+    'c1_cond0': 2.0,
+    'c1_rad0': 0.6,
+    'helium_to_hydrogen_ratio': 0.075,
+    'surface_gravity': 1.0,
+    'heating': OrderedDict({
+        'partition': 1.,
+        'background': 3.5e-5,}),
+}
+
+# Single nanoflare
+N = 1
+tn = (config['total_time'] - N*duration)/N
+events = []
+for i in range(N):
+    events.append({'event':{
+        'rise_start': i*(tn + duration),
+        'rise_end': i*(tn + duration) + duration/2,
+        'decay_start': i*(tn + duration) + duration/2,
+        'decay_end': i*(tn + duration) + duration,
+        'magnitude': 2*config['total_time']*Heq/N/duration,}})
+
+config['heating']['events'] = events
+res = run_ebtel(config, EBTEL_DIR)
+ax[0].plot(res['time'], res['electron_temperature'].to(u.MK), color=PALETTE[0])
+bins_T, H = calculate_em(
+    res['time'], res['electron_temperature'], res['density'], config['loop_length'])
+plot_hist(ax[1], H.value, bins_T.value, color=PALETTE[0])
+a, b, T_fit = fit_slope(bins_T, H, T0=1.25e6*u.K, T1=4e6*u.K)
+ax[1].plot(T_fit, b*T_fit**a, color=PALETTE[0], ls='--', label=f'$a={a:.1f}$')
+# Repeated nanoflares
+N = 10
+tn = (config['total_time'] - N*duration)/N
+events = []
+for i in range(N):
+    events.append({'event':{
+        'rise_start': i*(tn + duration),
+        'rise_end': i*(tn + duration) + duration/2,
+        'decay_start': i*(tn + duration) + duration/2,
+        'decay_end': i*(tn + duration) + duration,
+        'magnitude': 2*config['total_time']*Heq/N/duration,}})
+
+config['heating']['events'] = events
+res = run_ebtel(config, EBTEL_DIR)
+ax[0].plot(res['time'], res['electron_temperature'].to(u.MK), color=PALETTE[1])
+bins_T, H = calculate_em(
+    res['time'], res['electron_temperature'], res['density'], config['loop_length'])
+plot_hist(ax[1], H.value, bins_T.value, color=PALETTE[1])
+a, b, T_fit = fit_slope(bins_T, H, T0=1.25e6*u.K, T1=4e6*u.K)
+ax[1].plot(T_fit, b*T_fit**a, color=PALETTE[1], ls='--', label=f'$a={a:.1f}$')
+# Labels and limits
+ax[0].set_xlim(0,5e3)
+ax[0].set_ylim(0.3, 11.5)
+ax[0].set_xlabel(r'$t$ $[\si{\second}]$')
+ax[0].set_ylabel(r'$T_e$ $[\si{\mega\kelvin}]$')
+ax[1].set_xscale('log')
+ax[1].set_yscale('log')
+ax[1].set_ylim(5e25, 2e28)
+ax[1].set_xlim(3e5, 2e7)
+ax[1].set_xlabel(r'$T_e$ $[\si{\kelvin}]$')
+ax[1].set_ylabel(r'EM $[\si{\cm\tothe{-5}}]$')
+ax[1].legend(loc=2, frameon=False)
+plt.subplots_adjust(wspace=0.35)
+# Save
+tfig = ch3_dem.save_figure('em-slope', fext='.pgf')
+tfig.caption = r'$\emd$ for a loop heated by a single nanoflare.'
+\end{pycode}
+\py[chapter3dem]|tfig|
+% spell-checker: enable %
+
 \section{Time-lag Analysis}\label{sec:timelag}
 
 % spell-checker: disable %
@@ -815,10 +908,10 @@ config = {
         'partition': 1.,
         'background': 1e-6,
         'events': [{'event': {'rise_start': 0.0,
-                                'rise_end': 0.0,
-                                'decay_start': 1.0,
-                                'decay_end': 1.0, 
-                                'magnitude': 0.01}}]
+                              'rise_end': 0.0,
+                              'decay_start': 1.0,
+                              'decay_end': 1.0, 
+                              'magnitude': 0.01}}]
     }),
 }
 res = run_ebtel(config, EBTEL_DIR)

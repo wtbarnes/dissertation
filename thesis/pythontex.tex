@@ -71,6 +71,11 @@ if 'EBTEL_DIR' not in os.environ:
 	EBTEL_DIR = '/Users/willbarnes/Documents/work/codes/ebtelPlusPlus/'
 else:
 	EBTEL_DIR = os.environ['EBTEL_DIR']
+# Set location of regularized DEM IDL code
+if 'DEMREG_DIR' not in os.environ:
+	DEMREG_DIR = '/Users/willbarnes/Documents/work/codes/demreg/idl/'
+else:
+	DEMREG_DIR = os.environ['DEMREG_DIR']
 
 # Set some plot styling here
 plt.rcParams['pgf.preamble'] = [r'\usepackage{siunitx}']

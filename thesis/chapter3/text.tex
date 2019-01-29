@@ -448,7 +448,105 @@ Note that the photon produced has energy $h\nu=E+I$, where $I$ is the ionization
 
 Two-photon decay processes in ions in the H and He isoelectronic sequences may also contribute to the total continuum emission \citep{young_chianti-atomic_2003}. However, compared to bremsstrahlung and free-found emission, the contribution of the two-photon decay process to the total continuum emission is relatively small for $T_e\SI{\le 1e4}{\kelvin}$ \citep{del_zanna_solar_2018}. The continuum emission due to free-free, free-bound, and two-photon decay processes can all be computed using data and associated software provided by CHIANTI.
 
+\section{Temperature Sensitivity of the AIA Passbands}\label{sec:aia_response}
+
+The primary focus of this thesis is the prediction and analysis of observations from the Atmospheric Imaging Assembly (AIA) instrument. Thus, before discussing the differential emission measure (\autoref{sec:dem}) and time lag diagnostics (\autoref{sec:timelag}), it is important to understand the temperature sensitivity of the EUV passbands of the AIA instrument. The AIA instrument onboard the SDO spacecraft is comprised of four dual-channel normal-incidence telescopes which have continuously observed the full Sun (\SI{41}{\arcminute} field of view) since 29 April 2010 at a cadence of \SIrange{10}{12}{\second} and spatial resolution of $\approx\SI{0.6}{\arcsecond}$ per pixel \citep{lemen_atmospheric_2012,boerner_initial_2012}. In addition to two ultraviolet (UV, \SIlist{1600;1700}{\angstrom}) channels and one visible (\SI{4500}{\angstrom}) channel, AIA has seven extreme ultraviolet (EUV) channels: \SIlist{94;131;171;193;211;304;335}{\angstrom}. Unlike the other EUV channels which are primarily sensitive to hot ($T\ge10^{5.8}$ \si{\kelvin}) lines in high ionization states of Fe, the \SI{304}{\angstrom} channel is dominated by the much cooler \SI{303.784}{\angstrom} He II line \citep[see Table 1 of][]{lemen_atmospheric_2012}. This line forms primarily in the chromosphere and is optically-thick, meaning its observed intensity is not well-modeled by \autoref{eq:intensity} and data in the CHIANTI database \citep{boerner_initial_2012,warren_solar_2005}. Because the primary focus of this thesis is the dynamics of hot plasma in \AR s, diagnostics will be limited to the six remaining channels: \SIlist{94;131;171;193;211;335}{\angstrom}. \autoref{tab:aia_channels} summarizes the solar features, dominant Fe ions, and characteristic temperature of each of the channels.
+
+\begin{table}
+    \centering
+    \caption{Primary ions observed by the six AIA EUV channels of interest. Adapted from Table 1 of \citet{lemen_atmospheric_2012}.\label{tab:aia_channels}}
+    \begin{tabularx}{\columnwidth}{cclC}
+        \toprule
+        Channel $[\si{\angstrom}]$ & Primary ion(s) & Solar feature & Characteristic temperature $[\si{\kelvin}]$ \\
+        \midrule
+        94 & Fe XVIII & flaring corona & $10^{6.8}$ \\
+        131 & Fe VIII, XXI & TR, flaring corona & $10^{5.6},10^7$ \\
+        171 & Fe IX & quiet corona, upper TR & $10^{5.8}$ \\
+        193 & Fe XII, XXIV & corona, hot flare plasma & $10^{6.2},10^{7.3}$ \\
+        211 & Fe XIV & active region & $10^{6.3}$ \\
+        335 & Fe XVI & active region & $10^{6.4}$ \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
+
+For any of the aforementioned EUV channels of AIA, the intensity as observed by a particular channel $c$ can be written as,
+\begin{equation}\label{eq:aia_intensity}
+    p_c = \int_\textup{LOS}\dd{h}n_Hn_eK_c(T_e),
+\end{equation}
+where $K_c$ is the temperature response function of channel $c$ and is given by,
+\begin{equation}\label{eq:temperature_response}
+    K_c = \int_0^\infty\dd{\lambda}G(\lambda)R_c(\lambda),
+\end{equation}
+where $G(\lambda)$ is the total contribution function of all ions and $R_c$ is the wavelength response of channel $c$ \citep{boerner_initial_2012}. Note that \autoref{eq:aia_intensity} gives the intensity in units of \si{\dn\per\pixel\per\second} such that $K_c$ has units \si{\dn\per\pixel\per\second\cm\tothe{5}} and $R_c$ has units \si{\cm\squared\dn\per\photon\steradian\per\pixel}. The wavelength response function incorporates all of the properties of the telescope channel, including the geometrical collecting area, the reflectance of the mirrors, the transmission efficiency of the filters, the quantum efficiency of the CCD, and the plate scale \citep[see Section 2 and Table 2 of][]{boerner_initial_2012}. An additional correction is applied to account for the degradation of the instrument over time. The wavelength response functions for the six EUV channels of interest are shown in \autoref{fig:aia-wavelength-response}.
+
+% spell-checker: disable %
+\begin{pycode}[chapter3]
+aia = InstrumentSDOAIA([0,1]*u.s, None)
+fig,axes = plt.subplots(2,3,sharey=True,
+                        figsize=texfigure.figsize(pytex,scale=1,height_ratio=2/3))
+for c,ax in zip(aia.channels, axes.flatten()):
+    wave = np.linspace(c['wavelength'].value-10, c['wavelength'].value+10, 100)*u.angstrom
+    r = splev(wave.value, c['wavelength_response_spline'])
+    ax.plot(wave, r/r.max())
+    ax.set_xlim(c['wavelength'].value-10, c['wavelength'].value+10)
+    ax.text(c['wavelength'].value+4, 0.85, f'{c["wavelength"].value:.0f} '+ r'$\si{\angstrom}$',
+            fontsize=plt.rcParams['legend.fontsize'])
+axes[1,0].set_xlabel(r'$\lambda$ $[\si{\angstrom}]$')
+axes[1,0].set_ylabel(r'$R_c/\max{R_c}$')
+axes[1,0].set_ylim(0,1.05)
+tfig = ch3.save_figure('aia-wavelength-response', fext='.pgf')
+tfig.caption = r'AIA wavelength response functions for the six primary EUV channels. For each channel, the response function is shown at $\pm\SI{10}{\angstrom}$ of the nominal wavelength. Each response function is normalized to the maximum value of $R_c$ over this interval.'
+\end{pycode}
+\py[chapter3]|tfig|
+% spell-checker: enable %
+
+While $R_c$ is only a function of the properties of the instrument, the temperature sensitivity of each channel, $K_c$ (\autoref{eq:temperature_response}), has an explicit dependence on the atomic data through the total contribution function, $G(\lambda)$. $G(\lambda)$ includes components from both line and continuum emission such that \autoref{eq:temperature_response} can be expressed more practically as,
+\begin{equation}\label{eq:temperature_response_discrete}
+    K_c = \int_0^\infty\dd{\lambda}P_{\textup{cont.}}(\lambda)R_c(\lambda)  + \sum_{\{ji\}}\,\frac{G_{ji}}{hc/\lambda_{ji}}R_c(\lambda_{ji}),
+\end{equation}
+where $P_{\textup{cont.}}$ is the continuum emissivity (see \autoref{sec:continuum}) and $G_{ji}$ is the contribution function for an atomic transition $\lambda_{ji}$ (\autoref{eq:contribution_function}). The sum is taken over $\{ji\}$, the set of all known atomic transitions for the relevant wavelength range of channel $c$. Note that $hc/\lambda_{ji}$ is the energy per photon of wavelength $\lambda_{ji}$ such that $G_{ji}/(hc/\lambda_{ji})$ has units of \si{\photon\cubic\cm\per\second}. The set of relevant atomic transitions, $\{ji\}$, can be obtained from the CHIANTI database such that accurately determining the temperature sensitivity of the passbands depends critically on knowledge of the relevant atomic transitions in the bandpass of each channel.
+
+% spell-checker: disable %
+\begin{pycode}[chapter3]
+fig = plt.figure(figsize=texfigure.figsize(pytex,scale=1,))
+ax = fig.gca()
+T = np.logspace(4,9,1000)*u.K
+for i,c in enumerate(aia.channels):
+    r = splev(T.value,c['temperature_response_spline'])
+    ax.plot(
+        T, r,
+        label=f'{c["wavelength"].value:.0f} '+ r'$\si{\angstrom}$',
+        color=PALETTE[i])
+ax.set_xscale('log')
+ax.set_yscale('log')
+ax.set_xlim(1e5,1e8)
+ax.set_ylim(1e-28,2e-24)
+ax.set_xlabel(r'$T$ $[\si{\kelvin}]$')
+ax.set_ylabel(r'$K_c$ $[\si{\dn\per\pixel\per\second\cm\tothe{5}}]$')
+ax.legend(loc=1,frameon=False,ncol=2)
+tfig = ch3.save_figure('aia-temperature-response', fext='.pgf')
+tfig.caption = r'Temperature response functions for the six EUV channels of AIA listed in \autoref{tab:aia_channels} as computed by \autoref{eq:temperature_response_discrete}. Together, these six channels provide observational coverage over the temperature range $3\times10^5\lesssim T\lesssim2\times10^7$ \si{\kelvin}.'
+\end{pycode}
+\py[chapter3]|tfig|
+% spell-checker: enable %
+
+The temperature response functions for the EUV channels of AIA are shown in \autoref{fig:aia-temperature-response}. Combined, the six response functions provide temperature coverage over the range $3\times10^5\lesssim T\lesssim2\times10^7$ \si{\kelvin}. Note that several of the response functions, particularly the \SI{94}{\angstrom} and \SI{131}{\angstrom} channels, are double-peaked in temperature due to the finite width of the wavelength responses. This degeneracy makes associating observations with specific temperatures very difficult. For example, intensity in the \SI{131}{\angstrom} channel may correspond to very hot, \SI{> e7}{\kelvin} plasma or much cooler, \SI{< e6}{\kelvin} plasma.
+
 \section{The Differential Emission Measure Distribution}\label{sec:dem}
+
+% spell-checker: disable %
+\begin{pycode}[chapter3dem]
+name = 'chapter3'
+ch3_dem = texfigure.Manager(
+    pytex,
+    os.path.join('.', name),
+    number=3,
+    **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
+)
+import hissw
+from run_ebtel import run_ebtel
+\end{pycode}
+% spell-checker: enable %
 
 \autoref{eq:intensity}, the intensity for a transition $\lambda_{ji}$, can be alternatively expressed as,
 \begin{equation}\label{eq:intensity_dem}
@@ -470,16 +568,15 @@ where $\frac{dT_e}{dh}$ is the temperature gradient along the LOS. Qualitatively
 
 \subsection{Determining the DEM from Observations}
 
-% note difficulties involved (ambiguities of integration along LOS as well)
-% summarize various other approaches
-
-The differential emission measure distribution is a useful diagnostic for understanding the temperature distribution of the coronal plasma and, by extension, the underlying energy deposition. However, deriving the $\dem$ from observed spectral line or narrowband intensities is difficult for a number of reasons. \autoref{eq:intensity_dem} is an inhomogeneous Fredholm equation of the first kind,
+Despite being a useful thermal diagnostics, deriving the differential emission measure distribution from observed spectral line or narrowband intensities is very difficult and can yield ambiguous results. \autoref{eq:intensity_dem} is an inhomogeneous Fredholm equation of the first kind,
 \begin{equation}\label{eq:fredholm}
     g(t) = \int_a^b\dd{s}K(t,s)f(s),
 \end{equation}
 where $g(t)$ is some known, measured value, $K(t,s)$ is the kernel, and $f(s)$ is unknown function to be determined \citep{press_numerical_1992}. Comparing with \autoref{eq:intensity_dem}, $s$ and $t$ correspond to the temperature and wavelength or channel, respectively. In principle, solving \autoref{eq:fredholm} to find $f$ requires inverting the kernel matrix provided $K$ is invertible. However, this is complicated by the fact that information about $f$ (or in the case of \autoref{eq:intensity_dem}, $\dem$) is lost when $f$ is ``smoothed'' by the kernel $K$ such that solutions to $f$ derived by inverting $K$ will be extremely sensitive to uncertainties in the input $g$ \citep{press_numerical_1992}. In applied mathematics, there exists a great deal of literature on solution methods for these so-called \textit{inverse problem}, of which \autoref{eq:fredholm} is a prime example.
 
-In solar astrophysics specifically, a great amount of effort has been focused on methods for solving \autoref{eq:intensity_dem} for the $\dem$ ($f$) given a set of observed EUV and/or X-ray intensities ($g$) using contribution functions or detector responses ($K$) derived from atomic data. These methods include, but are not limited to, Gaussian, multi-Gaussian, and spline fits via $\chi^2$-minimization \citep[e.g.][]{warren_observations_2013,ryan_compatibility_2014,caspi_constraining_2014}, Markov Chain Monte Carlo \citep[MCMC,][]{kashyap_markov-chain_1998}, regularized inversion \citep{hannah_differential_2012,plowman_fast_2013}, sparse basis pursuit \citep{cheung_thermal_2015}, and sparse Bayesian inference \citep{warren_sparse_2017}. Many of these methods have been designed to work well with specific observations and, due to the lack of a unique solution to \autoref{eq:intensity_dem}, tend to all give different $\dem$ for the same set of inputs $I$ \citep[see comparison of 15 different methods by][]{aschwanden_benchmark_2015}. 
+In solar astrophysics specifically, a great amount of effort has been focused on methods for solving \autoref{eq:intensity_dem} for the $\dem$ ($f$) given a set of observed EUV and/or X-ray intensities ($g$) using contribution functions or detector responses ($K$) derived from atomic data. These methods include, but are not limited to, Gaussian, multi-Gaussian, and spline fits via $\chi^2$-minimization \citep[e.g.][]{guennou_accuracy_2012,warren_observations_2013,ryan_compatibility_2014,caspi_constraining_2014}, Markov Chain Monte Carlo \citep[MCMC,][]{kashyap_markov-chain_1998}, regularized inversion \citep{hannah_differential_2012,plowman_fast_2013}, sparse basis pursuit \citep{cheung_thermal_2015}, and sparse Bayesian inference \citep{warren_sparse_2017}. Many of these methods have been designed to work well with specific types of observations and, due to the lack of a unique solution to \autoref{eq:intensity_dem}, tend to all give somewhat different $\dem$ for the same set of inputs $I$ \citep[see comparison of 15 different methods by][]{aschwanden_benchmark_2015}.
+
+In addition to the mathematical difficulties, uncertainties in the atomic data (e.g. due to line blends, line misidentification) make interpretions of the $\dem$ even more ambiguous though there has been recent progress in understanding how these uncertainties propagate through to plasma diagnostics \citep[e.g.][]{yu_incorporating_2018,del_zanna_uncertainties_2019}. Additionally, ions in the Li and Na isoelectronic sequences are known to exhibit ``anomalous behavior'' such that when lines of these ions are used to constrain the $\dem$, the intensities are consistently overestimated or underestimated by up to a factor of 5 \citep{burton_w._m._discussion_1971,dupree_analysis_1972,del_zanna_spectroscopic_2002}. It has been suggested that this behavior may be due to departures from ionization equilibrium or non-Maxwellian electron distributions \citep{del_zanna_solar_2018}. Thus, when selecting observed lines to constrain the $\dem$, care should be taken to avoid these anomalous ions as well as those which have a strong density dependence \citep[e.g. Fe IX][]{del_zanna_solar_2018}. Furthermore, several authors \citep{craig_fundamental_1976,judge_failure_1995,judge_fundamental_1997,judge_coronal_2010} have noted that uncertainties in the atomic data and observations combined with the ill-posed nature of \autoref{eq:intensity_dem} prevent a determination of a temperature distribution to within a degree of certainty that is of physical interest.
 
 \subsubsection{Emission Measure Loci}
 
@@ -491,11 +588,117 @@ Given this approximation, one can define a function called the emission measure 
 \begin{equation}\label{eq:em_loci}
     \emd_{\textup{loci}} = \frac{I(\lambda_{ji})}{G_{ji}(T_e)}.
 \end{equation}
-$\emd_{\textup{loci}}$ depends strongly on $T_e$ because of the temperature-dependence of the contribution function, $G_{ji}(T_e)$ (see \autoref{eq:contribution_function}). Note that $\emd[T_c]_{\textup{loci}}=\textup{EM}$. By plotting \autoref{eq:em_loci} as a function of $T_e$ for multiple lines and finding where all of the emission measure loci curves intersect, one can find $T_c$, the temperature of the isothermal plasma and $\textup{EM}$. This is because for $T=T_c$, \autoref{eq:em_loci} should be equal for an isothermal plasma with uniform density. For a multithermal plasma, \autoref{eq:em_loci} still provides an estimate for the upper bound on $\emd$, but the $\emd_{\textup{loci}}$ will not all intersect at a single temperature \citep{phillips_ultraviolet_2008}.
+$\emd_{\textup{loci}}$ depends strongly on $T_e$ because of the temperature-dependence of the contribution function, $G_{ji}(T_e)$ (see \autoref{eq:contribution_function}). Note that $\emd[T_c]_{\textup{loci}}=\textup{EM}$. By plotting \autoref{eq:em_loci} as a function of $T_e$ for multiple lines and finding where all of the emission measure loci curves intersect, one can find $T_c$, the temperature of the isothermal plasma and $\textup{EM}$. This is because for $T=T_c$, the righthand side of \autoref{eq:em_loci} should be equal for an isothermal plasma with uniform density. For a multithermal plasma, \autoref{eq:em_loci} still provides an estimate for the upper bound on $\emd$, but the $\emd_{\textup{loci}}$ will not all intersect at a single temperature \citep{phillips_ultraviolet_2008}.
 
 \subsubsection{Regularized Inversion}
 
-% focus on HK12 method; show example for a single Gaussian DEM with AIA integration
+% summarize HK12 method
+
+Despite the aforementioned difficulties, the differential emission measure distribution is a still a practical diagnostic for understanding how energy is deposited in the coronal plasma. The method of \citet{hannah_differential_2012} allows for efficient detmerination of the $\dem$ from AIA observations by solving \autoref{eq:intensity_dem} through regularized inversion. 
+
+% show example for a single Gaussian DEM with AIA integration
+
+% spell-checker: disable %
+\begin{pycode}[chapter3dem]
+# Create DEM
+T0 = 10**(6.5)*u.K
+sigma = 0.15
+dem_total = 3.76e22*u.cm**(-5)*u.K**(-1)
+T = 10**np.arange(5.5,7.5,0.01)*u.K
+dem_true = dem_total/(np.sqrt(2*np.pi)*sigma)*np.exp(-((np.log10(T.value) - np.log10(T0.value))**2)/(2*sigma**2))
+# Calculate intensities
+aia = InstrumentSDOAIA([0,1]*u.s,None)
+I_true = [(dem_true.value
+           *splev(T.value, c['temperature_response_spline'])
+           *np.gradient(T).value).sum()
+          for c in aia.channels]
+# Run regularized inversion code
+ssw = hissw.ScriptMaker(
+    ssw_packages=['sdo/aia'],
+    ssw_paths=['aia','xrt'],
+    extra_paths=[DEMREG_DIR]
+)
+script = """
+data = {{data}}
+; Calculate errors
+nchannels = n_elements(data)
+data_errors=fltarr(nchannels)
+exptimes = [2.901051,2.901311,2.000197,1.999629,2.901278,2.900791]
+channels = [94,131,171,193,211,335]
+common aia_bp_error_common,common_errtable
+common_errtable=aia_bp_read_error_table('{{ aia_error_table_filename }}')
+for i=0,nchannels-1 do begin
+    data_errors[i]=aia_bp_estimate_error(data[i]*exptimes[i],channels[i],n_sample=1)
+    data_errors[i]=data_errors[i]/exptimes[i]
+endfor
+; Get temperature bins
+response_logt = {{log_temperature}}
+temperature = {{temperature_bin_edges}}
+; Calculate response functions
+response_matrix = {{ response_matrix }}
+; DEM Calculation
+dn2dem_pos_nb,data,data_errors,response_matrix,response_logt,temperature,dem,dem_errors,logt_errors,chi_squared,dn_regularized
+"""
+T_bins = 10**(np.arange(5.5,7.5,0.1))*u.K
+T_bins_centers = (T_bins[1:] + T_bins[:-1])/2.
+K_matrix = np.stack([
+    splev(T_bins_centers.value, c['temperature_response_spline']) for c in aia.channels
+])
+input_args =  {
+    'log_temperature': np.log10(T_bins_centers.value).tolist(),
+    'temperature_bin_edges': T_bins.value.tolist(),
+    'aia_error_table_filename': os.path.join(ssw.ssw_home, 'sdo/aia/response/aia_V2_error_table.txt'),
+    'data': I_true,
+    'response_matrix': K_matrix.tolist(),
+}
+save_vars = ['dem', 'dem_errors', 'logt_errors', 'data_errors']
+reg = ssw.run(script, args=input_args, save_vars=save_vars,verbose=False)
+# Calculate DEM intensities
+I_dem = [(splev(T_bins_centers.value, c['temperature_response_spline'])
+          *reg['dem']
+          *np.diff(T_bins.value)).sum() for c in aia.channels]
+# Plot
+fig = plt.figure(figsize=texfigure.figsize(pytex,scale=1,height_ratio=0.8))
+## true DEM
+ax = plt.subplot2grid((4,1),(0,0),rowspan=3)
+ax.plot(T, dem_true, color='k', alpha=0.5, ls='--',lw=2)
+## EM loci
+for i,c in enumerate(aia.channels):
+    K = splev(T.value,c['temperature_response_spline'])
+    ax.plot(T, I_true[i]/K/np.gradient(T)/4/np.pi, 
+            label=f"{c['name']} " + r'\si{\angstrom}', color=PALETTE[i])
+## regularized DEM
+ax.errorbar(
+    T_bins_centers.value, reg['dem'], 
+    yerr=reg['dem_errors'],
+    xerr=(T_bins_centers.value*(10**(reg['logt_errors']/2) - 1),
+          T_bins_centers.value*(1 - 10**(-reg['logt_errors']/2))),
+    color='k',marker='',ls='')
+## labels and limits
+ax.set_xscale('log')
+ax.set_yscale('log')
+ax.set_ylim(1e19,5e24)
+ax.set_xlim(5e5,2e7)
+ax.set_xlabel(r'$T_e$ $[\si{\kelvin}]$')
+ax.set_ylabel(r'DEM $[\si{\cm\tothe{-5}\kelvin\tothe{-1}}]$')
+ax.legend(frameon=False,ncol=2,loc='lower center')
+## residuals
+ax = plt.subplot2grid((4,1),(3,0),rowspan=1)
+for i,c in enumerate(aia.channels):
+    ax.plot(c['wavelength'].value, (I_true[i] - I_dem[i])/reg['data_errors'][i],
+            marker='o', ls='', color=PALETTE[i])
+## labels and limits
+ax.set_ylim(-10,10)
+ax.axhline(y=0, ls=':', color='k')
+ax.set_xlabel(r'$\lambda$ $[\si{\angstrom}]$')
+ax.set_ylabel('Residuals')
+plt.subplots_adjust(hspace=0.85)
+# Save
+tfig = ch3_dem.save_figure('dem-regularized', fext='.pgf')
+tfig.caption = r'An example of the regularized inversion method of \citet{hannah_differential_2012} for a simple model $\dem$ and simulated AIA observations. The dashed, gray line is the model $\dem$, a single Gaussian pulse centered at \SI{e6.5}{\kelvin}, and the black errorbars in $T_e$ and $\dem$ denote the regularized solution. The colored curves as given in the legend are the emission measure loci curves for each AIA EUV channel. The lower panel shows the residuals between the true and recovered intensities for each channel.'
+\end{pycode}
+\py[chapter3dem]|tfig|
+% spell-checker: enable %
 
 \subsection{The Emission Measure Slope}
 
@@ -581,90 +784,6 @@ A simple example of the cross-correlation is illustrated in \autoref{fig:cross-c
 \end{equation}
 In this example, the time lag between $f_1$ and $f_2$ is $\tau_{12}=\SI{0.5}{\second}$. Note that for $\crosscor[21]$ (i.e. $f_1$ and $f_2$ reversed), the time lag would be $\tau_{21}=\SI{-0.5}{\second}$ as $f_2$ would need to be shifted 0.5 s to the left in order to maximize the similarity between the two signals. Thus, the order of the two signals in \autoref{eq:cross_correlation_final} will determine the sign of the time lag.
 
-\subsection{Temperature Sensitivity of the AIA Passbands}\label{subsec:aia_response}
-
-Before discussing the time lag in the context of AIA observations, it is important to understand the temperature sensitivity of the EUV passbands of the AIA instrument. The AIA instrument onboard the SDO spacecraft is comprised of four dual-channel normal-incidence telescopes which have continuously observed the full Sun (\SI{41}{\arcminute} field of view) since 29 April 2010 at a cadence of \SIrange{10}{12}{\second} and spatial resolution of $\approx\SI{0.6}{\arcsecond}$ per pixel \citep{lemen_atmospheric_2012,boerner_initial_2012}. In addition to two ultraviolet (UV, \SIlist{1600;1700}{\angstrom}) channels and one visible (\SI{4500}{\angstrom}) channel, AIA has seven extreme ultraviolet (EUV) channels: \SIlist{94;131;171;193;211;304;335}{\angstrom}. Unlike the other EUV channels which are primarily sensitive to hot ($T\ge10^{5.8}$ \si{\kelvin}) lines in high ionization states of Fe, the \SI{304}{\angstrom} channel is dominated by the much cooler \SI{303.784}{\angstrom} He II line \citep[see Table 1 of][]{lemen_atmospheric_2012}. This line forms primarily in the chromosphere and is optically-thick, meaning its observed intensity is not well-modeled by \autoref{eq:intensity} and data in the CHIANTI database \citep{boerner_initial_2012,warren_solar_2005}. Because the primary focus of this thesis is the dynamics of hot plasma in \AR s, diagnostics will be limited to the six remaining channels: \SIlist{94;131;171;193;211;335}{\angstrom}. \autoref{tab:aia_channels} summarizes the solar features, dominant Fe ions, and characteristic temperature of each of the channels.
-
-\begin{table}
-    \centering
-    \caption{Primary ions observed by the six AIA EUV channels of interest. Adapted from Table 1 of \citet{lemen_atmospheric_2012}.\label{tab:aia_channels}}
-    \begin{tabularx}{\columnwidth}{cclC}
-        \toprule
-        Channel $[\si{\angstrom}]$ & Primary ion(s) & Solar feature & Characteristic temperature $[\si{\kelvin}]$ \\
-        \midrule
-        94 & Fe XVIII & flaring corona & $10^{6.8}$ \\
-        131 & Fe VIII, XXI & TR, flaring corona & $10^{5.6},10^7$ \\
-        171 & Fe IX & quiet corona, upper TR & $10^{5.8}$ \\
-        193 & Fe XII, XXIV & corona, hot flare plasma & $10^{6.2},10^{7.3}$ \\
-        211 & Fe XIV & active region & $10^{6.3}$ \\
-        335 & Fe XVI & active region & $10^{6.4}$ \\
-        \bottomrule
-    \end{tabularx}
-\end{table}
-
-For any of the aforementioned EUV channels of AIA, the intensity as observed by a particular channel $c$ can be written as,
-\begin{equation}\label{eq:aia_intensity}
-    p_c = \int_\textup{LOS}\dd{h}n_Hn_eK_c(T_e),
-\end{equation}
-where $K_c$ is the temperature response function of channel $c$ and is given by,
-\begin{equation}\label{eq:temperature_response}
-    K_c = \int_0^\infty\dd{\lambda}G(\lambda)R_c(\lambda),
-\end{equation}
-where $G(\lambda)$ is the total contribution function of all ions and $R_c$ is the wavelength response of channel $c$ \citep{boerner_initial_2012}. Note that \autoref{eq:aia_intensity} gives the intensity in units of \si{\dn\per\pixel\per\second} such that $K_c$ has units \si{\dn\per\pixel\per\second\cm\tothe{5}} and $R_c$ has units \si{\cm\squared\dn\per\photon\steradian\per\pixel}. The wavelength response function incorporates all of the properties of the telescope channel, including the geometrical collecting area, the reflectance of the mirrors, the transmission efficiency of the filters, the quantum efficiency of the CCD, and the plate scale \citep[see Section 2 and Table 2 of][]{boerner_initial_2012}. An additional correction is applied to account for the degradation of the instrument over time. The wavelength response functions for the six EUV channels of interest are shown in \autoref{fig:aia-wavelength-response}.
-
-% spell-checker: disable %
-\begin{pycode}[chapter3timelag]
-aia = InstrumentSDOAIA([0,1]*u.s, None)
-fig,axes = plt.subplots(2,3,sharey=True,
-                        figsize=texfigure.figsize(pytex,scale=1,height_ratio=2/3))
-for c,ax in zip(aia.channels, axes.flatten()):
-    wave = np.linspace(c['wavelength'].value-10, c['wavelength'].value+10, 100)*u.angstrom
-    r = splev(wave.value, c['wavelength_response_spline'])
-    ax.plot(wave, r/r.max())
-    ax.set_xlim(c['wavelength'].value-10, c['wavelength'].value+10)
-    ax.text(c['wavelength'].value+4, 0.85, f'{c["wavelength"].value:.0f} '+ r'$\si{\angstrom}$',
-            fontsize=plt.rcParams['legend.fontsize'])
-axes[1,0].set_xlabel(r'$\lambda$ $[\si{\angstrom}]$')
-axes[1,0].set_ylabel(r'$R_c/\max{R_c}$')
-axes[1,0].set_ylim(0,1.05)
-tfig = ch3_timelag.save_figure('aia-wavelength-response', fext='.pgf')
-tfig.caption = r'AIA wavelength response functions for the six primary EUV channels. For each channel, the response function is shown at $\pm\SI{10}{\angstrom}$ of the nominal wavelength. Each response function is normalized to the maximum value of $R_c$ over this interval.'
-\end{pycode}
-\py[chapter3timelag]|tfig|
-% spell-checker: enable %
-
-While $R_c$ is only a function of the properties of the instrument, the temperature sensitivity of each channel, $K_c$ (\autoref{eq:temperature_response}), has an explicit dependence on the atomic data through the total contribution function, $G(\lambda)$. $G(\lambda)$ includes components from both line and continuum emission such that \autoref{eq:temperature_response} can be expressed more practically as,
-\begin{equation}\label{eq:temperature_response_discrete}
-    K_c = \int_0^\infty\dd{\lambda}P_{\textup{cont.}}(\lambda)R_c(\lambda)  + \sum_{\{ji\}}\,\frac{G_{ji}}{hc/\lambda_{ji}}R_c(\lambda_{ji}),
-\end{equation}
-where $P_{\textup{cont.}}$ is the continuum emissivity (see \autoref{sec:continuum}) and $G_{ji}$ is the contribution function for an atomic transition $\lambda_{ji}$ (\autoref{eq:contribution_function}). The sum is taken over $\{ji\}$, the set of all known atomic transitions for the relevant wavelength range of channel $c$. Note that $hc/\lambda_{ji}$ is the energy per photon of wavelength $\lambda_{ji}$ such that $G_{ji}/(hc/\lambda_{ji})$ has units of \si{\photon\cubic\cm\per\second}. The set of relevant atomic transitions, $\{ji\}$, can be obtained from the CHIANTI database such that accurately determining the temperature sensitivity of the passbands depends critically on knowledge of the relevant atomic transitions in the bandpass of each channel.
-
-% spell-checker: disable %
-\begin{pycode}[chapter3timelag]
-fig = plt.figure(figsize=texfigure.figsize(pytex,scale=1,))
-ax = fig.gca()
-T = np.logspace(4,9,1000)*u.K
-for i,c in enumerate(aia.channels):
-    r = splev(T.value,c['temperature_response_spline'])
-    ax.plot(
-        T, r,
-        label=f'{c["wavelength"].value:.0f} '+ r'$\si{\angstrom}$',
-        color=PALETTE[i])
-ax.set_xscale('log')
-ax.set_yscale('log')
-ax.set_xlim(1e5,1e8)
-ax.set_ylim(1e-28,2e-24)
-ax.set_xlabel(r'$T$ $[\si{\kelvin}]$')
-ax.set_ylabel(r'$K_c$ $[\si{\dn\per\pixel\per\second\cm\tothe{5}}]$')
-ax.legend(loc=1,frameon=False,ncol=2)
-tfig = ch3_timelag.save_figure('aia-temperature-response', fext='.pgf')
-tfig.caption = r'Temperature response functions for the six EUV channels of AIA listed in \autoref{tab:aia_channels} as computed by \autoref{eq:temperature_response_discrete}. Together, these six channels provide observational coverage over the temperature range $3\times10^5\lesssim T\lesssim2\times10^7$ \si{\kelvin}.'
-\end{pycode}
-\py[chapter3timelag]|tfig|
-% spell-checker: enable %
-
-The temperature response functions for the EUV channels of AIA are shown in \autoref{fig:aia-temperature-response}. Combined, the six response functions provide temperature coverage over the range $3\times10^5\lesssim T\lesssim2\times10^7$ \si{\kelvin}. Note that several of the response functions, particularly the \SI{94}{\angstrom} and \SI{131}{\angstrom} channels, are double-peaked in temperature due to the finite width of the wavelength responses. This degeneracy makes associating observations with specific temperatures very difficult. For example, intensity in the \SI{131}{\angstrom} channel may correspond to very hot, \SI{> e7}{\kelvin} plasma or much cooler, \SI{< e6}{\kelvin} plasma.
-
 \subsection{Time lag between AIA Channel Pairs}\label{subsec:timelag_aia}
 
 The thermodynamic ambiguity inherent to observations from narrowband imaging instruments like AIA can be partially mediated by computing the cross-correlation (\autoref{eq:cross_correlation_final}) and time lag (\autoref{eq:timelag}) from observations from pairs of channels. Because $\tau_{AB}$ measures the time delay between peaks in different channels and the temperature sensitivity of each channel is approximately known (see \autoref{fig:aia-temperature-response}), the time lag for a channel pair $A,B$ provides a proxy for the loop plasma cooling time between the nominal temperatures of channels $A$ and $B$. For the six channels of interest, there are fifteen possible channel pairs. Recall that changing the order of the channels only changes the sign of the time lag such that $\tau_{AB}=-\tau_{BA}$.
@@ -709,6 +828,7 @@ n = interp1d(res['time'].value, res['density'].value)(t.value)*res['density'].un
 # Plot normalized intensities for each AIA channel
 fig = plt.figure(figsize=texfigure.figsize(pytex,scale=1,height_ratio=1))
 ax = fig.add_subplot(211)
+aia = InstrumentSDOAIA([0,1]*u.s,None)
 intensity = {}
 for i,c in enumerate(aia.channels):
     K = splev(Te.value, c['temperature_response_spline'])

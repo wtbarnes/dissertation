@@ -569,15 +569,15 @@ where $\frac{dT_e}{dh}$ is the temperature gradient along the LOS. Qualitatively
 
 \subsection{Determining the DEM from Observations}
 
-Despite being a useful thermal diagnostics, deriving the differential emission measure distribution from observed spectral line or narrowband intensities is very difficult and can yield ambiguous results. \autoref{eq:intensity_dem} is an inhomogeneous Fredholm equation of the first kind,
+Though a useful thermal diagnostic, deriving the differential emission measure distribution from observed spectral line or narrowband intensities is very difficult and can yield ambiguous results. \autoref{eq:intensity_dem} is an inhomogeneous Fredholm equation of the first kind,
 \begin{equation}\label{eq:fredholm}
     g(t) = \int_a^b\dd{s}K(t,s)f(s),
 \end{equation}
-where $g(t)$ is some known, measured value, $K(t,s)$ is the kernel, and $f(s)$ is unknown function to be determined \citep{press_numerical_1992}. Comparing with \autoref{eq:intensity_dem}, $s$ and $t$ correspond to the temperature and wavelength or channel, respectively. In principle, solving \autoref{eq:fredholm} to find $f$ requires inverting the kernel matrix provided $K$ is invertible. However, this is complicated by the fact that information about $f$ (or in the case of \autoref{eq:intensity_dem}, $\dem$) is lost when $f$ is ``smoothed'' by the kernel $K$ such that solutions to $f$ derived by inverting $K$ will be extremely sensitive to uncertainties in the input $g$ \citep{press_numerical_1992}. In applied mathematics, there exists a great deal of literature on solution methods for these so-called \textit{inverse problem}, of which \autoref{eq:fredholm} is a prime example.
+where $g(t)$ is some measured value, $K(t,s)$ is the kernel, and $f(s)$ is the unknown function to be determined \citep{press_numerical_1992}. Comparing with \autoref{eq:intensity_dem}, $s$ and $t$ correspond to the temperature and wavelength or channel, respectively. In principle, solving \autoref{eq:fredholm} to find $f$ requires inverting the kernel matrix provided $K$ is invertible. However, this is complicated by the fact that information about $f$ (or in the case of \autoref{eq:intensity_dem}, $\dem$) is lost when $f$ is ``smoothed'' by the kernel $K$ such that solutions to $f$ derived by inverting $K$ will be extremely sensitive to uncertainties in the input $g$ \citep{press_numerical_1992}. In applied mathematics, there exists a great deal of literature on solution methods for these so-called \textit{inverse problem}, of which \autoref{eq:fredholm} is a prime example.
 
 In solar astrophysics specifically, a great amount of effort has been focused on methods for solving \autoref{eq:intensity_dem} for the $\dem$ ($f$) given a set of observed EUV and/or X-ray intensities ($g$) using contribution functions or detector responses ($K$) derived from atomic data. These methods include, but are not limited to, Gaussian, multi-Gaussian, and spline fits via $\chi^2$-minimization \citep[e.g.][]{guennou_accuracy_2012,warren_observations_2013,ryan_compatibility_2014,caspi_constraining_2014}, Markov Chain Monte Carlo \citep[MCMC,][]{kashyap_markov-chain_1998}, regularized inversion \citep{hannah_differential_2012,plowman_fast_2013}, sparse basis pursuit \citep{cheung_thermal_2015}, and sparse Bayesian inference \citep{warren_sparse_2017}. Many of these methods have been designed to work well with specific types of observations and, due to the lack of a unique solution to \autoref{eq:intensity_dem}, tend to all give somewhat different $\dem$ for the same set of inputs $I$ \citep[see comparison of 15 different methods by][]{aschwanden_benchmark_2015}.
 
-In addition to the mathematical difficulties, uncertainties in the atomic data (e.g. due to line blends, line misidentification) make interpretions of the $\dem$ even more ambiguous though there has been recent progress in understanding how these uncertainties propagate through to plasma diagnostics \citep[e.g.][]{yu_incorporating_2018,del_zanna_uncertainties_2019}. Additionally, ions in the Li and Na isoelectronic sequences are known to exhibit ``anomalous behavior'' such that when lines of these ions are used to constrain the $\dem$, the intensities are consistently overestimated or underestimated by up to a factor of 5 \citep{burton_w._m._discussion_1971,dupree_analysis_1972,del_zanna_spectroscopic_2002}. It has been suggested that this behavior may be due to departures from ionization equilibrium or non-Maxwellian electron distributions \citep{del_zanna_solar_2018}. Thus, when selecting observed lines to constrain the $\dem$, care should be taken to avoid these anomalous ions as well as those which have a strong density dependence \citep[e.g. Fe IX][]{del_zanna_solar_2018}. Furthermore, several authors \citep{craig_fundamental_1976,judge_failure_1995,judge_fundamental_1997,judge_coronal_2010} have noted that uncertainties in the atomic data and observations combined with the ill-posed nature of \autoref{eq:intensity_dem} prevent a determination of a temperature distribution to within a degree of certainty that is of physical interest.
+In addition to the mathematical difficulties, uncertainties in the atomic data (e.g. due to line blends, line misidentification) make interpreting the $\dem$ even more ambiguous though there has been recent progress in understanding how these uncertainties propagate through to plasma diagnostics \citep[e.g.][]{yu_incorporating_2018,del_zanna_uncertainties_2019}. Additionally, ions in the Li and Na isoelectronic sequences are known to exhibit ``anomalous behavior'' such that when lines of these ions are used to constrain the $\dem$, the intensities are consistently overestimated or underestimated by up to a factor of 5 \citep{burton_w._m._discussion_1971,dupree_analysis_1972,del_zanna_spectroscopic_2002}. It has been suggested that this behavior may be due to departures from ionization equilibrium or non-Maxwellian electron distributions \citep{del_zanna_solar_2018}. Thus, when selecting observed lines to constrain the $\dem$, care should be taken to avoid these anomalous ions as well as those ions whose contribution functions have a strong density dependence \citep[e.g. Fe IX][]{del_zanna_solar_2018}. Furthermore, several authors \citep{craig_fundamental_1976,judge_failure_1995,judge_fundamental_1997,judge_coronal_2010} have noted that uncertainties in the atomic data and observations combined with the ill-posed nature of \autoref{eq:intensity_dem} prevent a determination of a temperature distribution to within a degree of certainty that is of physical interest.
 
 \subsubsection{Emission Measure Loci}
 
@@ -591,13 +591,20 @@ Given this approximation, one can define a function called the emission measure 
 \end{equation}
 $\emd_{\textup{loci}}$ depends strongly on $T_e$ because of the temperature-dependence of the contribution function, $G_{ji}(T_e)$ (see \autoref{eq:contribution_function}). Note that $\emd[T_c]_{\textup{loci}}=\textup{EM}$. By plotting \autoref{eq:em_loci} as a function of $T_e$ for multiple lines and finding where all of the emission measure loci curves intersect, one can find $T_c$, the temperature of the isothermal plasma and $\textup{EM}$. This is because for $T=T_c$, the righthand side of \autoref{eq:em_loci} should be equal for an isothermal plasma with uniform density. For a multithermal plasma, \autoref{eq:em_loci} still provides an estimate for the upper bound on $\emd$, but the $\emd_{\textup{loci}}$ will not all intersect at a single temperature \citep{phillips_ultraviolet_2008}.
 
-\subsubsection{Regularized Inversion}
+\subsubsection{Regularized Inversion}\label{subsubsec:dem_regularized_inversion}
 
-% summarize HK12 method
+Despite the aforementioned difficulties, the differential emission measure distribution is a still a practical diagnostic for understanding how energy is deposited in the coronal plasma. The method developed by \citet{hannah_differential_2012} allows for efficient detmerination of the $\dem$ from AIA observations (or observed spectral line intensities) by solving \autoref{eq:intensity_dem} through \textit{regularized inversion} wherein a smoothing parameter is introduced to guarantee a well-behaved and unique solution to an otherwise ill-posed problem. In the work presented in this thesis, I will compute the differential emission measure distribution from both predicted and observed AIA intensities using the method of \citet{hannah_differential_2012}. I will now describe this approach for computing the $\dem$ and provide an example.
 
-Despite the aforementioned difficulties, the differential emission measure distribution is a still a practical diagnostic for understanding how energy is deposited in the coronal plasma. The method of \citet{hannah_differential_2012} allows for efficient detmerination of the $\dem$ from AIA observations by solving \autoref{eq:intensity_dem} through regularized inversion. 
-
-% show example for a single Gaussian DEM with AIA integration
+Using the notation of \citet{hannah_differential_2012}, \autoref{eq:intensity_dem} can be written in matrix form as,
+\begin{equation}\label{eq:intensity_dem_matrix}
+    \mathbf{g} = \mathbf{K} \bm{\xi} + \delta\mathbf{g},
+\end{equation}
+where $\mathbf{g}$ is a vector of intensities for each EUV channel, $\delta\mathbf{g}$ are the associated uncertainties, $\mathbf{K}$ is the matrix 
+of temperature response functions\footnote{Note that the contribution function has been replaced by the temperature response function in the kernel as $\mathbf{g}$ denotes a narrowband intensity rather than spectral line emission. The temperature response function is effectively the contribution function for the detector channel.} (see \autoref{sec:aia_response}) for each channel as a function of $T_e$, and $\bm{\xi}$ is the differential emission measure as a function of $T_e$. Recovering $\bm{\xi}$ by simply inverting $\mathbf{K}$ is not possible due to noise amplification from the uncertainties in the data $\delta\mathbf{g}$. Additionally, this system may be under-determined if the number of temperature bins is greater than the number of detector channels. One common method for dealing with these difficulties is to add linear constraints to $\bm{\xi}$ in the form of zeroth-order regularization \citep[e.g.][]{tikhonov_solution_1963}. The regularized least squares problem for \autoref{eq:intensity_dem_matrix} then becomes,
+\begin{equation}\label{eq:regularized_least_squares}
+    \textup{minimize} \quad \norm{\tilde{\mathbf{K}}\bm{\xi} - \tilde{\mathbf{g}}} + \lambda\norm{\mathbf{L}(\bm{\xi} - \bm{\xi}_0)},
+\end{equation}
+wher $\tilde{\mathbf{K}}=(\delta\mathbf{g})^{-1}\mathbf{K}$, $\tilde{g}=(\delta\mathbf{g})^{-1}\mathbf{g}$, $\norm{\mathbf{x}}=\sum_ix_i^2$ is the $\ell^2$ norm, $\mathbf{L}$ is the constraint matrix, $\lambda$ is the regularization parameter, and $\bm{\xi}_0$ is the initial guess of the solution. Solutions to \autoref{eq:regularized_least_squares} are unique and well-behaved and can be expressed in terms of $\lambda$. The exact value of $\lambda$ depends on the desired $\chi^2$ of the solution and may need to be ``tweaked'' depending on the input data. An additional constraint may be added to ensure the positivity of $\bm{\xi}$.
 
 % spell-checker: disable %
 \begin{pycode}[chapter3dem]
@@ -690,16 +697,18 @@ for i,c in enumerate(aia.channels):
             marker='o', ls='', color=PALETTE[i])
 ## labels and limits
 ax.set_ylim(-10,10)
-ax.axhline(y=0, ls=':', color='k')
-ax.set_xlabel(r'$\lambda$ $[\si{\angstrom}]$')
+ax.axhline(y=0, ls=':', color='k',lw=1)
+ax.set_xlabel(r'Channel $[\si{\angstrom}]$')
 ax.set_ylabel('Residuals')
 plt.subplots_adjust(hspace=0.85)
 # Save
 tfig = ch3_dem.save_figure('dem-regularized', fext='.pgf')
-tfig.caption = r'An example of the regularized inversion method of \citet{hannah_differential_2012} for a simple model $\dem$ and simulated AIA observations. The dashed, gray line is the model $\dem$, a single Gaussian pulse centered at \SI{e6.5}{\kelvin}, and the black errorbars in $T_e$ and $\dem$ denote the regularized solution. The colored curves as given in the legend are the emission measure loci curves for each AIA EUV channel. The lower panel shows the residuals between the true and recovered intensities for each channel.'
+tfig.caption = r'An example of the regularized inversion method of \citet{hannah_differential_2012} for a simple model $\dem$ and simulated AIA observations. The dashed, gray line is the true $\dem$, a single Gaussian pulse centered at \SI{e6.5}{\kelvin}, and the black errorbars in $T_e$ and $\dem$ denote the regularized solution. The true $\dem$ has a total emission measure of \SI{3.76e22}{\cm\tothe{-5}} and spread of $\sigma=0.15$ in $\log{T_e}$. The colored curves as given in the legend are the emission measure loci curves for each AIA EUV channel. The lower panel shows the residuals between the true and recovered intensities for each channel. Adapted from Figure 3 of \citet{hannah_differential_2012}.'
 \end{pycode}
 \py[chapter3dem]|tfig|
 % spell-checker: enable %
+
+\autoref{fig:dem-regularized} shows a model $\dem$ consisting of a single Gaussian pulse centered on \SI{e6.5}{\kelvin} (dashed gray) and the  regularized solution (black errorbars) as computed from the model AIA intensities using the method of \citet{hannah_differential_2012}\footnote{An  IDL implementation of the regularized inversion method of \citet{hannah_differential_2012} is kindly made publicly available by the authors: \href{https://github.com/ianan/demreg}{github.com/ianan/demreg}}. The emission measure loci curves for each AIA channel are denoted by the colored curves. The lower panel shows the residuals between the true and recovered intensities for each channel. The uncertainties on the model intensities, $\delta\mathbf{g}$, are estimated using the error tables provided by the AIA instrument team in SSW \citep{freeland_data_1998}. Note that the regularized solution and the true $\dem$ deviate most for \SI{> e7}{\kelvin} and \SI{<7e5}{\kelvin}, where the AIA passbands are least sensitive (see \autoref{fig:aia-temperature-response}). The vertical errorbars represent the propagation of the uncertainties in the intensity through the regularized kernel matrix and are computed by taking the standard deviation of multiple Monte Carlo samples of the regularized solution from $\mathbf{g}$ in the range of $\delta\mathbf{g}$. The horizontal errors represent the best possible temperature resolution, or the temperature bias, of the method and will be larger the greater the degree of regularization. The temperature bias will also be worse if the uncertainties on the observed intensities are large.
 
 \subsection{The Emission Measure Slope}
 
@@ -711,7 +720,7 @@ tfig.caption = r'An example of the regularized inversion method of \citet{hannah
 % spell-checker: disable %
 \begin{pycode}[chapter3dem]
 fig,ax = plt.subplots(
-    1,2,figsize=texfigure.figsize(pytex,scale=1,))
+    1,2,figsize=texfigure.figsize(pytex,scale=1, height_ratio=0.5))
 # Configure EBTEL simulation
 Heq = 2e-3
 duration = 200.
@@ -858,7 +867,7 @@ axes[0].set_ylabel(r'$f$ $[\textup{arb. unit}]$')
 axes[0].yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(prune='lower',nbins=6))
 ## Cross-correlation
 axes[1].plot(lag, cc, color=PALETTE[0])
-axes[1].axvline(x=0, ls='--', color='k',lw=1)
+axes[1].axvline(x=0, ls=':', color='k',lw=1)
 axes[1].set_xlabel(r'$\tau$ $[\si{\second}]$')
 axes[1].set_ylabel(r'$\mathcal{C}_{12}$',)
 axes[1].set_xlim(-1,1)
@@ -866,7 +875,7 @@ axes[1].set_ylim(0,1.05)
 axes[1].yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(nbins=6,prune='lower'))
 plt.subplots_adjust(wspace=0.3)
 tfig = ch3_timelag.save_figure('cross-correlation-example', fext='.pgf')
-tfig.caption = r'The left panel shows two Gaussian signals $f_1$ and $f_2$ with peaks at \SI{0.25}{\second} (blue) and \SI{0.75}{\second} (orange), respectively. The right panel shows the cross-correlation $\crosscor[12]$ between $f_1$ and $f_2$ as a function of the offset $\tau$. The dashed black line denotes $\tau=0$ \si{\second}. Note that $\crosscor[12]$ peaks at $\tau=0.5$ \si{\second}, the separation in $t$ between the peaks of $f_1$ and $f_2$.'
+tfig.caption = r'The left panel shows two Gaussian signals $f_1$ and $f_2$ with peaks at \SI{0.25}{\second} (blue) and \SI{0.75}{\second} (orange), respectively. The right panel shows the cross-correlation $\crosscor[12]$ between $f_1$ and $f_2$ as a function of the offset $\tau$. The dotted black line denotes $\tau=0$ \si{\second}. Note that $\crosscor[12]$ peaks at $\tau=0.5$ \si{\second}, the separation in $t$ between the peaks of $f_1$ and $f_2$.'
 \end{pycode}
 \py[chapter3timelag]|tfig|
 % spell-checker: enable %
@@ -956,7 +965,7 @@ for i,(a,b) in enumerate(pairs):
     ax.plot(tl, cc, label=f'{a},{b}', color=PALETTE[i])
     ax.plot(tl[np.argmax(cc)], cc.max(), marker='o', ls='', color=PALETTE[i])
     ax.vlines(tl[np.argmax(cc)].value, -1, cc.max(), linestyles='dotted', lw=1, color=PALETTE[i])
-ax.axvline(x=0,ls='--',color='k',lw=1)
+ax.axvline(x=0,ls=':',color='k',lw=1)
 ax.set_xlim(-2.5e3,2.5e3)
 ax.set_ylim(-0.2,1.05)
 ax.set_xlabel(r'$\tau$ $[\si{\second}]$')
@@ -965,7 +974,7 @@ ax.legend(loc=2,frameon=False,ncol=2)
 plt.subplots_adjust(hspace=0.3)
 # Save
 tfig = ch3_timelag.save_figure('aia-timelags', fext='.pgf')
-tfig.caption = r'\textit{Top panel:} Simulated light curves (normalized to the peak value) for the six EUV channels of AIA (left axis) and electron temperature (black line, right axis) for a loop of half-length \SI{40}{\mega\m} cooling from $\approx\SI{5}{\mega\kelvin}$ to $\approx\SI{0.2}{\mega\kelvin}$. The hydrodynamic evolution of the loop was simulated using the EBTEL model and the six light curves were computed using $T_e$ and $n_e$ from the simulation. \textit{Bottom panel:} Cross-correlation as a function of temporal shift, $\tau$, computed from the light curves shown in the top panel for six selected channel pairs. The dashed, black line indicates a temporal shift of $\tau=\SI{0}{\second}$. The dotted lines and dots at the peak of each curve denote the time lag for that channel pair.'
+tfig.caption = r'\textit{Top panel:} Simulated light curves (normalized to the peak value) for the six EUV channels of AIA (left axis) and electron temperature (black line, right axis) for a loop of half-length \SI{40}{\mega\m} cooling from $\approx\SI{5}{\mega\kelvin}$ to $\approx\SI{0.2}{\mega\kelvin}$. The hydrodynamic evolution of the loop was simulated using the EBTEL model and the six light curves were computed using $T_e$ and $n_e$ from the simulation. \textit{Bottom panel:} Cross-correlation as a function of temporal shift, $\tau$, computed from the light curves shown in the top panel for six selected channel pairs. The dotted black line indicates a temporal shift of $\tau=\SI{0}{\second}$. The dotted lines and dots at the peak of each curve denote the time lag for that channel pair.'
 \end{pycode}
 \py[chapter3timelag]|tfig|
 % spell-checker: enable %
@@ -998,3 +1007,4 @@ Using 24 hours of AIA observations of \AR{} NOAA 11082, \citet{viall_evidence_20
 \nomenclature[z-arcsec]{\si{\arcsecond}}{arcsecond}
 \nomenclature[z-euv]{EUV}{extreme ultraviolet}
 \nomenclature[z-dn]{DN}{digital number, equivalent to counts}
+\nomenclature[z-ssw]{SSW}{SolarSoftware, a suite of IDL tools for analysis of solar data}

@@ -3,32 +3,18 @@
 
 % Figure manager for Chapter 1
 % spell-checker: disable
-\begin{pycode}[chapter1]
-name = 'chapter1'
-ch1 = texfigure.Manager(
-    pytex,
-    os.path.join('.', name),
-    number=1,
-    **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
-)
-\end{pycode}
+%\begin{pycode}[chapter1]
+%name = 'chapter1'
+%ch1 = texfigure.Manager(
+%    pytex,
+%    os.path.join('.', name),
+%    number=1,
+%    **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
+%)
+%\end{pycode}
 % spell-checker: enable
 
-This is the introduction to my PhD thesis. Here is a test plot
-
-% spell-checker: disable
-\begin{pycode}[chapter1]
-fig = plt.figure(figsize=texfigure.figsize(pytex,scale=0.5,height_ratio=1,))
-ax = fig.gca()
-x = np.linspace(-4*np.pi,4*np.pi,1000)
-ax.plot(x,np.sin(x))
-ax.set_xlabel(r'$x$ [Some normal text]')
-ax.set_ylabel(r'$\sin{(x)}$')
-fig_test = ch1.save_figure('test', fext='.pgf')
-fig_test.caption = r'This is a test of TexFigure in my thesis'
-\end{pycode}
-\py[chapter1]|fig_test|
-% spell-checker: enable
+This is the introduction to my PhD thesis.
 
 % Nomenclature
 \nomenclature[z-ar]{AR}{active region}

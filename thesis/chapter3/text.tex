@@ -14,7 +14,7 @@ ch3 = texfigure.Manager(
 \end{pycode}
 % spell-checker: enable %
 
-Diagnosing the properties of the underlying energy deposition in the corona is nontrivial as measurements are limited to remote sensing data from ground- and space-based instruments. Additionally, until the recently launched Parker Solar Probe mission \citep{fox_solar_2016}, \textit{in situ} measurements were limited to the solar wind at 1 AU. Thus, inferring the dynamics and energy budget of the coronal plasma necessitates the use of multiple diagnostics computed from the observed coronal emission at multiple wavelengths. In \autoref{sec:line_formation}, I discuss the physics of the formation of the optically thin solar spectrum. In \autoref{sec:dem}, I give an overview of the differential emission measure distribution (DEM) and discuss how the DEM can be used to understand the frequency of energy deposition in the solar atmosphere. Lastly, in \autoref{sec:timelag}, I discuss the time-lag analysis technique and show how it can be used to visualize large-scale cooling patterns in active regions.
+Diagnosing the properties of the underlying energy deposition in the corona is nontrivial as measurements are limited to remote sensing data from ground- and space-based instruments. Until the recently launched Parker Solar Probe mission \citep{fox_solar_2016}, \textit{in situ} measurements were limited to the solar wind at 1 AU. Thus, inferring the dynamics and energy budget of the coronal plasma necessitates the use of multiple diagnostics computed from the observed coronal emission at multiple wavelengths. In this chapter, I will give an overview of how emission is produced in the corona and what meaningful diagnostics can be derived from observations. First, I will discuss the practical importance of the CHIANTI database in modeling and interpreting solar observations. In \autoref{sec:line_formation} and \autoref{sec:continuum}, I review the physics of the formation of spectral lines and continuum radiation in the corona. \autoref{sec:aia_response} provides a detailed explanation of the temperature sensitivity of the AIA passbands. In the last two sections, I discuss two primary diagnostics for inferring properties of the energy deposition from observations: the differential emission measure distribution (\autoref{sec:dem}) and the timelag (\autoref{sec:timelag}).
 
 \section{The CHIANTI Atomic Database}\label{subsec:chianti}
 
@@ -567,17 +567,170 @@ where $\frac{dT_e}{dh}$ is the temperature gradient along the LOS. Qualitatively
 \end{equation}
 \citep{del_zanna_solar_2018}. For an unresolved point source (e.g. a star other than the Sun), the integration in \autoref{eq:intensity} is often taken over a volume $V$ such that $\dem$ and $\emd$ are defined in terms of $dV$ rather than $dh$. Because of this ambiguity, \autoref{eq:dem} and \autoref{eq:em} are sometimes referred to as the column differential emission measure and column emission measure, respectively.
 
+Because the $\dem$ (and the $\emd$) describes the distribution of emitting material in temperature space, it is a useful diagnostic for understanding the underlying thermodynamics of the coronal plasma. This is best illustrated by example. The left panel of \autoref{fig:em-slope} shows the electron temperature, $T_e$, for a \SI{40}{\mega\m} loop heated by a single nanoflare at $t=\SI{0}{\second}$ (blue) and 10 nanoflares every \SI{300}{\second} (orange) as simulated by the two-fluid EBTEL model (\autoref{sec:ebtel}). In both cases, the duration of each nanoflare is \SI{200}{\second} and the total energy deposited in the loop is \SI{10}{\erg\per\cubic\cm}. In the single-nanoflare case, the loop is rapidly heated to \SI{> 10}{\mega\kelvin}and then allowed to cool, uninterrupted, by thermal conduction and radiation down to its equilibrium temperature, \SI{< 1}{\mega\kelvin}. In contrast, the loop heated by 10 nanoflares is never allowed to cool below \SI{3}{\mega\kelvin} because the time between consecutive nanoflares is longer than the fundamental cooling time of the loop. Additionally, the loop is only heated to a maximum temperature of just over \SI{4}{\mega\kelvin} following each event because the energy of each nanoflare is $1/10$ of the single nanoflare energy. Thus, the loop heated by single nanoflare samples a wide range of temperatures while the loop heated by 10 nanoflares is kept within a very narrow range in $T_e$, centered near \SI{4}{\mega\kelvin}.
+
+The right panel of \autoref{fig:em-slope} shows the corresponding emission measure distributions, $\emd$, for the two loops. Note that compared to $\emd$ for the loop heated by 10 nanoflares, which is narrowly peaked in th range \SIrange{3}{4}{\mega\kelvin}, the $\emd$ for the loop heated by a single nanoflare is very broad because the loop samples a much larger temperature range. Thus, for infrequently (relative to the fundamental loop cooling time) heated loops, a broad $\emd$ is expected while frequently heated loops lead to a more narrow, isothermal $\emd$.
+
+% spell-checker: disable %
+\begin{pycode}[chapter3dem]
+fig,ax = plt.subplots(
+    1,2,figsize=texfigure.figsize(pytex,scale=1, height_ratio=0.5))
+# Configure EBTEL simulation
+Heq = 2e-3
+duration = 200.
+config = {
+    'total_time': 5e3,
+    'tau': 1,
+    'tau_max': 10,
+    'loop_length': 4e9,
+    'saturation_limit': 1,
+    'force_single_fluid': False,
+    'use_c1_loss_correction': True,
+    'use_c1_grav_correction': True,
+    'use_flux_limiting': True,
+    'use_power_law_radiative_losses': True,
+    'calculate_dem': False,
+    'save_terms': False,
+    'use_adaptive_solver': True,
+    'adaptive_solver_error': 1e-10,
+    'adaptive_solver_safety': 0.5,
+    'c1_cond0': 2.0,
+    'c1_rad0': 0.6,
+    'helium_to_hydrogen_ratio': 0.075,
+    'surface_gravity': 1.0,
+    'heating': OrderedDict({
+        'partition': 1.,
+        'background': 3.5e-5,}),
+}
+
+# Single nanoflare
+N = 1
+tn = (config['total_time'] - N*duration)/N
+events = []
+for i in range(N):
+    events.append({'event':{
+        'rise_start': i*(tn + duration),
+        'rise_end': i*(tn + duration) + duration/2,
+        'decay_start': i*(tn + duration) + duration/2,
+        'decay_end': i*(tn + duration) + duration,
+        'magnitude': 2*config['total_time']*Heq/N/duration,}})
+
+config['heating']['events'] = events
+res = run_ebtel(config, EBTEL_DIR)
+ax[0].plot(res['time'], res['electron_temperature'].to(u.MK), color=PALETTE[0])
+bins_T, H = calculate_em(
+    res['time'], res['electron_temperature'], res['density'], config['loop_length'])
+plot_hist(ax[1], H.value, bins_T.value, color=PALETTE[0])
+a, b, T_fit = fit_slope(bins_T, H, T0=1.25e6*u.K, T1=4e6*u.K)
+ax[1].plot(T_fit, b*T_fit**a, color=PALETTE[0], ls='--', label=f'$a={a:.1f}$')
+# Repeated nanoflares
+N = 10
+tn = (config['total_time'] - N*duration)/N
+events = []
+for i in range(N):
+    events.append({'event':{
+        'rise_start': i*(tn + duration),
+        'rise_end': i*(tn + duration) + duration/2,
+        'decay_start': i*(tn + duration) + duration/2,
+        'decay_end': i*(tn + duration) + duration,
+        'magnitude': 2*config['total_time']*Heq/N/duration,}})
+
+config['heating']['events'] = events
+res = run_ebtel(config, EBTEL_DIR)
+ax[0].plot(res['time'], res['electron_temperature'].to(u.MK), color=PALETTE[1])
+bins_T, H = calculate_em(
+    res['time'], res['electron_temperature'], res['density'], config['loop_length'])
+plot_hist(ax[1], H.value, bins_T.value, color=PALETTE[1])
+a, b, T_fit = fit_slope(bins_T, H, T0=1.25e6*u.K, T1=4e6*u.K)
+ax[1].plot(T_fit, b*T_fit**a, color=PALETTE[1], ls='--', label=f'$a={a:.1f}$')
+# Labels and limits
+ax[0].set_xlim(0,5e3)
+ax[0].set_ylim(0.3, 11.5)
+ax[0].set_xlabel(r'$t$ $[\si{\second}]$')
+ax[0].set_ylabel(r'$T_e$ $[\si{\mega\kelvin}]$')
+ax[1].set_xscale('log')
+ax[1].set_yscale('log')
+ax[1].set_ylim(5e25, 2e28)
+ax[1].set_xlim(3e5, 2e7)
+ax[1].set_xlabel(r'$T_e$ $[\si{\kelvin}]$')
+ax[1].set_ylabel(r'EM $[\si{\cm\tothe{-5}}]$')
+ax[1].legend(loc=2, frameon=False)
+plt.subplots_adjust(wspace=0.35)
+# Save
+tfig = ch3_dem.save_figure('em-slope', fext='.pgf')
+tfig.caption = r'\textit{Left panel:} Two-fluid EBTEL simulations of the electron temperature, $T_e$, for a loop heated by a single nanoflare at $t=\SI{0}{\second}$ (blue) and loop heated by 10 nanoflares every \SI{300}{\second} (orange) for a total simulation time of \SI{5e3}{\second}. In both cases, the loop length is \SI{40}{\mega\m}, the duration of each nanoflare is \SI{200}{\second}, and the total energy deposited in the electrons in the loop is \SI{10}{\erg\per\cubic\cm}. \textit{Right panel:} $\emd$ for the two loops shown in the left panel. The dashed lines denote the power-law fit, $T_e^a$, to each distribution over the interval $\SI{1.25}{\mega\kelvin}\le T_e\le\SI{4}{\mega\kelvin}$ and the emission measure slopes are shown in the legend. $\emd$ is approximated by binning $T_{e,i}$, weighted by $n_i^2L$, at each timestep $t_i$ in temperature bins between \SIrange{e4}{e8.5}{\kelvin} with width 0.05 in $\log{T_e}$ and then time-averaging over the whole simulation. Note that both distributions peak at approximately the same temperature.'
+\end{pycode}
+\py[chapter3dem]|tfig|
+% spell-checker: enable %
+
+\subsection{The Emission Measure Slope}\label{sec:em_slope}
+
+\citet{jordan_structure_1975,jordan_structure_1976} found that for $T_e\approx$\SIrange{e5}{e6}{\kelvin}, the observed emission measure distribution could be described by,
+\begin{equation}\label{eq:em_slope}
+    \emd \propto T_e^a,
+\end{equation}
+where $a$ is some constant. This implies $\log{\emd}$ is linear in $\log{T_e}$ over the given temperature range with slope $a$ such that $a$ is often referred to as the \textit{emission measure slope}. \citet{athay_theoretical_1966,jordan_energy_1980} found that a slope of $a=3/2$ was most consistent with observations of the quiet Sun. \citet{cargill_implications_1994} simulated loops heated by nanoflares using a loop cooling model and found that this scaling also held between \SI{e6}{\kelvin} and \SI{e6.4}{\kelvin} with $a\approx4$. Generally speaking, \autoref{eq:em_slope} is applicable for temperatures ``coolward'' of $T_{peak}=\argmax_{T_e}\emd$ down to $\approx\SI{e5}{\kelvin}$.
+
+Using simple scaling laws, one can derive an expression for $a$ for a loop undergoing radiative cooling. The emission measure distribution can be approximated as $\emd\sim n^2\tau_\textup{rad}$ \citep{cargill_implications_1994}, where $\tau_\textup{rad}\sim T_e^{1-\alpha}n^{-1}$ is the radiative cooling time and $\alpha$ controls the temperature-dependence of the radiative loss function (see \autoref{ch:loops}). Assuming $T_e\propto n^{l}$ gives,
+\begin{equation}
+    \emd \propto T_e^{1/l + 1 - \alpha}.
+\end{equation}
+While the empircal result $l\approx2$ of \citet{serio_dynamics_1991,jakimiec_dynamics_1992} is often used, \citet{bradshaw_cooling_2010} showed that accounting for the enthalpy flux during radiative cooling leads to $l\sim1$ for long loops and $l\sim2$ for short loops. Using $\alpha=-1/2$ \citep[from the scaling laws of][see \autoref{sec:scaling_laws}]{rosner_dynamics_1978}, one finds $a=5/2$ for long loops and $a=2$ for short loops. The dashed lines in the right panel of \autoref{fig:em-slope} show \autoref{eq:em_slope} fit over the temperature range $\SI{1.25}{\mega\kelvin}\le T_e\le\SI{4}{\mega\kelvin}$ and the values of the emission measure slope are shown in the legend. Note that $a=2$ for the single nanoflare case as expected from the analytical scaling while $a=12.4$ for the repeating nanoflare case because the loop is never allowed to undergo full radiative cooling before being reheated. 
+
+Many workers have used the emission measure slope to infer properties of the underlying heating from the observed $\emd$. These studies are summarized in \autoref{tab:em_slope}. Notably, \citet{warren_systematic_2012} computed $\emd$ distributions for the cores of 15 different \AR s using spectroscopic observations of 22 different lines from \textit{Hinode}/EIS and narrowband intensities from the \SI{94}{\angstrom} channel of AIA. \citeauthor{warren_systematic_2012} found $2\le a\le 4.8$ and that shallower slopes coincided coincided with lower magnetic flux. Additionally, \citet{cargill_active_2014} systematically addressed the relationship between the frequency of energy deposition and the emission measure slope by computing $a$ for a range of waiting times between consecutive nanoflare events using the EBTEL loop model. \citeauthor{cargill_active_2014} found that $a$ became large ($\gtrsim8$) for very short waiting times, $a\approx2$ for waiting times greater than the characteristic loop cooling time, and that a scaling between the nanoflare energy and the waiting time was needed to reproduce the range of observed slopes. While the emission measure slope is a relatively simple and easily interpretable diagnostic, one should exercise caution when comparing slopes derived from observations to those from models as uncertainties in the atomic data can lead to confidence intervals of at least \numrange{1}{1.3} on $a$ \citep{guennou_can_2013}.
+
+\begin{table}[!h]
+\begin{threeparttable}
+    \centering
+    \caption{Summary of observational and modeling studies that have used the emission measure slope, $a$, as a diagnostic for the underlying energy deposition. The approximate range of observed slopes is $2\lesssim a\lesssim5$. Adapted from Table 3 of \citet{bradshaw_diagnosing_2012}.\label{tab:em_slope}}
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabularx}{\columnwidth}{lcCC}
+        \toprule
+        Reference & Type & Slope ($a$) & Temperature range $[\si{\kelvin}]$ \\
+        \midrule
+        \citet{warren_constraints_2011} & observation & 3.26 & \numrange[range-phrase = --]{e6}{e6.6} \\
+        & model & 2.17 &  \\
+        \citet{winebarger_using_2011} & observation & 3.2 & \numrange[range-phrase = --]{e6}{e6.5} \\
+        \citet{tripathi_emission_2011} & observation & \numrange[range-phrase = --]{2.08}{2.47} & \numrange[range-phrase = --]{e5.5}{e6.55} \\
+        & & \numrange[range-phrase = --]{2.05}{2.7}\tnote{a} & \\
+        \citet{mulu-moore_can_2011} & model\tnote{b} & \numrange[range-phrase = --]{1.6}{2} & $10^6$--$T_{peak}$\tnote{c} \\
+        & & \numrange[range-phrase = --]{2}{2.3} & \\
+        \citet{warren_systematic_2012} & observation & \numrange[range-phrase = --]{1.7}{4.5} & \numrange[range-phrase = --]{e6}{e6.6} \\
+        \citet{schmelz_cold_2012} & observation & \numrange[range-phrase = --]{1.91}{5.17} & $10^6$--$T_{peak}$\tnote{d} \\
+        \citet{bradshaw_diagnosing_2012} & model & \numrange[range-phrase = --]{0.81}{2.56} & $10^6$--$T_{peak}$\tnote{e} \\
+        \citet{reep_diagnosing_2013} & model & \numrange[range-phrase = --]{0.88}{4.56} & $10^6$--$T_{peak}$\tnote{f} \\
+        \citet{cargill_active_2014} & model & \numrange[range-phrase = --]{2}{8} & $T_0$--$10^{6.6}$\tnote{g} \\
+        \citet{del_zanna_evolution_2015} & observation\tnote{h} & $4.4\pm0.4$ & \numrange[range-phrase = --]{e6}{3e6} \\
+        & & $4.6\pm0.4$ & \\
+        \bottomrule
+    \end{tabularx}
+    \begin{tablenotes}
+        \footnotesize
+        \item[a] $\dem$ computed from background-subtracted observations.
+        \item[b] Intensities were modeled using photospheric (first row) and coronal (second row) abundances.
+        \item[c] $T_{peak}$ varied from \SIrange{e6.6}{e6.8}{\kelvin}.
+        \item[d] $T_{peak}$ varied from \SIrange{e6.3}{e6.8}{\kelvin}.
+        \item[e] $T_{peak}$ varied from \SIrange{e5.85}{e7.35}{\kelvin}.
+        \item[f] $T_{peak}$ varied from \SIrange{e6.35}{e6.65}{\kelvin}.
+        \item[g] $a$ is computed for 12 different values of $T_0$ between \numrange[range-phrase = and]{e6}{e6.25} and averaged.
+        \item[h] The slope was computed in every pixel of \AR{} NOAA 11193 once when it first appeared (first row) and then again after one rotation (second row). 
+    \end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The $\emd$ distribution ``hotward'' of $T_{peak}$ provides a potential diagnostic for the nanoflare model \citep{cargill_implications_1994,cargill_nanoflare_2004} and a similar scaling to \autoref{eq:em_slope}, $\emd\propto T_e^{-b}$, is claimed to exist for $T_e>T_{peak}$ \citep[e.g.][]{warren_systematic_2012}. However, the amount of emission in this temperature range is not well constrained by current observations \citep{winebarger_defining_2012}. Furthermore, $b$ is very sensitive to the temperature range over which it is calculated such that it is not a robust diagnostic for characterizing very hot plasma in the $\emd$ \citep{barnes_inference_2016-1}. I will defer discussion of the ``hot'' part of the $\emd$ distribution to \autoref{ch:inferring_hot_plasma}.
+
 \subsection{Determining the DEM from Observations}
 
 Though a useful thermal diagnostic, deriving the differential emission measure distribution from observed spectral line or narrowband intensities is very difficult and can yield ambiguous results. \autoref{eq:intensity_dem} is an inhomogeneous Fredholm equation of the first kind,
 \begin{equation}\label{eq:fredholm}
     g(t) = \int_a^b\dd{s}K(t,s)f(s),
 \end{equation}
-where $g(t)$ is some measured value, $K(t,s)$ is the kernel, and $f(s)$ is the unknown function to be determined \citep{press_numerical_1992}. Comparing with \autoref{eq:intensity_dem}, $s$ and $t$ correspond to the temperature and wavelength or channel, respectively. In principle, solving \autoref{eq:fredholm} to find $f$ requires inverting the kernel matrix provided $K$ is invertible. However, this is complicated by the fact that information about $f$ (or in the case of \autoref{eq:intensity_dem}, $\dem$) is lost when $f$ is ``smoothed'' by the kernel $K$ such that solutions to $f$ derived by inverting $K$ will be extremely sensitive to uncertainties in the input $g$ \citep{press_numerical_1992}. In applied mathematics, there exists a great deal of literature on solution methods for these so-called \textit{inverse problem}, of which \autoref{eq:fredholm} is a prime example.
+where $g(t)$ is some measured value, $K(t,s)$ is the kernel, and $f(s)$ is the unknown function to be determined \citep{press_numerical_1992}. Comparing with \autoref{eq:intensity_dem}, $s$ and $t$ correspond to the temperature and wavelength or channel, respectively. In principle, solving \autoref{eq:fredholm} to find $f$ requires inverting the kernel matrix provided $K$ is invertible. However, this is complicated by the fact that information about $f$ (or in the case of \autoref{eq:intensity_dem}, $\dem$) is lost when $f$ is ``smoothed'' by the kernel $K$ such that solutions to $f$ derived by inverting $K$ will be extremely sensitive to uncertainties in the input $g$ \citep{press_numerical_1992}. In applied mathematics, there exists a great deal of literature on solution methods for these so-called \textit{inverse problems}, of which \autoref{eq:fredholm} is a prime example.
 
 In solar astrophysics specifically, a great amount of effort has been focused on methods for solving \autoref{eq:intensity_dem} for the $\dem$ ($f$) given a set of observed EUV and/or X-ray intensities ($g$) using contribution functions or detector responses ($K$) derived from atomic data. These methods include, but are not limited to, Gaussian, multi-Gaussian, and spline fits via $\chi^2$-minimization \citep[e.g.][]{guennou_accuracy_2012,warren_observations_2013,ryan_compatibility_2014,caspi_constraining_2014}, Markov Chain Monte Carlo \citep[MCMC,][]{kashyap_markov-chain_1998}, regularized inversion \citep{hannah_differential_2012,plowman_fast_2013}, sparse basis pursuit \citep{cheung_thermal_2015}, and sparse Bayesian inference \citep{warren_sparse_2017}. Many of these methods have been designed to work well with specific types of observations and, due to the lack of a unique solution to \autoref{eq:intensity_dem}, tend to all give somewhat different $\dem$ for the same set of inputs $I$ \citep[see comparison of 15 different methods by][]{aschwanden_benchmark_2015}.
 
-In addition to the mathematical difficulties, uncertainties in the atomic data (e.g. due to line blends, line misidentification) make interpreting the $\dem$ even more ambiguous though there has been recent progress in understanding how these uncertainties propagate through to plasma diagnostics \citep[e.g.][]{yu_incorporating_2018,del_zanna_uncertainties_2019}. Additionally, ions in the Li and Na isoelectronic sequences are known to exhibit ``anomalous behavior'' such that when lines of these ions are used to constrain the $\dem$, the intensities are consistently overestimated or underestimated by up to a factor of 5 \citep{burton_w._m._discussion_1971,dupree_analysis_1972,del_zanna_spectroscopic_2002}. It has been suggested that this behavior may be due to departures from ionization equilibrium or non-Maxwellian electron distributions \citep{del_zanna_solar_2018}. Thus, when selecting observed lines to constrain the $\dem$, care should be taken to avoid these anomalous ions as well as those ions whose contribution functions have a strong density dependence \citep[e.g. Fe IX][]{del_zanna_solar_2018}. Furthermore, several authors \citep{craig_fundamental_1976,judge_failure_1995,judge_fundamental_1997,judge_coronal_2010} have noted that uncertainties in the atomic data and observations combined with the ill-posed nature of \autoref{eq:intensity_dem} prevent a determination of a temperature distribution to within a degree of certainty that is of physical interest.
+In addition to the mathematical difficulties, uncertainties in the atomic data (e.g. due to line blends, line misidentification) make interpreting the $\dem$ even more ambiguous though there has been recent progress in understanding how these uncertainties propagate through to plasma diagnostics \citep[e.g.][]{yu_incorporating_2018,del_zanna_uncertainties_2019}. Additionally, ions in the Li and Na isoelectronic sequences are known to exhibit ``anomalous behavior'' such that when lines of these ions are used to constrain the $\dem$, the intensities are consistently overestimated or underestimated by up to a factor of 5 \citep{burton_w._m._discussion_1971,dupree_analysis_1972,del_zanna_spectroscopic_2002}. It has been suggested that this behavior may be due to departures from ionization equilibrium or non-Maxwellian electron distributions \citep{del_zanna_solar_2018}. Thus, when selecting observed lines to constrain the $\dem$, care should be taken to avoid these anomalous ions as well as those ions whose contribution functions have a strong density dependence \citep[e.g. Fe IX][]{del_zanna_solar_2018}. It should be noted that several authors \citep{craig_fundamental_1976,judge_failure_1995,judge_fundamental_1997,judge_coronal_2010} claim the uncertainties in the atomic data and observations combined with the ill-posed nature of \autoref{eq:intensity_dem} prevent a determination of a temperature distribution to within a degree of certainty that is of physical interest.
 
 \subsubsection{Emission Measure Loci}
 
@@ -708,106 +861,7 @@ tfig.caption = r'An example of the regularized inversion method of \citet{hannah
 \py[chapter3dem]|tfig|
 % spell-checker: enable %
 
-\autoref{fig:dem-regularized} shows a model $\dem$ consisting of a single Gaussian pulse centered on \SI{e6.5}{\kelvin} (dashed gray) and the  regularized solution (black errorbars) as computed from the model AIA intensities using the method of \citet{hannah_differential_2012}\footnote{An  IDL implementation of the regularized inversion method of \citet{hannah_differential_2012} is kindly made publicly available by the authors: \href{https://github.com/ianan/demreg}{github.com/ianan/demreg}}. The emission measure loci curves for each AIA channel are denoted by the colored curves. The lower panel shows the residuals between the true and recovered intensities for each channel. The uncertainties on the model intensities, $\delta\mathbf{g}$, are estimated using the error tables provided by the AIA instrument team in SSW \citep{freeland_data_1998}. Note that the regularized solution and the true $\dem$ deviate most for \SI{> e7}{\kelvin} and \SI{<7e5}{\kelvin}, where the AIA passbands are least sensitive (see \autoref{fig:aia-temperature-response}). The vertical errorbars represent the propagation of the uncertainties in the intensity through the regularized kernel matrix and are computed by taking the standard deviation of multiple Monte Carlo samples of the regularized solution from $\mathbf{g}$ in the range of $\delta\mathbf{g}$. The horizontal errors represent the best possible temperature resolution, or the temperature bias, of the method and will be larger the greater the degree of regularization. The temperature bias will also be worse if the uncertainties on the observed intensities are large.
-
-\subsection{The Emission Measure Slope}
-
-% show example for single nanoflare and high-frequency heating, fit slope
-% mention ambiguities raised by Guennou
-% adapt table from Bradshaw et al with updated results
-% discuss hot DEM slope as well; defer most discussion to chapter 4
-
-% spell-checker: disable %
-\begin{pycode}[chapter3dem]
-fig,ax = plt.subplots(
-    1,2,figsize=texfigure.figsize(pytex,scale=1, height_ratio=0.5))
-# Configure EBTEL simulation
-Heq = 2e-3
-duration = 200.
-config = {
-    'total_time': 5e3,
-    'tau': 1,
-    'tau_max': 10,
-    'loop_length': 4e9,
-    'saturation_limit': 1,
-    'force_single_fluid': False,
-    'use_c1_loss_correction': True,
-    'use_c1_grav_correction': True,
-    'use_flux_limiting': True,
-    'use_power_law_radiative_losses': True,
-    'calculate_dem': False,
-    'save_terms': False,
-    'use_adaptive_solver': True,
-    'adaptive_solver_error': 1e-10,
-    'adaptive_solver_safety': 0.5,
-    'c1_cond0': 2.0,
-    'c1_rad0': 0.6,
-    'helium_to_hydrogen_ratio': 0.075,
-    'surface_gravity': 1.0,
-    'heating': OrderedDict({
-        'partition': 1.,
-        'background': 3.5e-5,}),
-}
-
-# Single nanoflare
-N = 1
-tn = (config['total_time'] - N*duration)/N
-events = []
-for i in range(N):
-    events.append({'event':{
-        'rise_start': i*(tn + duration),
-        'rise_end': i*(tn + duration) + duration/2,
-        'decay_start': i*(tn + duration) + duration/2,
-        'decay_end': i*(tn + duration) + duration,
-        'magnitude': 2*config['total_time']*Heq/N/duration,}})
-
-config['heating']['events'] = events
-res = run_ebtel(config, EBTEL_DIR)
-ax[0].plot(res['time'], res['electron_temperature'].to(u.MK), color=PALETTE[0])
-bins_T, H = calculate_em(
-    res['time'], res['electron_temperature'], res['density'], config['loop_length'])
-plot_hist(ax[1], H.value, bins_T.value, color=PALETTE[0])
-a, b, T_fit = fit_slope(bins_T, H, T0=1.25e6*u.K, T1=4e6*u.K)
-ax[1].plot(T_fit, b*T_fit**a, color=PALETTE[0], ls='--', label=f'$a={a:.1f}$')
-# Repeated nanoflares
-N = 10
-tn = (config['total_time'] - N*duration)/N
-events = []
-for i in range(N):
-    events.append({'event':{
-        'rise_start': i*(tn + duration),
-        'rise_end': i*(tn + duration) + duration/2,
-        'decay_start': i*(tn + duration) + duration/2,
-        'decay_end': i*(tn + duration) + duration,
-        'magnitude': 2*config['total_time']*Heq/N/duration,}})
-
-config['heating']['events'] = events
-res = run_ebtel(config, EBTEL_DIR)
-ax[0].plot(res['time'], res['electron_temperature'].to(u.MK), color=PALETTE[1])
-bins_T, H = calculate_em(
-    res['time'], res['electron_temperature'], res['density'], config['loop_length'])
-plot_hist(ax[1], H.value, bins_T.value, color=PALETTE[1])
-a, b, T_fit = fit_slope(bins_T, H, T0=1.25e6*u.K, T1=4e6*u.K)
-ax[1].plot(T_fit, b*T_fit**a, color=PALETTE[1], ls='--', label=f'$a={a:.1f}$')
-# Labels and limits
-ax[0].set_xlim(0,5e3)
-ax[0].set_ylim(0.3, 11.5)
-ax[0].set_xlabel(r'$t$ $[\si{\second}]$')
-ax[0].set_ylabel(r'$T_e$ $[\si{\mega\kelvin}]$')
-ax[1].set_xscale('log')
-ax[1].set_yscale('log')
-ax[1].set_ylim(5e25, 2e28)
-ax[1].set_xlim(3e5, 2e7)
-ax[1].set_xlabel(r'$T_e$ $[\si{\kelvin}]$')
-ax[1].set_ylabel(r'EM $[\si{\cm\tothe{-5}}]$')
-ax[1].legend(loc=2, frameon=False)
-plt.subplots_adjust(wspace=0.35)
-# Save
-tfig = ch3_dem.save_figure('em-slope', fext='.pgf')
-tfig.caption = r'$\emd$ for a loop heated by a single nanoflare.'
-\end{pycode}
-\py[chapter3dem]|tfig|
-% spell-checker: enable %
+\autoref{fig:dem-regularized} shows a model $\dem$ consisting of a single Gaussian pulse centered on \SI{e6.5}{\kelvin} (dashed gray) and the  regularized solution (black errorbars) as computed from the model AIA intensities using the method of \citet{hannah_differential_2012}\footnote{An  IDL implementation of the regularized inversion method of \citet{hannah_differential_2012} is kindly made publicly available by the authors: \href{https://github.com/ianan/demreg}{github.com/ianan/demreg}}. The emission measure loci curves for each AIA channel are denoted by the colored curves. The lower panel shows the residuals between the true and recovered intensities for each channel. The uncertainties on the model intensities, $\delta\mathbf{g}$, are estimated using the error tables provided by the AIA instrument team in SSW \citep{freeland_data_1998}. Note that the regularized solution and the true $\dem$ deviate most for \SI{> e7}{\kelvin} and \SI{<7e5}{\kelvin}, where the AIA passbands are least sensitive (see \autoref{fig:aia-temperature-response}). The vertical errorbars represent the propagation of the uncertainties in the intensity through the regularized kernel matrix and are computed by taking the standard deviation of multiple Monte Carlo samples of the regularized solution from $\mathbf{g}$ in the range of $\delta\mathbf{g}$. The horizontal errors represent the best possible temperature resolution, or the temperature bias, of the method and will be larger the greater the degree of regularization. The temperature bias will also be worse if the uncertainties of the observed intensities are large.
 
 \section{Time-lag Analysis}\label{sec:timelag}
 
@@ -985,7 +1039,6 @@ Note that for a loop which is purely cooling, as is the case in \autoref{fig:aia
 
 Using 24 hours of AIA observations of \AR{} NOAA 11082, \citet{viall_evidence_2012} compute time lags in every pixel of the \AR{} for all fifteen channel pairs. By computing $\tau_{AB}$ in each pixel, they build up a map of the cooling pattern across the entire \AR{} and find persistent positive time lags in all channel pairs, indicative of cooling plasma. \citet{viall_survey_2017} extend this same technique to the catalogue of \AR s compiled by \citet{warren_systematic_2012} and find similar results for all fifteen \AR s. Additionally, \citet{bradshaw_patterns_2016} apply the time lag analysis to a set of forward-modeled AIA intensities for a range of different heating models. In \autoref{ch:modeling_observables} and \autoref{ch:classifying_observables}, I apply the time lag analysis to simulated and observed AIA data and make detailed comparisons between the simulated and real data using a random forest classification model.
 
-\section{Summary}
 
 % Nomenclature
 \nomenclature[z-au]{AU}{astronomical unit}

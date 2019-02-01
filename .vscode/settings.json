@@ -1,5 +1,5 @@
 {   // LaTeX Workshop
-    "latex-workshop.latex.autoBuild.cleanAndRetry.enabled": true,
+    "latex-workshop.latex.autoBuild.cleanAndRetry.enabled": false,
     "latex-workshop.latex.tools": [
         {
             "name": "pdflatex",
@@ -101,10 +101,6 @@
         "*/figures/Chapter*-Figure*",
     ],
     // Spell Checker
-    "cSpell.enabledLanguageIds": [
-        "markdown",
-        "latex"
-    ],
     "python.unitTest.promptToConfigure": false,
     "python.unitTest.pyTestEnabled": false,
     "python.unitTest.unittestEnabled": false,

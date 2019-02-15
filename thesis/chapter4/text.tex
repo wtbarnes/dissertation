@@ -14,13 +14,23 @@ ch4 = texfigure.Manager(
 \end{pycode}
 % spell-checker: enable %
 
-In order to accurately predict observed optically-thin emission from the impulsively-heated coronal plasma, one must properly account for the field-aligned hydrodynamic response to the energy deposition (\autoref{ch:loops}), the detailed atomic physics that produces the radiation (\autoref{ch:diagnostics}), and geometric effects due to the integration along the LOS. During the course of my PhD, I have a developed synthesizAR, a software framework for modeling optically-thin coronal emission from magnetic field extrapolations combined with ensembles of field-aligned hydrynamic models. synthesizAR includes tools for extrapolating the three-dimensional magnetic field from observed LOS magnetograms, configuring input and reading output from field-aligned hydrodynamic simulations, and computing projections for arbitrary viewing angles. synthesizAR is written entirely in the widely-used Python programming language and developed openly on GitHub\footnote{The entire source code, including installation instructions and links to the documentation, can be found at \href{https://github.com/wtbarnes/synthesizAR}{github.com/wtbarnes/synthesizAR}}. The code is fully-documented, including examples, and also includes a test suite that is executed at every code check-in. In this chapter, I give a detailed description of each step of an example workflow using synthesizAR, including working code examples throughout, for a simple dipolar \AR{} in hydrostatic equilibrium.
+In order to accurately predict observed optically-thin emission from the impulsively-heated coronal plasma, one must properly account for the field-aligned hydrodynamic response to the energy deposition (\autoref{ch:loops}), the detailed atomic physics that produces the radiation (\autoref{ch:diagnostics}), and geometric effects due to the integration along the LOS. During the course of my PhD, I have a developed a software framework for modeling optically-thin coronal emission called synthesizAR. synthesizAR includes tools for extrapolating the three-dimensional magnetic field from observed LOS magnetograms, configuring input and reading output from ensembles of field-aligned hydrynamic simulations, and computing projections of the emission along the LOS for arbitrary viewing angles. 
 
-\section{Magnetic Field Geometry}
+synthesizAR is written entirely in the widely-used and open-source Python programming language and developed openly on GitHub\footnote{The entire source code, including installation instructions and links to documentation, can be found at \href{https://github.com/wtbarnes/synthesizAR}{github.com/wtbarnes/synthesizAR}}. The code is fully-documented, including examples, and also includes a test suite that is executed at every code check-in. In this chapter, I give a detailed description of each step of an example workflow using synthesizAR, including working code examples throughout, for a simple dipolar \AR{} in hydrostatic equilibrium. In \autoref{ch:modeling_observables}, I use the synthesizAR code coupled with the two-fluid EBTEL code (see \autoref{sec:ebtel}) to model time-dependent, multi-wavelength emission from an \AR{} for a range of nanoflare heating frequencies.
+
+\section{Building the Magnetic Skeleton}
 
 % Magnetic field extrapolations
-% Tracing strands
-% Loop coordinate systems
+
+The first step in the forward modeling pipeline is to determine the three-dimensional geometry of each magnetic strand in order to construct the magnetic ``skeleton'' of our model \AR{}. As noted in \autoref{ch:loops}, a field-aligned hydrodynamic model only computes the evolution of the plasma along a single thermally-isolated strand such that the three-dimensional position and orientation of the strand relative to the solar surface must be imposed externally.
+
+\subsection{Potential Field Extrapolation}\label{sec:potential_field}
+
+% Schmidt/Sakurai Greens function method
+
+\subsection{Tracing Magnetic Fieldlines}
+
+\subsection{Coordinate Systems for Solar Physics}
 
 \section{Field-aligned Modeling}
 
@@ -34,4 +44,4 @@ In order to accurately predict observed optically-thin emission from the impulsi
 
 \section{Instrument Effects}
 
-\section{Projecting along the Line-of-Sight}
+\subsection{LOS Projection}

@@ -11,6 +11,7 @@ ch4 = texfigure.Manager(
     number=4,
     **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
 )
+from matplotlib.patches import ConnectionPatch
 \end{pycode}
 % spell-checker: enable %
 
@@ -22,9 +23,91 @@ synthesizAR is written entirely in the widely-used and open-source Python progra
 
 % Magnetic field extrapolations
 
-The first step in the forward modeling pipeline is to determine the three-dimensional geometry of each magnetic strand in order to construct the magnetic ``skeleton'' of our model \AR{}. As noted in \autoref{ch:loops}, a field-aligned hydrodynamic model only computes the evolution of the plasma along a single thermally-isolated strand such that the three-dimensional position and orientation of the strand relative to the solar surface must be imposed externally.
+The first step in the forward modeling pipeline is to determine the three-dimensional geometry of each magnetic strand in order to construct the magnetic ``skeleton'' of our model \AR{}. As noted in \autoref{ch:loops}, a field-aligned hydrodynamic model only computes the evolution of the plasma along a single thermally-isolated strand such that the three-dimensional position and orientation of the strand relative to the solar surface must be imposed externally. In this example, I will model the emission from \AR{} NOAA 12733 as observed by SDO/AIA on 2019 January 24. \autoref{fig:noaa12733-magnetogram} shows the LOS magnetogram as observed by SDO/HMI.
+
+% spell-checker: disable %
+\begin{pycode}[chapter4]
+# Load the magnetogram
+magnetogram = Map(
+    os.path.join(ch4.data_dir, 'hmi_m_45s_2019_01_24_14_01_30_tai_magnetogram.fits')
+).rotate(order=3)
+# Define AR FOV
+l_corner = SkyCoord(Tx=-142*u.arcsec,Ty=50*u.arcsec,frame=magnetogram.coordinate_frame)
+r_corner = SkyCoord(Tx=158*u.arcsec,Ty=350*u.arcsec,frame=magnetogram.coordinate_frame)
+
+# Mask the magnetogram off limb
+x, y = np.meshgrid(*[np.arange(v.value) for v in magnetogram.dimensions]) * u.pixel
+hpc_coords = magnetogram.pixel_to_world(x, y)
+r = np.sqrt(hpc_coords.Tx ** 2 + hpc_coords.Ty ** 2) / magnetogram.rsun_obs
+mask = np.ma.masked_greater(r, 1)
+m_big = Map(magnetogram.data, magnetogram.meta, mask=mask.mask)
+
+# Setup figure
+fig = plt.figure(figsize=texfigure.figsize(pytex,scale=1,height_ratio=1.2/2,))
+norm = matplotlib.colors.SymLogNorm(50, vmin=-7.5e2, vmax=7.5e2)
+
+# Plot the first magnetogram
+ax1 = fig.add_subplot(121, projection=m_big)
+m_big.plot(axes=ax1, cmap='better_RdBu_r', norm=norm, annotate=False,)
+lon,lat = ax1.coords[0], ax1.coords[1]
+lon.frame.set_linewidth(0)
+lat.frame.set_linewidth(0)
+lon.set_ticks_visible(False)
+lat.set_ticks_visible(False)
+lon.set_ticklabel_visible(False)
+lat.set_ticklabel_visible(False)
+m_big.draw_rectangle(l_corner, r_corner.Tx-l_corner.Tx, r_corner.Ty-l_corner.Ty, color='k', lw=1)
+m_big.draw_grid(axes=ax1, color='k', alpha=0.25, lw=1)
+
+# Plot the zoomed-in magnetogram
+m_small = magnetogram.submap(l_corner, r_corner)
+ax2 = fig.add_subplot(122, projection=m_small)
+im = m_small.plot(axes=ax2, norm=norm, cmap='better_RdBu_r',annotate=False,)
+lon, lat = ax2.coords[0], ax2.coords[1]
+lon.frame.set_linewidth(1)
+lat.frame.set_linewidth(1)
+lon.set_ticklabel()
+lat.set_ticklabel(rotation='vertical',)
+lon.set_axislabel('Helioprojective Longitude')
+lat.set_axislabel('Helioprojective Latitude')
+lat.set_axislabel_position('r')
+lat.set_ticks_position('r')
+lat.set_ticklabel_position('r')
+
+# Add connectors
+xpix, ypix = m_big.world_to_pixel(r_corner)
+con1 = ConnectionPatch(
+    (0,1), (xpix.value, ypix.value), 'axes fraction', 'data', axesA=ax2, axesB=ax1,
+    arrowstyle='-', color='k', lw=1
+)
+xpix, ypix = m_big.world_to_pixel(SkyCoord(r_corner.Tx, l_corner.Ty, frame=m_big.coordinate_frame))
+con2 = ConnectionPatch(
+    (0,0), (xpix.value,ypix.value), 'axes fraction', 'data', axesA=ax2, axesB=ax1,
+    arrowstyle='-', color='k', lw=1
+)
+ax2.add_artist(con1)
+ax2.add_artist(con2)
+
+# Add colorbar
+pos = ax2.get_position().get_points()
+cax = fig.add_axes([
+    pos[0,0], pos[1,1]+0.01, pos[1,0]-pos[0,0], 0.025
+])
+cbar = fig.colorbar(im, cax=cax, orientation='horizontal')
+cbar.locator = matplotlib.ticker.FixedLocator([-1e2,0,1e2])
+cbar.update_ticks()
+cbar.ax.xaxis.set_ticks_position('top')
+
+# Save figure
+tfig = ch4.save_figure('noaa12733-magnetogram', fext='.pdf')
+tfig.caption = r'LOS magnetogram of NOAA 12733'
+\end{pycode}
+\py[chapter4]|tfig|
+% spell-checker: enable %
 
 \subsection{Potential Field Extrapolation}\label{sec:potential_field}
+
+As discussed in \autoref{sec:field_extrapolation}, a potential field extrapolation provides a reasonable approximation of the lowest energy configuration of the coronal magnetic field and can be computed relatively efficiently given an input LOS photospheric magnetogram as the lower boundary.
 
 % Schmidt/Sakurai Greens function method
 

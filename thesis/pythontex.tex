@@ -45,7 +45,7 @@ texfigure.configure_latex_plots(pytex, font_size=12)
 import numpy as np
 from scipy.interpolate import interp1d, splev
 import matplotlib
-#matplotlib.use('pdf')
+# matplotlib.use('pdf')
 import matplotlib.pyplot as plt
 import matplotlib.colors
 import matplotlib.ticker
@@ -66,6 +66,15 @@ manager_opts = {'python_dir': 'python', 'fig_dir': 'figures', 'data_dir': 'data'
 
 # Define color palette(s)
 PALETTE = seaborn.color_palette('colorblind', 100)
+#  Register colormaps
+seaborn_deep = seaborn.color_palette('deep')
+cmap1 = matplotlib.colors.LinearSegmentedColormap.from_list(
+    'better_RdBu', [seaborn_deep[3], 'w', seaborn_deep[0]]
+)
+matplotlib.cm.register_cmap(name=cmap1.name, cmap=cmap1)
+cmap2 = matplotlib.colors.LinearSegmentedColormap.from_list(
+    'better_RdBu_r', [seaborn_deep[0], 'w', seaborn_deep[3]])
+matplotlib.cm.register_cmap(name=cmap2.name, cmap=cmap2)
 
 # Set location of ebtel++ code
 if 'EBTEL_DIR' not in os.environ:
@@ -86,16 +95,21 @@ plt.rcParams['pgf.preamble'] += [
 	r'\DeclareSIUnit[number-unit-product={}]\pixel{pixel}',
 	r'\DeclareSIUnit[number-unit-product={}]\photon{photon}',
 ]
+plt.rcParams['pgf.rcfonts'] = False
+plt.rcParams['text.latex.preamble'] = [
+	r'\RequirePackage{mathpazo}'
+]
+plt.rcParams['text.latex.preamble'] += plt.rcParams['pgf.preamble']
 plt.rcParams['text.usetex'] = True
 plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = [] # Leave blank to inherit from document
 plt.rcParams['font.sans-serif'] = [] # Leave blank to inherit from document
 plt.rcParams['font.monospace'] = [] # Leave blank to inherit from document
-#plt.rcParams['axes.titlesize'] = 12
-#plt.rcParams['axes.labelsize'] = 12
+plt.rcParams['axes.titlesize'] = 12
+plt.rcParams['axes.labelsize'] = 12
 plt.rcParams['legend.fontsize'] = 10
-#plt.rcParams['xtick.labelsize'] = 10
-#plt.rcParams['ytick.labelsize'] = 10
+plt.rcParams['xtick.labelsize'] = 10
+plt.rcParams['ytick.labelsize'] = 10
 plt.rcParams['xtick.major.pad'] = 3
 plt.rcParams['xtick.minor.pad'] = 3
 plt.rcParams['ytick.major.pad'] = 3

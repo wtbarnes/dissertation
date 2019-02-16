@@ -32,27 +32,26 @@
 % LOS vs vector magnetograms
 % show a synoptic map (GONG) or full-disk (HMI)
 
-\subsection{Field Extrapolation}
+\subsection{Field Extrapolation}\label{sec:field_extrapolation}
 
 % should we introduce MHD equations here?
 
 In general, determining the vector magnetic field in the corona requires solving the coupled, non-linear equations of \textit{magnetohydrodynamics} (MHD),
 \begin{align}
-    \frac{\partial}{\partial t}\rho + \nabla\cdot(\rho\mathbf{v}) &= 0, \label{eq:mhd_continuity} \\
-    \rho\left(\frac{\partial}{\partial t} + \mathbf{v}\cdot\nabla\right)\mathbf{v} &= \frac{1}{c}\mathbf{j}\times\mathbf{B} - \nabla p, \label{eq:mhd_momentum} \\
-    \mathbf{j} &= \frac{c}{4\pi}\nabla\times\mathbf{B}, \label{eq:mhd_ampere} \\
-    \frac{\partial}{\partial t}\mathbf{B} &= -c\nabla\times\mathbf{E}, \label{eq:mhd_faraday} \\
-    \mathbf{E} + \frac{1}{c}\mathbf{v}\times\mathbf{B} &= 0, \label{eq:mhd_ohms} \\
-    \nabla\cdot\mathbf{B} &= 0, \label{eq:mhd_divb} \\
-    \frac{\partial}{\partial t}\left(\frac{p}{\rho^{\gamma}}\right) + \mathbf{v}\cdot\nabla\left(\frac{p}{\rho^{\gamma}}\right) &= 0, \label{eq:mhd_energy}
+    &\frac{d}{dt}\rho + \rho\nabla\cdot\mathbf{v} = 0, \label{eq:mhd_continuity} \\
+    &\rho\frac{d}{dt}\mathbf{v} = \frac{1}{c}\mathbf{j}\times\mathbf{B} - \nabla p, \label{eq:mhd_momentum} \\
+    &\mathbf{j} = \frac{c}{4\pi}\nabla\times\mathbf{B}, \label{eq:mhd_ampere} \\
+    &\frac{\partial}{\partial t}\mathbf{B} = \nabla\times(\mathbf{v}\times\mathbf{B}) + \frac{\eta c^2}{4\pi}\nabla^2\mathbf{B}, \label{eq:mhd_faraday} \\
+    &\nabla\cdot\mathbf{B} = 0, \label{eq:mhd_divb} \\
+    &\frac{\rho^\gamma}{\gamma - 1}\frac{d}{dt}\left(\frac{p}{\rho^{\gamma}}\right) = -\nabla\cdot\mathbf{q} - R + H, \label{eq:mhd_energy}
 \end{align}
-where $\rho$ is the mass density, $\mathbf{v}$ is the bulk flow velocity, $\mathbf{j}$ is the current density, $\mathbf{B}$ is the magnetic field, $p$ is the thermal pressure, $\mathbf{E}$ is the electric field, and $\gamma=5/3$ is the ratio of specific heats. Solving the MHD equations for the time-dependent, vector magnetic field in three-dimensions is an extremely challenging problem that requires sophisticated numerical tools and significant computational resources. However, several methods exist for efficiently approximating the coronal magnetic field given an observation of the photospheric LOS magnetic field.
+where $\rho$ is the mass density, $\mathbf{v}$ is the bulk flow velocity, $\mathbf{j}$ is the current density, $\mathbf{B}$ is the magnetic field, $p$ is the thermal pressure, $\eta$ is the magnetic diffusivity, $\gamma=5/3$ is the ratio of specific heats, $\mathbf{q}$ is the heat flux, $R$ is the radiative loss term, $H$ is heating due to Ohmic and viscous dissipation, and $d/dt\equiv\partial/\partial t + \mathbf{v}\cdot\nabla$ \citep{priest_magnetohydrodynamics_2014}. Solving the MHD equations for the time-dependent, vector magnetic field in three-dimensions is an extremely challenging problem that requires sophisticated numerical tools and significant computational resources. However, several methods exist for efficiently approximating the coronal magnetic field in \textit{magnetohydrostatic equilibrium} given an observation of the photospheric LOS magnetic field.
 
 \textit{Magnetic field extrapolation} is a commonly-used technique for approximating the three-dimensional vector magnetic field in the corona. Following the treatment in \citet[Chapter 3]{priest_magnetohydrodynamics_2014}, \autoref{eq:mhd_momentum}, the ideal MHD momentum equation, in magnetohydrostatic balance can be written as,
 \begin{equation}\label{eq:magnetohydrostatic_balance}
-    0 = \frac{1}{c}\mathbf{j}\times\mathbf{B} - \nabla p,
+    0 = \frac{1}{c}\mathbf{j}\times\mathbf{B} - \nabla p.
 \end{equation}
-where $p$ is the pressure, $\mathbf{j}$ is the current density, and $\mathbf{B}$ is the magnetic field. In a low-$\beta$ plasma where the magnetic pressure dominates over the thermal pressure (see \autoref{ch:loops}), the first term on the right-hand side can often be neglected such that \autoref{eq:magnetohydrostatic_balance} becomes,
+In a low-$\beta$ plasma where the magnetic pressure dominates over the thermal pressure (see \autoref{ch:loops}), the first term on the right-hand side can often be neglected such that \autoref{eq:magnetohydrostatic_balance} becomes,
 \begin{equation}\label{eq:force_free}
     \mathbf{j}\times\mathbf{B} = 0.
 \end{equation}
@@ -64,9 +63,9 @@ where, in general, the scalar $\alpha$ may be some function of position $\mathbf
 
 In the case of $\alpha=0$, $\mathbf{j}=0$ (from \autoref{eq:mhd_ampere}) and the magnetic field is said to be current-free or \textit{potential}. \autoref{eq:ampere_force_free} implies that $\mathbf{B}$ is also curl-free such that it can be expressed as $\mathbf{B}=\nabla\phi$, where $\phi$ is some scalar potential. Combining this expression with the requirement from Maxwell's equations that the magnetic field must always be divergence-free (\autoref{eq:mhd_divb}) gives Laplace's equation,
 \begin{equation}\label{eq:laplace}
-    \nabla^2\phi = 0,
+    \nabla^2\phi = 0.
 \end{equation}
-where $\nabla^2$ is the Laplacian operator. If the normal component of the magnetic field is specified on the lower boundary (e.g. from a photospheric LOS magnetogram), the solution within a closed volume is unique \citep{priest_magnetohydrodynamics_2014}.
+If the normal component of the magnetic field is specified on the lower boundary (e.g. from a photospheric LOS magnetogram), the solution within a closed volume is unique \citep{priest_magnetohydrodynamics_2014}.
 
 Several methods have been developed to solve \autoref{eq:laplace} for the coronal magnetic field. The potential field source surface (PFSS) model of \citet{schatten_model_1969} solves \autoref{eq:laplace} for the global corona given a synoptic photospheric magnetogram as the lower boundary input and under the assumption that the field is purely radial at some ``source surface'', typically $2.5R_{\solar}$. Additionally, the Green's function method of \citet{schmidt_observable_1964} can be used to efficiently determine the potential magnetic field on the scale of a single \AR{} on a Cartesian grid given a LOS magnetogram. \autoref{sec:potential_field} will describe the latter method in detail. While the work presented in this thesis will only make use of photospheric LOS magnetogram data, there exist many techniques for computing field extrapolations from vector magnetograms as well \citep[see review by][]{welsch_deriving_2016}.
 
@@ -86,3 +85,4 @@ The potential field represents the lowest possible energy state of the magnetic 
 \nomenclature[z-tr]{TR}{transition region}
 \nomenclature[z-mhd]{MHD}{magnetohydrodynamics}
 \nomenclature[z-noaa]{NOAA}{National Oceanic and Atmospheric Administration}
+\nomenclature[z-pfss]{PFSS}{potential field source surface}

@@ -42,6 +42,17 @@
 		],
 		"description": "Add PythonTeX Pycode block"
 	},
+	"Add Pyblock block": {
+		"scope": "latex",
+		"prefix": "pyblock-block",
+		"body": [
+			"% spell-checker: disable %",
+			"\\begin{pyblock}[$0][baselinestretch=1,xleftmargin=3em]",
+			"\\end{pyblock}",
+			"% spell-checker: enable %"
+		],
+		"description": "Add PythonTeX Pyblock block for typesetting code"
+	},
 	"Add labeled equation": {
 		"scope": "latex",
 		"prefix": "labeled-equation",

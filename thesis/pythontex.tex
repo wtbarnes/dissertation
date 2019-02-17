@@ -40,7 +40,6 @@ from fractions import Fraction
 
 import texfigure
 pytex.formatter = texfigure.repr_latex_formatter
-texfigure.configure_latex_plots(pytex, font_size=12)
 
 import numpy as np
 from scipy.interpolate import interp1d, splev
@@ -88,36 +87,43 @@ else:
 	DEMREG_DIR = os.environ['DEMREG_DIR']
 
 # Set some plot styling here
-plt.rcParams['pgf.preamble'] = [r'\usepackage{siunitx}']
-plt.rcParams['pgf.preamble'] += [
-	r'\DeclareSIUnit[number-unit-product={}]\erg{erg}',
-	r'\DeclareSIUnit[number-unit-product={}]\dn{DN}',
-	r'\DeclareSIUnit[number-unit-product={}]\pixel{pixel}',
-	r'\DeclareSIUnit[number-unit-product={}]\photon{photon}',
-]
-plt.rcParams['pgf.rcfonts'] = False
-plt.rcParams['text.latex.preamble'] = [
-	r'\RequirePackage{mathpazo}'
-]
-plt.rcParams['text.latex.preamble'] += plt.rcParams['pgf.preamble']
-plt.rcParams['text.usetex'] = True
-plt.rcParams['font.family'] = 'serif'
-plt.rcParams['font.serif'] = [] # Leave blank to inherit from document
-plt.rcParams['font.sans-serif'] = [] # Leave blank to inherit from document
-plt.rcParams['font.monospace'] = [] # Leave blank to inherit from document
-plt.rcParams['axes.titlesize'] = 12
-plt.rcParams['axes.labelsize'] = 12
-plt.rcParams['legend.fontsize'] = 10
-plt.rcParams['xtick.labelsize'] = 10
-plt.rcParams['ytick.labelsize'] = 10
-plt.rcParams['xtick.major.pad'] = 3
-plt.rcParams['xtick.minor.pad'] = 3
-plt.rcParams['ytick.major.pad'] = 3
-plt.rcParams['ytick.minor.pad'] = 3
-plt.rcParams['xtick.direction'] = 'in'
-plt.rcParams['ytick.direction'] = 'in'
-plt.rcParams['savefig.dpi'] = 200
-plt.rcParams['savefig.format'] = 'pdf'
-plt.rcParams['savefig.bbox'] = 'tight'
+rc = {
+	'pgf.preamble': [
+		r'\usepackage{siunitx}',
+		r'\DeclareSIUnit[number-unit-product={}]\erg{erg}',
+		r'\DeclareSIUnit[number-unit-product={}]\dn{DN}',
+		r'\DeclareSIUnit[number-unit-product={}]\pixel{pixel}',
+		r'\DeclareSIUnit[number-unit-product={}]\photon{photon}',
+	],
+	'pgf.rcfonts': False,
+	'text.latex.preamble': [
+		r'\usepackage{mathpazo}',
+		r'\usepackage{siunitx}',
+		r'\DeclareSIUnit[number-unit-product={}]\erg{erg}',
+		r'\DeclareSIUnit[number-unit-product={}]\dn{DN}',
+		r'\DeclareSIUnit[number-unit-product={}]\pixel{pixel}',
+		r'\DeclareSIUnit[number-unit-product={}]\photon{photon}',
+	],
+	'text.usetex': True,
+	'font.family': 'serif',
+	'font.serif': [], # Leave blank to inherit from document
+	'font.sans-serif': [], # Leave blank to inherit from document
+	'font.monospace': [], # Leave blank to inherit from document
+	'axes.titlesize': 12,
+	'axes.labelsize': 12,
+	'legend.fontsize': 10,
+	'xtick.labelsize': 10,
+	'ytick.labelsize': 10,
+	'xtick.major.pad': 3,
+	'xtick.minor.pad': 3,
+	'ytick.major.pad': 3,
+	'ytick.minor.pad': 3,
+	'xtick.direction': 'in',
+	'ytick.direction': 'in',
+	'savefig.dpi': 200,
+	'savefig.format': 'pdf',
+	'savefig.bbox': 'tight',
+}
+texfigure.configure_latex_plots(pytex, font_size=12, **rc)
 
 \end{pythontexcustomcode}

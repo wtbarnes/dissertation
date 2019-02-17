@@ -1,3 +1,6 @@
+### TeXFigure ###
+thesis/*/figures/Chapter*-Figure*
+
 ### LaTeX ###
 ## Core latex/pdflatex auxiliary files:
 *.aux

@@ -17,13 +17,15 @@ from matplotlib.patches import ConnectionPatch
 
 In order to accurately predict observed optically-thin emission from the impulsively-heated coronal plasma, one must properly account for the field-aligned hydrodynamic response to the energy deposition (\autoref{ch:loops}), the detailed atomic physics that produces the radiation (\autoref{ch:diagnostics}), and geometric effects due to the integration along the LOS. During the course of my PhD, I have a developed a software framework for modeling optically-thin coronal emission called synthesizAR. synthesizAR includes tools for extrapolating the three-dimensional magnetic field from observed LOS magnetograms, configuring input and reading output from ensembles of field-aligned hydrynamic simulations, and computing projections of the emission along the LOS for arbitrary viewing angles. 
 
-synthesizAR is written entirely in the widely-used and open-source Python programming language and developed openly on GitHub\footnote{The entire source code, including installation instructions and links to documentation, can be found at \href{https://github.com/wtbarnes/synthesizAR}{github.com/wtbarnes/synthesizAR}}. The code is fully-documented, including examples, and also includes a test suite that is executed at every code check-in. In this chapter, I give a detailed description of each step of an example workflow using synthesizAR, including working code examples throughout, for a simple dipolar \AR{} in hydrostatic equilibrium. In \autoref{ch:modeling_observables}, I use the synthesizAR code coupled with the two-fluid EBTEL code (see \autoref{sec:ebtel}) to model time-dependent, multi-wavelength emission from an \AR{} for a range of nanoflare heating frequencies.
+synthesizAR is written entirely in the widely-used and open-source Python programming language and developed openly on GitHub\footnote{The entire source code, including installation instructions and links to documentation, can be found at \href{https://github.com/wtbarnes/synthesizAR}{github.com/wtbarnes/synthesizAR}}. synthesizAR is built on top of many of the packages in the mature scientific Python ecosystem, including the scipy package \citep{jones_scipy_2001}, NumPy for array computation \citep{oliphant_guide_2006}, and Astropy \citep{the_astropy_collaboration_astropy_2018}. In particular, synthesizAR depends heavily on SunPy \citep{sunpy_community_sunpypython_2015}, a package for data analysis in solar physics, for manipulating imaging data and solar coordinate transformations.
+
+The code is fully-documented, including examples, and also includes a test suite that is executed at every code check-in. In this chapter, I give a detailed description of each step of an example workflow using synthesizAR, including working code examples throughout, for a simple dipolar \AR{} in hydrostatic equilibrium. In \autoref{ch:modeling_observables}, I use the synthesizAR code coupled with the two-fluid EBTEL code (see \autoref{sec:ebtel}) to model time-dependent, multi-wavelength emission from an \AR{} for a range of nanoflare heating frequencies.
 
 \section{Building the Magnetic Skeleton}
 
 % Magnetic field extrapolations
 
-The first step in the forward modeling pipeline is to determine the three-dimensional geometry of each magnetic strand in order to construct the magnetic ``skeleton'' of our model \AR{}. As noted in \autoref{ch:loops}, a field-aligned hydrodynamic model only computes the evolution of the plasma along a single thermally-isolated strand such that the three-dimensional position and orientation of the strand relative to the solar surface must be imposed externally. In this example, I will model the emission from \AR{} NOAA 12733 as observed by SDO/AIA on 2019 January 24. \autoref{fig:noaa12733-magnetogram} shows the LOS magnetogram as observed by SDO/HMI.
+The first step in the forward modeling pipeline is to determine the three-dimensional geometry of each magnetic strand in order to construct the magnetic ``skeleton'' of our model \AR{}. As noted in \autoref{ch:loops}, a field-aligned hydrodynamic model only computes the evolution of the plasma along a single thermally-isolated strand such that the three-dimensional position and orientation of the strand relative to the solar surface must be imposed externally. In this example, I will model the emission from \AR{} NOAA 12733 as observed by SDO/AIA on 2019 January 24. \autoref{fig:noaa12733-magnetogram} shows the LOS magnetogram as observed by SDO/HMI on 2019 January 24 14:00:22 UTC.
 
 % spell-checker: disable %
 \begin{pycode}[chapter4]
@@ -57,19 +59,20 @@ lat.set_ticks_visible(False)
 lon.set_ticklabel_visible(False)
 lat.set_ticklabel_visible(False)
 m_big.draw_rectangle(l_corner, r_corner.Tx-l_corner.Tx, r_corner.Ty-l_corner.Ty, color='k', lw=1)
-m_big.draw_grid(axes=ax1, color='k', alpha=0.25, lw=1)
+m_big.draw_grid(axes=ax1, color='k', alpha=0.25, lw=0.5)
 
 # Plot the zoomed-in magnetogram
 m_small = magnetogram.submap(l_corner, r_corner)
 ax2 = fig.add_subplot(122, projection=m_small)
 im = m_small.plot(axes=ax2, norm=norm, cmap='better_RdBu_r',annotate=False,)
+ax2.grid(alpha=0)
 lon, lat = ax2.coords[0], ax2.coords[1]
 lon.frame.set_linewidth(1)
 lat.frame.set_linewidth(1)
 lon.set_ticklabel()
 lat.set_ticklabel(rotation='vertical',)
-lon.set_axislabel('Helioprojective Longitude')
-lat.set_axislabel('Helioprojective Latitude')
+lon.set_axislabel('Helioprojective Longitude',)
+lat.set_axislabel('Helioprojective Latitude',)
 lat.set_axislabel_position('r')
 lat.set_ticks_position('r')
 lat.set_ticklabel_position('r')
@@ -100,18 +103,123 @@ cbar.ax.xaxis.set_ticks_position('top')
 
 # Save figure
 tfig = ch4.save_figure('noaa12733-magnetogram', fext='.pdf')
-tfig.caption = r'LOS magnetogram of NOAA 12733'
+tfig.caption = r'HMI LOS magnetogram observed on 2019 January 24 14:00:22 UTC. The full-disk observation is shown on the left and the zoomed-in view of NOAA 12733 is shown on the right. In both panels, the colorbar is on a symlog scale from \SI{-750}{\gauss} to \SI{750}{\gauss}. Note that at the time of this observation, the \AR{} was close to the center of the disk.'
 \end{pycode}
 \py[chapter4]|tfig|
 % spell-checker: enable %
 
 \subsection{Potential Field Extrapolation}\label{sec:potential_field}
 
-As discussed in \autoref{sec:field_extrapolation}, a potential field extrapolation provides a reasonable approximation of the lowest energy configuration of the coronal magnetic field and can be computed relatively efficiently given an input LOS photospheric magnetogram as the lower boundary.
+As discussed in \autoref{sec:field_extrapolation}, a potential field extrapolation provides a reasonable approximation of the lowest energy configuration of the coronal magnetic field and can be computed relatively efficiently given an input LOS photospheric magnetogram as the lower boundary. On the scale of a single \AR{}, the curvature of the solar surface can be ignored and  the problem reduces to solving Laplace's equation (\autoref{eq:laplace}) on a Cartesian grid, with the $z$-axis pointed toward the observer, given the boundary conditions,
+\begin{align}\label{eq:potential_bcs}
+    &-\mathbf{n}\cdot\nabla\phi = B_z(x,y,0), \\
+    &\phi(\mathbf{r})\to0\,\textup{as}\,\mathbf{r}\to\infty,
+\end{align}
+where $\mathbf{n}$ is the unit vector in the $z$-direction and $B_z(x,y,0)$ is the $z$-component of the magnetic field at the photosphere given by the observed LOS magnetogram \citep{sakurai_greens_1982}.
 
-% Schmidt/Sakurai Greens function method
+Following the method of \citet{schmidt_observable_1964} as outlined by \citet{sakurai_greens_1982}, the Green's function, $G$, for this problem must satisfy the conditions,
+\begin{align}
+    &\nabla^2G(\mathbf{r},\mathbf{r}^\prime) = 0, \nonumber \\
+    &G(\mathbf{r},\mathbf{r}^\prime) \to 0 \, \textup{as} \, |\mathbf{r}-\mathbf{r}^\prime|\to\infty, \nonumber \\
+    &-\mathbf{n}\cdot\nabla G(\mathbf{r},\mathbf{r}^\prime) = 0, \nonumber
+\end{align} 
+where $\mathbf{r}^\prime=(x^\prime,y^\prime,0)$ is the position on the $z=0$ plane and the gradient is taken with respect to $\mathbf{r}$. Integrating this Green's function over the boundary weighted by the observed field strength gives a solution for $\phi$,
+\begin{equation}\label{eq:bv_solution}
+    \phi(\mathbf{r}) = \int\dd{x^\prime}\dd{y^\prime}B_z(\mathbf{r}^\prime)G(\mathbf{r},\mathbf{r}^\prime),
+\end{equation}
+and the magnetic field is computed trivially from \autoref{eq:b_potential} using a finite-difference scheme. The Green's function in \autoref{eq:bv_solution} has the form,
+\begin{equation}\label{eq:greens}
+    G = \frac{1}{2\pi|\mathbf{r} - \mathbf{r}^\prime|}.
+\end{equation}
+\citet{schmidt_observable_1964} suggest an ``oblique'' correction to $G$ for cases where the \AR{} is far from disk center and $\mathbf{n}$, the surface normal, is not aligned with unit vector pointing toward the observer, $\bm{\ell}$. In this case, the modified Green's function is,
+\begin{equation}\label{eq:greens_oblique}
+    G = \frac{1}{2\pi}\left[\frac{\mathbf{n}\cdot\bm{\ell}}{|\mathbf{r} - \mathbf{r}^\prime|} + \frac{(\bm{\ell}\times(\mathbf{n}\times\bm{\ell}))\cdot\mathbf{R}}{R(R + \bm{\ell}\cdot\mathbf{R})} \right]
+\end{equation}
+where $\mathbf{R}=\mathbf{r} - \mathbf{r}^\prime$. Note that if $\bm{\ell}=\mathbf{n}$, \autoref{eq:greens_oblique} reduces to \autoref{eq:greens}. The second term in \autoref{eq:greens_oblique} corresponds to a line of dipoles extending out to $z\to\infty$ in order to compensate for a reduction in the first term due to the projection of $\mathbf{n}$ on $\bm{\ell}$ \citep{sakurai_greens_1982}.
 
-\subsection{Tracing Magnetic Fieldlines}
+The oblique extrapolation method of \citet{schmidt_observable_1964} is implemented in synthesizAR and can easily be used to compute $\mathbf{B}$ above an \AR{},
+% spell-checker: disable %
+\begin{pycode}[chapter4]
+m_ar = magnetogram.submap(l_corner, r_corner)
+\end{pycode}
+\begin{pyblock}[chapter4][baselinestretch=1,xleftmargin=3em]
+from synthesizAR.extrapolate import PotentialField
+m_ar_resampled = m_ar.resample([50, 50] * u.pixel)
+n_z = 50 * u.pixel
+w_z = 215 * u.Mm
+extrapolator = PotentialField(m_ar_resampled, w_z, n_z)
+B_field = extrapolator.extrapolate()
+\end{pyblock}
+% spell-checker: enable %
+\pyb[chapter4]|m_ar| is a \pyb[chapter4]|Map| object provided by SunPy that includes both the data and associated metadata of the HMI LOS magnetogram cropped to the area around NOAA 12733 as shown in the right panel of \autoref{fig:noaa12733-magnetogram}. The magnetogram is resampled to a lower resolution to reduce the computational cost of the field extrapolation. The method call in the last line computes $\mathbf{B}$ using the Green's function in \autoref{eq:greens_oblique} and the observed magnetogram as $B_z(x,y,0)$ and returns an object containing a $100\times100\times100$ array for each component of $\mathbf{B}$. \autoref{fig:extrapolation-slice} shows a slice along the $y$-axis through the center of the extrapolated volume of $B_x$.
+
+% spell-checker: disable %
+\begin{pycode}[chapter4]
+# Extract yt dataset and grid
+ds = extrapolator.as_yt(B_field)
+sli = ds.slice('y', ds.domain_left_edge[1].value+ds.domain_width[1].value/2)
+frb = sli.to_frb(ds.domain_width[0], ds.domain_dimensions[[0,2]])
+x,z = np.meshgrid(
+    np.linspace(
+        ds.domain_left_edge[0].value,
+        ds.domain_right_edge[0].value,
+        ds.domain_dimensions[0]),
+    np.linspace(
+        ds.domain_left_edge[2].value,
+        ds.domain_right_edge[2].value,
+        ds.domain_dimensions[2])
+)
+x = x*u.cm
+z = z*u.cm
+
+# Setup figure
+fig = plt.figure(figsize=texfigure.figsize(pytex,scale=0.75,height_ratio=0.95,))
+ax = fig.gca()
+# Plot image
+im = ax.pcolormesh(
+    x.to(u.Mm), z.to(u.Mm),
+    np.array(frb['Bx']).T,
+    cmap='better_RdBu_r',
+    norm=matplotlib.colors.SymLogNorm(5,vmin=-7.5e2,vmax=7.5e2)
+)
+# Plot streamlines
+ax.streamplot(
+    x.to(u.Mm).value, z.to(u.Mm).value,
+    np.array(frb['Bx']).T, np.array(frb['Bz']).T,
+    color='k', linewidth=1, density=1, arrowstyle='fancy'
+)
+# Limits and labels
+ax.set_xlim(x.to(u.Mm)[0,:][[0,-1]].value)
+ax.set_ylim(z.to(u.Mm)[:,0][[0,-1]].value)
+ax.set_xlabel(r'$x$ $[\si{\mega\m}]$')
+ax.set_ylabel(r'$z$ $[\si{\mega\m}]$')
+# Colorbar
+pos = ax.get_position().get_points()
+cbar = fig.colorbar(
+    im,
+    fig.add_axes([pos[1,0]+0.01, pos[0,1], 0.03, pos[1,1]-pos[0,1]]),
+    orientation='vertical',
+)
+cbar.locator = matplotlib.ticker.FixedLocator([-1e2, 0, 1e2])
+cbar.update_ticks()
+# Save figure
+tfig = ch4.save_figure('extrapolation-slice', fext='.pdf')
+tfig.caption = r'A slice through the center of the extrapolated volume of $B_x$ along the $y$-axis. The black streamlines indicate the $B_x$ and $B_z$ components of the field at this slice. The colorbar is on a log scale and ranges from \SI{-750 }{\gauss} to \SI{750 }{\gauss}.'
+tfig.figure_width = r'0.75\textwidth'
+\end{pycode}
+\py[chapter4]|tfig|
+% spell-checker: enable %
+
+\subsection{Tracing Magnetic Fieldlines}\label{sec:trace-fieldlines}
+
+Now that the vector magnetic field has been computed from the observed LOS magnetogram, the next step in the pipeline is to trace magnetic fieldlines through the extrapolated volume in order to obtain three-dimensional coordinates for each of the magnetic strands. synthesizAR wraps the low-level streamline tracing capabilities of yt, a Python package for manipulating large, high-dimensional datasets \citep{turk_yt_2011}. This is encapsulated in a method attached to the \py[chapter4]|PotentialField| object instantiated above,
+% spell-checker: disable %
+\begin{pyblock}[chapter4][baselinestretch=1,xleftmargin=3em]
+strands = extrapolator.trace_fieldlines(
+    B_field, 200, loop_length_range=[20,250]*u.Mm)
+\end{pyblock}
+% spell-checker: enable %
+This traces 200 fieldlines through the extrapolated volume and returns a list of three-dimensional coordinates and field strengths along the strand for each of the 200 traced fieldlines. By default, synthesizAR places seed points for the fieldline tracing on the lower boundary in areas of relatively high magnetic field strength though this parameter can be adjusted. Additionally, the strands are filtered by  lengths can be specified (as shown above) and only strands 
 
 \subsection{Coordinate Systems for Solar Physics}
 

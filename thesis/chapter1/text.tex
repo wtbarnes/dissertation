@@ -61,7 +61,11 @@ In a low-$\beta$ plasma where the magnetic pressure dominates over the thermal p
 \end{equation}
 where, in general, the scalar $\alpha$ may be some function of position $\mathbf{r}$.
 
-In the case of $\alpha=0$, $\mathbf{j}=0$ (from \autoref{eq:mhd_ampere}) and the magnetic field is said to be current-free or \textit{potential}. \autoref{eq:ampere_force_free} implies that $\mathbf{B}$ is also curl-free such that it can be expressed as $\mathbf{B}=\nabla\phi$, where $\phi$ is some scalar potential. Combining this expression with the requirement from Maxwell's equations that the magnetic field must always be divergence-free (\autoref{eq:mhd_divb}) gives Laplace's equation,
+In the case of $\alpha=0$, $\mathbf{j}=0$ (from \autoref{eq:mhd_ampere}) and the magnetic field is said to be current-free or \textit{potential}. \autoref{eq:ampere_force_free} implies that $\mathbf{B}$ is also curl-free such that it can be expressed as,
+\begin{equation}\label{eq:b_potential}
+    \mathbf{B}=\nabla\phi,
+\end{equation}
+ where $\phi$ is some scalar potential. Combining this expression with the requirement from Maxwell's equations that the magnetic field must always be divergence-free (\autoref{eq:mhd_divb}) gives Laplace's equation,
 \begin{equation}\label{eq:laplace}
     \nabla^2\phi = 0.
 \end{equation}

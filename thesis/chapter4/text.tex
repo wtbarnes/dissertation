@@ -113,14 +113,14 @@ tfig.caption = r'HMI LOS magnetogram observed on 2019 January 24 14:00:22 UTC. T
 As discussed in \autoref{sec:field_extrapolation}, a potential field extrapolation provides a reasonable approximation of the lowest energy configuration of the coronal magnetic field and can be computed relatively efficiently given an input LOS photospheric magnetogram as the lower boundary. On the scale of a single \AR{}, the curvature of the solar surface can be ignored and  the problem reduces to solving Laplace's equation (\autoref{eq:laplace}) on a Cartesian grid, with the $z$-axis pointed toward the observer, given the boundary conditions,
 \begin{align}\label{eq:potential_bcs}
     &-\mathbf{n}\cdot\nabla\phi = B_z(x,y,0), \\
-    &\phi(\mathbf{r})\to0\,\textup{as}\,\mathbf{r}\to\infty,
+    &\phi(\mathbf{r})\to0 \enspace \textup{as} \enspace \mathbf{r}\to\infty,
 \end{align}
 where $\mathbf{n}$ is the unit vector in the $z$-direction and $B_z(x,y,0)$ is the $z$-component of the magnetic field at the photosphere given by the observed LOS magnetogram \citep{sakurai_greens_1982}.
 
 Following the method of \citet{schmidt_observable_1964} as outlined by \citet{sakurai_greens_1982}, the Green's function, $G$, for this problem must satisfy the conditions,
 \begin{align}
     &\nabla^2G(\mathbf{r},\mathbf{r}^\prime) = 0, \nonumber \\
-    &G(\mathbf{r},\mathbf{r}^\prime) \to 0 \, \textup{as} \, |\mathbf{r}-\mathbf{r}^\prime|\to\infty, \nonumber \\
+    &G(\mathbf{r},\mathbf{r}^\prime) \to 0 \enspace \textup{as} \enspace |\mathbf{r}-\mathbf{r}^\prime|\to\infty, \nonumber \\
     &-\mathbf{n}\cdot\nabla G(\mathbf{r},\mathbf{r}^\prime) = 0, \nonumber
 \end{align} 
 where $\mathbf{r}^\prime=(x^\prime,y^\prime,0)$ is the position on the $z=0$ plane and the gradient is taken with respect to $\mathbf{r}$. Integrating this Green's function over the boundary weighted by the observed field strength gives a solution for $\phi$,
@@ -131,7 +131,7 @@ and the magnetic field is computed trivially from \autoref{eq:b_potential} using
 \begin{equation}\label{eq:greens}
     G = \frac{1}{2\pi|\mathbf{r} - \mathbf{r}^\prime|}.
 \end{equation}
-\citet{schmidt_observable_1964} suggest an ``oblique'' correction to $G$ for cases where the \AR{} is far from disk center and $\mathbf{n}$, the surface normal, is not aligned with unit vector pointing toward the observer, $\bm{\ell}$. In this case, the modified Green's function is,
+\citet{schmidt_observable_1964} suggest an ``oblique'' correction to $G$ for cases where the \AR{} is far from disk center and $\mathbf{n}$, the surface normal, is not aligned with the unit vector pointing toward the observer, $\bm{\ell}$. In this case, the modified Green's function is,
 \begin{equation}\label{eq:greens_oblique}
     G = \frac{1}{2\pi}\left[\frac{\mathbf{n}\cdot\bm{\ell}}{|\mathbf{r} - \mathbf{r}^\prime|} + \frac{(\bm{\ell}\times(\mathbf{n}\times\bm{\ell}))\cdot\mathbf{R}}{R(R + \bm{\ell}\cdot\mathbf{R})} \right]
 \end{equation}
@@ -144,8 +144,8 @@ m_ar = magnetogram.submap(l_corner, r_corner)
 \end{pycode}
 \begin{pyblock}[chapter4][baselinestretch=1,xleftmargin=3em]
 from synthesizAR.extrapolate import PotentialField
-m_ar_resampled = m_ar.resample([50, 50] * u.pixel)
-n_z = 50 * u.pixel
+m_ar_resampled = m_ar.resample([100, 100] * u.pixel)
+n_z = 100 * u.pixel
 w_z = 215 * u.Mm
 extrapolator = PotentialField(m_ar_resampled, w_z, n_z)
 B_field = extrapolator.extrapolate()
@@ -212,16 +212,57 @@ tfig.figure_width = r'0.75\textwidth'
 
 \subsection{Tracing Magnetic Fieldlines}\label{sec:trace-fieldlines}
 
-Now that the vector magnetic field has been computed from the observed LOS magnetogram, the next step in the pipeline is to trace magnetic fieldlines through the extrapolated volume in order to obtain three-dimensional coordinates for each of the magnetic strands. synthesizAR wraps the low-level streamline tracing capabilities of yt, a Python package for manipulating large, high-dimensional datasets \citep{turk_yt_2011}. This is encapsulated in a method attached to the \py[chapter4]|PotentialField| object instantiated above,
+Now that the vector magnetic field has been computed from the observed LOS magnetogram, the next step in the pipeline is to trace magnetic fieldlines through the extrapolated volume in order to obtain three-dimensional coordinates for each of the magnetic strands. synthesizAR wraps the low-level streamline tracing capabilities of yt, a Python package for manipulating large, high-dimensional datasets \citep{turk_yt_2011}. This is encapsulated in a method attached to the \pyv{PotentialField} object instantiated above,
 % spell-checker: disable %
 \begin{pyblock}[chapter4][baselinestretch=1,xleftmargin=3em]
 strands = extrapolator.trace_fieldlines(
     B_field, 200, loop_length_range=[20,250]*u.Mm)
 \end{pyblock}
 % spell-checker: enable %
-This traces 200 fieldlines through the extrapolated volume and returns a list of three-dimensional coordinates and field strengths along the strand for each of the 200 traced fieldlines. By default, synthesizAR places seed points for the fieldline tracing on the lower boundary in areas of relatively high magnetic field strength though this parameter can be adjusted. Additionally, the strands are filtered by  lengths can be specified (as shown above) and only strands 
+This traces 200 fieldlines through the extrapolated volume and returns a list of field strengths and three-dimensional coordinates along the strand for each of the 200 traced fieldlines. By default, synthesizAR places seed points for the fieldline tracing on the lower boundary in areas of relatively high magnetic field strength though this parameter can be adjusted. Additionally, only strands whose footpoints are both connected to the surface (closed field) and whose loop lengths fall within the specified range (as shown above) are kept.
 
-\subsection{Coordinate Systems for Solar Physics}
+The last step is to create the magnetic ``skeleton'' object from the traced fieldlines,
+% spell-checker: disable %
+\begin{pyblock}[chapter4][baselinestretch=1,xleftmargin=3em]
+from synthesizAR import Field
+noaa12733 = Field(m_ar_resampled, strands)
+\end{pyblock}
+% spell-checker: enable %
+The \pyv{Field} object holds all of the information about each of the magnetic strands. When the \pyv{Field} object is created, a \pyv{Loop} object is created for each strand. These are accessible through the \pyv{.loops} attribute on the \pyv{Field} object. Each \pyv{Loop} object holds several attributes related to the properties of that strand
+% spell-checker: disable %
+\begin{pyblock}[chapter4][baselinestretch=1,xleftmargin=3em]
+noaa12733.loops  # list of all strands
+noaa12733.loops[0]  # access the first strand
+noaa12733.loops[0].coordinates  # access the 3D positions
+noaa12733.loops[0].full_length  # footpoint-to-footpoint length
+noaa12733.loops[0].field_strength  # |B| along the streamline
+\end{pyblock}
+% spell-checker: enable %
+This construction provides an intuitive interface for investigating the properties of the \AR{}. \autoref{fig:magnetogram-with-strands} shows all 200 strands traced from the extrapolated volume overlaid on the observed magnetogram of NOAA 12733. 
+
+% spell-checker: disable %
+\begin{pycode}[chapter4]
+fig = plt.figure(figsize=texfigure.figsize(pytex,scale=0.65,height_ratio=1,))
+ax = fig.gca(projection=m_ar)
+m_ar.plot(axes=ax, annotate=False, cmap='better_RdBu_r',
+          norm=matplotlib.colors.SymLogNorm(50, vmin=-7.5e2, vmax=7.5e2))
+ax.grid(alpha=0)
+lon,lat = ax.coords[0], ax.coords[1]
+lon.set_axislabel('Helioprojective Longitude')
+lat.set_axislabel('Helioprojective Latitude')
+for l in noaa12733.loops:
+    coord = l.coordinates.transform_to(m_ar.coordinate_frame)
+    ax.plot_coord(coord, ls='-', lw=1, color='k', alpha=0.5)
+tfig = ch4.save_figure('magnetogram-with-strands', fext='.pdf')
+tfig.caption = r'LOS magnetogram of NOAA 12733 as observed by SDO/HMI. All 200 traced fieldlines are overlaid in black.'
+tfig.figure_width = r'0.65\textwidth'
+\end{pycode}
+\py[chapter4]|tfig|
+% spell-checker: enable %
+
+\subsection{Coordinate Systems in Solar Physics}\label{sec:coordinates}
+
+The coordinates of each strand are stored as Astropy \pyv{SkyCoord} objects. A \pyv{SkyCoord} stores the numerical value of the coordinate as well as the frame of reference in which the coordinate is defined, making it simple to represent the position of the strands in different coordinate systems.
 
 \section{Field-aligned Modeling}
 

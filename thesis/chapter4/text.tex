@@ -260,9 +260,108 @@ tfig.figure_width = r'0.65\textwidth'
 \py[chapter4]|tfig|
 % spell-checker: enable %
 
-\subsection{Coordinate Systems in Solar Physics}\label{sec:coordinates}
+\subsection{Aside: Coordinate Systems in Solar Physics}\label{sec:coordinates}
 
-The coordinates of each strand are stored as Astropy \pyv{SkyCoord} objects. A \pyv{SkyCoord} stores the numerical value of the coordinate as well as the frame of reference in which the coordinate is defined, making it simple to represent the position of the strands in different coordinate systems.
+The extrapolated magnetic field is represented in a Cartesian coordinate system where the origin is at the center of the \AR{}, the $z$-axis is normal to the surface, and the $y$-axis points toward solar north. The coordinates in this local \AR{} frame can be defined in terms of the Heliocentric Earth equatorial (HEEQ) Cartesian coordinate system of \citet{hapgood_space_1992},
+\begin{equation}\label{eq:local_heeq_transform}
+    \begin{pmatrix}x_\textup{HEEQ} \\ y_\textup{HEEQ} \\ z_\textup{HEEQ}\end{pmatrix}
+    = \mathbf{R}_z(\Phi_\textup{AR})\mathbf{R}_y(-\Theta_\textup{AR})
+    \begin{pmatrix}z_\textup{local} \\ x_\textup{local} \\ y_\textup{local}\end{pmatrix},
+\end{equation}
+where $x_\textup{local}$, $y_\textup{local}$, $z_\textup{local}$ are the coordinates in the local \AR{} frame, $x_\textup{HEEQ}$, $y_\textup{HEEQ}$, $z_\textup{HEEQ}$ are the coordinates in the HEEQ frame, $\mathbf{R}_{y,z}$ are the rotation matrices about the $y$ and $z$ axes, and $\Phi_\textup{AR}$ and $\Theta_\textup{AR}$ are the longitude and latitude of the center of the \AR{}, respectively.
+
+The HEEQ Cartesian coordinate system is defined such that the $z$-axis is the solar rotation axis and increases towards solar north, and the $x$-axis points from the center of the Sun to the intersection between the solar equator and the central meridian as seen from Earth. The longitude and latitude in \autoref{eq:local_heeq_transform} are defined in the Stonyhurst heliographic (HGS) coordinate system which can be defined in HEEQ coordinates as,
+\begin{align}\label{eq:heeq_hgs_transform}
+    r &= \sqrt{x^2_\textup{HEEQ} + y^2_\textup{HEEQ} + z^2_\textup{HEEQ}}, \\
+    \Theta &= \arctan{\left(\frac{z_\textup{HEEQ}}{\sqrt{x^2_\textup{HEEQ} + y^2_\textup{HEEQ}}}\right)}, \\
+    \Phi &= \arctan{\left(\frac{y_\textup{HEEQ}}{x_\textup{HEEQ}}\right)},
+\end{align}
+where $r$ is the radial distance, measured in units of physical distance, from the center of the Sun and $\Phi$ and $\Theta$ are the angles of longitude and latitude, respectively, as measured from origin \citep{thompson_coordinate_2006}. Note that both the HEEQ and HGS coordinate systems are defined such that they remained fixed with respect to the Earth.
+
+% spell-checker: disable %
+\begin{pycode}[chapter4]
+data = np.zeros((10, 10))
+lon, lat = 0*u.deg, 0*u.deg
+time_now = astropy.time.Time.now()
+meta = {
+    'ctype1': 'HPLN-TAN',
+    'ctype2': 'HPLT-TAN',
+    'cunit1': 'arcsec',
+    'cunit2': 'arcsec',
+    'crpix1': (data.shape[0] + 1)/2.,
+    'crpix2': (data.shape[1] + 1)/2.,
+    'cdelt1': 1.0,
+    'cdelt2': 1.0,
+    'crval1': 0.0,
+    'crval2': 0.0,
+    'hgln_obs': lon.to(u.deg).value,
+    'hglt_obs': lat.to(u.deg).value,
+    'dsun_obs': const.au.to(u.m).value,
+    'dsun_ref': const.au.to(u.m).value,
+    'rsun_ref': const.R_sun.to(u.m).value,
+    'rsun_obs': ((const.R_sun/const.au).decompose()*u.radian).to(u.arcsec).value,
+    't_obs': time_now.iso,
+    'date-obs': time_now.iso,
+}
+dummy_map = GenericMap(data, meta)
+# Plot coordinates
+fig = plt.figure(figsize=texfigure.figsize(pytex,scale=0.65,height_ratio=1,))
+ax = fig.gca(projection=dummy_map)
+dummy_map.plot(alpha=0, axes=ax, annotate=False)
+ax.plot_coord(
+    SkyCoord(*[-1000,-1000]*u.arcsec, frame=dummy_map.coordinate_frame),
+    color='w',alpha=0,
+)
+ax.plot_coord(
+    SkyCoord(*[1000,1000]*u.arcsec, frame=dummy_map.coordinate_frame),
+    color='w',alpha=0,
+)
+lon,lat = ax.coords[0],ax.coords[1]
+lon.grid(color='k', alpha=0.75, linestyle='solid', lw=1)
+lat.grid(color='k', alpha=0.75, linestyle='solid', lw=1)
+lon.frame.set_linewidth(0)
+lat.frame.set_linewidth(0)
+dummy_map.draw_grid(axes=ax, grid_spacing=10*u.deg, color=PALETTE[0], lw=1.5, alpha=0.35)
+lon.set_ticks_visible(False)
+lat.set_ticks_visible(False)
+lon.set_ticks(spacing=250*u.arcsec)
+lat.set_ticks(spacing=250*u.arcsec)
+lon.set_ticklabel_visible(False)
+lat.set_ticklabel_visible(False)
+# Save figure
+tfig = ch4.save_figure('hpc-hgs-grid', fext='.pdf')
+tfig.caption = r'Helioprojective coordinate system (black) overlaid on a Stonyhurst heliographic coordinate system (blue) as viewed by an observer at $(\SI{0}{\degree},\SI{0}{\degree},\num{1}\,\textup{AU})$. The spacing between the lines of HGS longitude and latitude is \SI{10}{\degree} and the spacing between the lines of HPC longitude and latitude is \SI{250}{\arcsecond}.'
+tfig.figure_width = r'0.65\textwidth'
+\end{pycode}
+\py[chapter4]|tfig|
+% spell-checker: enable %
+
+Though the HGS frame provides an intuitive way for representing coordinates on the Sun, real data represent projections of the Sun on the celestial sphere such that the data must be represented in a \textit{projected} coordinate system defined by the position of the observer (e.g. a satellite, Earth). Following \citet{thompson_coordinate_2006}, the helioprojective (HPC) coordinate system is defined in terms of the longitude and latitude on the celestial sphere centered on the Sun-observer line. The transformation between the HPC frame and the heliocentric cartesian (HCC) coordinate frame is given by,
+\begin{align}\label{eq:hcc_hpc_transform}
+    &d = \sqrt{x^2 + y^2  + (D_{\solar} - z)^2}, \\
+    &\theta_x = \arctan{\left(\frac{x}{D_{\solar} - z}\right)}, \\
+    &\theta_y = \arcsin{\left(\frac{y}{d}\right)},
+\end{align}
+where $d$ is the radial distance from the observer, $D_{\solar}$ is the distance between the observer and the center of the Sun, and $x,y,z$ are the coordinates in the HCC frame. The $z$-axis of the HCC frame is oriented along the Sun-observer line and the $y$-axis points toward solar north. The transformation between the HGS and HCC frame is given by,
+\begin{align}\label{eq:hgs_hcc_transform}
+    &x = r\cos{\Theta}\sin{(\Phi - \Phi_0)}, \\
+    &y = r\left( \sin{\Theta}\cos{B_0} - \cos{\Theta}\cos{(\Phi - \Phi_0)}\sin{B_0} \right), \\
+    &z = r\left( \sin{\Theta}\sin{B_0} + \cos{\Theta}\cos{(\Phi - \Phi_0)}\cos{B_0} \right),
+\end{align}
+where $\Phi_0$ and $B_0$ are the HGS longitude and latitude of the observer. Note that unlike the HGS frame, the HPC and HCC frames are defined in terms of an observer at a particular location. \autoref{fig:hpc-hgs-grid} shows a comparison between the HGS frame and a HPC frame defined by an observer at $\Phi=\SI{0}{\degree}$, $\Theta=\SI{0}{\degree}$, and distance of \num{1} AU. 
+
+After the fieldlines are traced through the extrapolated volume, synthesizAR transforms the coordinates of each strand to HEEQ coordinates (using \autoref{eq:local_heeq_transform}) and returns an Astropy \pyv{SkyCoord} objects. These are stored in the \pyv{.coordinates} attributed of each \pyv{Loop} object in the magnetic skeleton. A \pyv{SkyCoord} object stores the numerical values of the coordinates as well as the frame of reference in which the coordinates are defined such that coordinates can easily be represented different frames. SunPy provides representations of and transformations between many of the common solar coordinate systems as described by \citet{thompson_coordinate_2006}. For example, to define a point \pyv{p} on the surface of the Sun at \SI{20}{\degree} longitude and \SI{20}{\degree} latitude and then transform it to a HPC coordinate system defined by an observer on Earth,
+% spell-checker: disable %
+\begin{pyblock}[][baselinestretch=1,xleftmargin=3em]
+from sunpy.coordinates import Helioprojective
+p = SkyCoord(lon=20*u.deg, lat=20*u.deg, radius=const.R_sun,
+             frame='heliographic_stonyhurst')
+hpc_frame = Helioprojective(
+    observer='Earth', obstime=astropy.time.Time.now())
+p_hpc = p.transform_to(hpc_frame)
+\end{pyblock}
+% spell-checker: enable %
+Representing the coordinates of each strand in this way makes it simple to compute projections of the magnetic skeleton for any viewing angle. For example, in \autoref{fig:magnetogram-with-strands}, the coordinates of each strand are transformed to a HPC coordinate system defined by an observer at the position of the SDO spacecraft on 2019 January 24 14:00:22 UTC.
 
 \section{Field-aligned Modeling}
 

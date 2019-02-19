@@ -99,6 +99,7 @@
         "*.pytxcode",
         "*/*.aux",
         "*/figures/Chapter*-Figure*",
+        "*/data/*_counts.h5",
     ],
     // Spell Checker
     "python.unitTest.promptToConfigure": false,

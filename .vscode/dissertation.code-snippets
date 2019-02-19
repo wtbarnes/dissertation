@@ -60,5 +60,26 @@
 			"\\begin{equation}\\label{eq:$0}",
 			"\\end{equation}"
 		]
+	},
+	"TeXFigure figure setup": {
+		"scope": "latex",
+		"prefix": "figure-texfigure",
+		"body": [
+			"fig = plt.figure(figsize=texfigure.figsize(",
+			"\tpytex,",
+			"\tscale=1,",
+			"\theight_ratio=1,",
+			"\tfigure_width_context='figurewidth',",
+			"))",
+		],
+	},
+	"TeXFigure save figure": {
+		"scope": "latex",
+		"prefix": "save-figure-texfigure",
+		"body": [
+			"tfig = ch.save_figure('', fext='')",
+			"tfig.caption = r''",
+			"tfig.figure_width = r''",
+		],
 	}
 }

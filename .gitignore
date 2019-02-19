@@ -1,6 +1,9 @@
 ### TeXFigure ###
 thesis/*/figures/Chapter*-Figure*
-thesis/*/data/*.h5
+
+# Data files
+*.h5
+*.fits
 
 ### LaTeX ###
 ## Core latex/pdflatex auxiliary files:

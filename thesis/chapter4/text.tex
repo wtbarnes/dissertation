@@ -391,6 +391,10 @@ In this example workflow, the thermal structure of each loop is determined using
 % spell-checker: disable %
 \begin{pycode}[chapter4]
 fn = os.path.join(ch4.data_dir, 'loop_results.h5')
+try:
+    os.remove(fn)
+except OSError:
+    pass
 \end{pycode}
 \begin{pyblock}[chapter4][baselinestretch=1,xleftmargin=3em]
 from synthesizAR.interfaces import MartensInterface
@@ -467,6 +471,10 @@ After constructing the \pyv{EmissionModel}, the population fraction of each ion 
 % spell-checker: disable %
 \begin{pycode}[chapter4]
 fn_ionfrac = os.path.join(ch4.data_dir, 'ion_pop.h5')
+try:
+    os.remove(fn_ionfrac)
+except OSError:
+    pass
 \end{pycode}
 \begin{pyblock}[chapter4][baselinestretch=1,xleftmargin=3em]
 em_model.calculate_ionization_fraction(noaa12733, fn_ionfrac)
@@ -478,6 +486,10 @@ Finally, the emissivity is computed for each transition of each ion specified ab
 % spell-checker: disable %
 \begin{pycode}[chapter4]
 fn_emiss = os.path.join(ch4.data_dir, 'emiss_table.h5')
+try:
+    os.remove(fn_emiss)
+except OSError:
+    pass
 \end{pycode}
 \begin{pyblock}[chapter4][baselinestretch=1,xleftmargin=3em]
 em_model.calculate_emissivity(fn_emiss)
@@ -497,6 +509,10 @@ from synthesizAR import Observer
 observer = Observer(noaa12733, [aia],)
 \end{pyblock}
 \begin{pycode}[chapter4]
+try:
+    os.remove(os.path.join(ch4.data_dir, 'SDO_AIA_counts.h5'))
+except OSError:
+    pass
 observer.build_detector_files(ch4.data_dir, 0.05*u.Mm)
 \end{pycode}
 % spell-checker: enable %
@@ -517,7 +533,7 @@ observer.bin_detector_counts(dir_results)
 fig = plt.figure(figsize=texfigure.figsize(
     pytex,
     scale=1,
-    height_ratio=1.025,
+    height_ratio=1.01,
     figure_width_context='figurewidth',
 ))
 for i,c in enumerate([94, 131, 211, 335]):
@@ -549,7 +565,8 @@ for i,c in enumerate([94, 131, 211, 335]):
     xt,yt = m.world_to_pixel(
         SkyCoord(*[-70,270]*u.arcsec, frame=m.coordinate_frame))
     ax.text(xt.value, yt.value, f'{c} ' + r'\si{\angstrom}', 
-            verticalalignment='top', horizontalalignment='left', color='w')
+            verticalalignment='top', horizontalalignment='left', color='w',
+            fontsize=plt.rcParams['legend.fontsize'])
 plt.subplots_adjust(wspace=0.02, hspace=0.02)
 tfig = ch4.save_figure('aia-intensities', fext='.pdf')
 tfig.caption = r'Predicted intensities, in \si{\dn\per\pixel\per\second}, for \AR{} NOAA 12733 as observed by four out of the six AIA EUV channels: \SIlist{94;131;211;335}{\angstrom}. The colorbar is on an $\arcsinh$ scale from 0 to the maximum intensity in that channel and the color tables are the standard AIA color tables as defined in SunPy. The coordinate frame of each map is a helioprojective coordinate system defined by an observer at the location of the SDO satellite on 2019 January 24 14:00:22 UTC.'

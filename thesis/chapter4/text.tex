@@ -15,15 +15,13 @@ from matplotlib.patches import ConnectionPatch
 \end{pycode}
 % spell-checker: enable %
 
-In order to accurately predict observed optically-thin emission from the impulsively-heated coronal plasma, one must properly account for the field-aligned hydrodynamic response to the energy deposition (\autoref{ch:loops}), the detailed atomic physics that produces the radiation (\autoref{ch:diagnostics}), and geometric effects due to the integration along the LOS. During the course of my PhD, I have a developed a software framework for modeling optically-thin coronal emission called synthesizAR. synthesizAR includes tools for extrapolating the three-dimensional magnetic field from observed LOS magnetograms, configuring input and reading output from ensembles of field-aligned hydrynamic simulations, and computing projections of the emission along the LOS for arbitrary viewing angles. 
+In order to accurately predict observed optically-thin emission from the impulsively-heated coronal plasma, one must properly account for the field-aligned hydrodynamic response to the energy deposition (\autoref{ch:loops}), the detailed atomic physics that produces the radiation (\autoref{ch:diagnostics}), and geometric effects due to the integration along the LOS. During the course of my PhD, I have a developed a software framework for modeling optically-thin coronal emission called synthesizAR\footnote{The name derives from the words ``synthesize'' and the common abbreviation for \AR{}, ``AR'' as the code was built to predict, or synthesize, emission from \AR s. synthesizAR is also a homophone of synthesizer.}. synthesizAR includes tools for extrapolating the three-dimensional magnetic field from observed LOS magnetograms, configuring input and reading output from ensembles of field-aligned hydrynamic simulations, and computing projections of the emission along the LOS for arbitrary viewing angles. 
 
-synthesizAR is written entirely in the widely-used and open-source Python programming language and developed openly on GitHub\footnote{The entire source code, including installation instructions and links to documentation, can be found at \href{https://github.com/wtbarnes/synthesizAR}{github.com/wtbarnes/synthesizAR}}. synthesizAR is built on top of many of the packages in the mature scientific Python ecosystem, including the scipy package \citep{jones_scipy_2001}, NumPy for array computation \citep{oliphant_guide_2006}, and Astropy \citep{the_astropy_collaboration_astropy_2018}. In particular, synthesizAR depends heavily on SunPy \citep{sunpy_community_sunpypython_2015}, a package for data analysis in solar physics, for manipulating imaging data and solar coordinate transformations.
+synthesizAR is written entirely in the widely-used and open-source Python programming language and developed openly on GitHub\footnote{The entire source code, including installation instructions and links to documentation, can be found at \href{https://github.com/wtbarnes/synthesizAR}{github.com/wtbarnes/synthesizAR}}. synthesizAR is built on top of many of the packages in the mature scientific Python ecosystem, including the scipy \citep{jones_scipy_2001} for general numerical and scientific computation, NumPy for array computation \citep{oliphant_guide_2006}, and Astropy \citep{the_astropy_collaboration_astropy_2018}. In particular, synthesizAR depends heavily on SunPy \citep{sunpy_community_sunpypython_2015}, a package for data analysis in solar physics, for manipulating imaging data and solar coordinate transformations.
 
-The code is fully-documented, including examples, and also includes a test suite that is executed at every code check-in. In this chapter, I give a detailed description of each step of an example workflow using synthesizAR, including working code examples throughout, for a simple dipolar \AR{} in hydrostatic equilibrium. In \autoref{ch:modeling_observables}, I use the synthesizAR code coupled with the two-fluid EBTEL code (see \autoref{sec:ebtel}) to model time-dependent, multi-wavelength emission from an \AR{} for a range of nanoflare heating frequencies.
+The code is fully-documented, including examples, and also includes a test suite that is executed at every code check-in. In this chapter, I give a detailed description of each step of an example workflow using synthesizAR, including working code examples throughout, for a simple dipolar \AR{} in hydrostatic equilibrium. In \autoref{ch:modeling_observables}, I use the synthesizAR code coupled with the two-fluid EBTEL code (see \autoref{sec:ebtel}) to model time-dependent, multi-wavelength emission from an \AR{} for a range of nanoflare heating frequencies. While similar approaches have been used in the past to model optically-thin coronal X-ray and EUV emission \citep[e.g.][]{warren_hydrostatic_2006,schrijver_coronal_2004,lundquist_forward_2008,lundquist_forward_2008-1,bradshaw_patterns_2016,allred_3d_2018}, the synthesizAR package represents the first effort to organize this forward modeling pipeline into an openly-developed and easily-configurable codebase that leverages the high-quality software developed by the greater scientific Python and astronomy communities.
 
 \section{Building the Magnetic Skeleton}
-
-% Magnetic field extrapolations
 
 The first step in the forward modeling pipeline is to determine the three-dimensional geometry of each magnetic strand in order to construct the magnetic ``skeleton'' of our model \AR{}. As noted in \autoref{ch:loops}, a field-aligned hydrodynamic model only computes the evolution of the plasma along a single thermally-isolated strand such that the three-dimensional position and orientation of the strand relative to the solar surface must be imposed externally. In this example, I will model the emission from \AR{} NOAA 12733 as observed by SDO/AIA on 2019 January 24. \autoref{fig:noaa12733-magnetogram} shows the LOS magnetogram as observed by SDO/HMI on 2019 January 24 14:00:22 UTC.
 
@@ -290,7 +288,7 @@ where $r$ is the radial distance, measured in units of physical distance, from t
 % spell-checker: disable %
 \begin{pycode}[chapter4]
 data = np.zeros((10, 10))
-lon, lat = 0*u.deg, 0*u.deg
+Phi0, B0 = 0*u.deg, -20*u.deg
 time_now = astropy.time.Time.now()
 meta = {
     'ctype1': 'HPLN-TAN',
@@ -303,8 +301,8 @@ meta = {
     'cdelt2': 1.0,
     'crval1': 0.0,
     'crval2': 0.0,
-    'hgln_obs': lon.to(u.deg).value,
-    'hglt_obs': lat.to(u.deg).value,
+    'hgln_obs': Phi0.to(u.deg).value,
+    'hglt_obs': B0.to(u.deg).value,
     'dsun_obs': const.au.to(u.m).value,
     'dsun_ref': const.au.to(u.m).value,
     'rsun_ref': const.R_sun.to(u.m).value,
@@ -339,7 +337,7 @@ lon.set_ticklabel_visible(False)
 lat.set_ticklabel_visible(False)
 # Save figure
 tfig = ch4.save_figure('hpc-hgs-grid', fext='.pdf')
-tfig.caption = r'Helioprojective coordinate system (black) overlaid on a Stonyhurst heliographic coordinate system (blue) as viewed by an observer at $(\SI{0}{\degree},\SI{0}{\degree},\num{1}\,\textup{AU})$. The spacing between the lines of HGS longitude and latitude is \SI{10}{\degree} and the spacing between the lines of HPC longitude and latitude is \SI{250}{\arcsecond}.'
+tfig.caption = r'Helioprojective coordinate system (black) overlaid on a Stonyhurst heliographic coordinate system (blue) as viewed by an observer at $(\SI{0}{\degree},\SI{-20}{\degree},\num{1}\,\textup{AU})$. The spacing between the lines of HGS longitude and latitude is \SI{10}{\degree} and the spacing between the lines of HPC longitude and latitude is \SI{250}{\arcsecond}.'
 tfig.figure_width = r'0.65\textwidth'
 \end{pycode}
 \py[chapter4]|tfig|
@@ -357,9 +355,9 @@ where $d$ is the radial distance from the observer, $D_{\solar}$ is the distance
     &y = r\left( \sin{\Theta}\cos{B_0} - \cos{\Theta}\cos{(\Phi - \Phi_0)}\sin{B_0} \right), \\
     &z = r\left( \sin{\Theta}\sin{B_0} + \cos{\Theta}\cos{(\Phi - \Phi_0)}\cos{B_0} \right),
 \end{align}
-where $\Phi_0$ and $B_0$ are the HGS longitude and latitude of the observer. Note that unlike the HGS frame, the HPC and HCC frames are defined in terms of an observer at a particular location. \autoref{fig:hpc-hgs-grid} shows a comparison between the HGS frame and a HPC frame defined by an observer at $\Phi=\SI{0}{\degree}$, $\Theta=\SI{0}{\degree}$, and distance of \num{1} AU. 
+where $\Phi_0$ and $B_0$ are the HGS longitude and latitude of the observer. Note that unlike the HGS frame, the HPC and HCC frames are defined in terms of an observer at a particular location in HGS coordinates, $(D_{\solar}, \Phi_0, B_0)$. \autoref{fig:hpc-hgs-grid} shows a comparison between the HGS frame and a HPC frame defined by an observer at $\Phi_0=\SI{0}{\degree}$, $B_0=\SI{-20}{\degree}$, and distance of $D_{\solar}=1\,\textup{AU}$.
 
-After the fieldlines are traced through the extrapolated volume, synthesizAR transforms the coordinates of each strand to HEEQ coordinates (using \autoref{eq:local_heeq_transform}) and returns an Astropy \pyv{SkyCoord} objects. These are stored in the \pyv{.coordinates} attributed of each \pyv{Loop} object in the magnetic skeleton. A \pyv{SkyCoord} object stores the numerical values of the coordinates as well as the frame of reference in which the coordinates are defined such that coordinates can easily be represented different frames. SunPy provides representations of and transformations between many of the common solar coordinate systems as described by \citet{thompson_coordinate_2006}. For example, to define a point \pyv{p} on the surface of the Sun at \SI{20}{\degree} longitude and \SI{20}{\degree} latitude and then transform it to a HPC coordinate system defined by an observer on Earth,
+After the fieldlines are traced through the extrapolated volume, synthesizAR transforms the coordinates into an HEEQ coordinate frame (using \autoref{eq:local_heeq_transform}) and returns an Astropy \pyv{SkyCoord} object for each strand. These are stored in the \pyv{.coordinates} attributed of each \pyv{Loop} object in the magnetic skeleton. A \pyv{SkyCoord} object stores the numerical values of the coordinates as well as the frame of reference in which the coordinates are defined such that coordinates can easily be represented in different frames. SunPy provides representations of and transformations between many of the common solar coordinate systems as described by \citet{thompson_coordinate_2006}. For example, to define a point \pyv{p} on the surface of the Sun at \SI{20}{\degree} longitude and \SI{20}{\degree} latitude and then transform it to a HPC coordinate system defined by an observer on Earth,
 % spell-checker: disable %
 \begin{pyblock}[][baselinestretch=1,xleftmargin=3em]
 from sunpy.coordinates import Helioprojective
@@ -370,7 +368,7 @@ hpc_frame = Helioprojective(
 p_hpc = p.transform_to(hpc_frame)
 \end{pyblock}
 % spell-checker: enable %
-Representing the coordinates of each strand in this way makes it simple to compute projections of the magnetic skeleton for any viewing angle. For example, in \autoref{fig:magnetogram-with-strands}, the coordinates of each strand are transformed to a HPC coordinate system defined by an observer at the position of the SDO spacecraft on 2019 January 24 14:00:22 UTC.
+Representing the coordinates of each strand in this way makes it simple to compute projections of the magnetic skeleton for any viewing angle. For example, in \autoref{fig:magnetogram-with-strands}, the coordinates of each strand are transformed to a HPC coordinate system defined by an observer at the position of the SDO spacecraft on 2019 January 24 14:00:22 UTC. Note that the coordinates of the magnetic strands do not necessarily have to be determined by a magnetic field extrapolation described in \autoref{sec:potential_field}. As long as the coordinates can be expressed in a HGS frame using a \pyv{SkyCoord} object, any method (e.g. a non-linear force-free field extrapolation, see \autoref{sec:field_extrapolation}) may be used to model the magnetic skeleton of the \AR{}.
 
 \section{Field-aligned Modeling}\label{sec:field-aligned-modeling}
 
@@ -392,15 +390,15 @@ While not very useful, this is a valid model interface. An interface is defined 
 In this example workflow, the thermal structure of each loop is determined using the scaling laws of \citet[see \autoref{sec:scaling_laws}]{martens_scaling_2010}. An interface to the \citeauthor{martens_scaling_2010} scaling laws is included in the synthesizAR package. To define this interface and apply it to each strand in the magnetic skeleton,
 % spell-checker: disable %
 \begin{pycode}[chapter4]
-filename = os.path.join(ch4.data_dir, 'loop_results.h5')
+fn = os.path.join(ch4.data_dir, 'loop_results.h5')
 \end{pycode}
 \begin{pyblock}[chapter4][baselinestretch=1,xleftmargin=3em]
 from synthesizAR.interfaces import MartensInterface
 martens = MartensInterface()
-noaa12733.load_loop_simulations(martens, filename)
+noaa12733.load_loop_simulations(martens, fn)
 \end{pyblock}
 % spell-checker: enable %
-The maximum temperature of each loop is determined using the scaling laws of \citet{rosner_dynamics_1978} (see \autoref{sec:scaling_laws}) and \pyv|filename| specifies the name of the output file for the interface model results. Storing these results on disk rather than in memory is advantageous when constructing an \AR{} with many thousands of loops. After applying the model to each strand, the thermodynamic properties, as a function of loop coordinate and time, can be accessed as attributes on each strand in the \AR{},
+The maximum temperature of each strand is determined using the scaling laws of \citet{rosner_dynamics_1978} (see \autoref{sec:scaling_laws}) and the base temperature of each strand is fixed at \SI{e4}{\kelvin}. \pyv|fn| specifies the name of the output file for the interface model results. Storing these results on disk rather than in memory is advantageous when constructing an \AR{} with many thousands of loops. After applying the model to each strand, the thermodynamic properties, as a function of loop coordinate and time, can be accessed as attributes on each strand in the \AR{},
 % spell-checker: disable %
 \begin{pyblock}[chapter4][baselinestretch=1,xleftmargin=3em]
 noaa12733.loops[0].time
@@ -409,7 +407,7 @@ noaa12733.loops[0].ion_temperature
 noaa12733.loops[0].density
 \end{pyblock}
 % spell-checker: enable %
-\autoref{fig:martens-loops} shows the temperature (left panel) and density (right panel) as a function of loop coordinate for all 200 strands in the \AR{} as determined by the scaling laws of \citet{martens_scaling_2010}. Note that it is assumed that the each loop is semi-circular and symmetric about the apex of the strand as \citeauthor{martens_scaling_2010} only model the thermal structure of half of the loop. synthesizAR also includes an interface to the EBTEL model (see \autoref{sec:ebtel}) which I will use in \autoref{ch:modeling_observables} to model the hydrodynamic evolution of many strands in an \AR{}.
+\autoref{fig:martens-loops} shows the temperature (left panel) and density (right panel) as a function of loop coordinate for all 200 strands in the \AR{} as determined by the scaling laws of \citet{martens_scaling_2010}. Note that it is assumed that the each loop is semi-circular and symmetric about the apex of the strand as the \citeauthor{martens_scaling_2010} scaling laws only model the thermal structure of half of the loop. synthesizAR also includes an interface to the EBTEL model (see \autoref{sec:ebtel}) which I will use in \autoref{ch:modeling_observables} to model the hydrodynamic evolution of many strands in an \AR{} heated by nanoflares.
 
 % spell-checker: disable %
 \begin{pycode}[chapter4]
@@ -442,11 +440,122 @@ tfig.caption = r'Temperature (left) and density (right) as a function of field-a
 \py[chapter4]|tfig|
 % spell-checker: enable %
 
-\section{Atomic Physics}
+\section{Atomic Physics}\label{sec:atomic-physics}
 
 % Choose Fe XVIII (94), XVIII (131) XIV (211), and XVI (335)
 
-\section{Instrument Effects}
+To correctly model the optically-thin EUV and X-ray emission, synthesizAR uses the CHIANTI atomic database (see \autoref{sec:chianti}) to model the emissivity from all transitions of selected ions for each strand in the magnetic skeleton using \autoref{eq:emissivity_simplified}. The first step is to construct an \pyv{EmissionModel} that includes the relevant ions,
+% spell-checker: disable %
+\begin{pyblock}[chapter4][baselinestretch=1,xleftmargin=3em]
+from fiasco import Ion
+T = np.logspace(4, 8, 80) * u.K
+kws = { 'abundance_filename': 'sun_coronal_1992_feldman' }
+ions = [
+    Ion('Fe 8', T, **kws),
+    Ion('Fe 14', T, **kws),
+    Ion('Fe 16', T, **kws),
+    Ion('Fe 18', T, **kws),
+]
+n = np.logspace(8, 11, 15) * u.cm**(-3)
+from synthesizAR.atomic import EmissionModel
+em_model = EmissionModel(n, *ions)
+\end{pyblock}
+% spell-checker: enable %
+For this example workflow, I model only a few of the dominant ions in the EUV passbands of AIA: Fe VIII, XIV, XVI, and XVIII. In practice, it is better to include as many ions as possible though this may significantly increase compute times. The ions are specified as \pyv{Ion} objects from the fiasco library, a Python interface to the CHIANTI atomic database. \autoref{ap:fiasco} provides a detailed description of the fiasco package. The ions are then passed to the \pyv{EmissionModel}, a subclass of the fiasco \pyv{IonCollection} obect (see \autoref{sec:ion-collection}). The \pyv{T} and \pyv{n} variables define the grid of temperature and density over which the emissivity is calculated.
+
+After constructing the \pyv{EmissionModel}, the population fraction of each ion specified above is computed for each loop,
+% spell-checker: disable %
+\begin{pycode}[chapter4]
+fn_ionfrac = os.path.join(ch4.data_dir, 'ion_pop.h5')
+\end{pycode}
+\begin{pyblock}[chapter4][baselinestretch=1,xleftmargin=3em]
+em_model.calculate_ionization_fraction(noaa12733, fn_ionfrac)
+\end{pyblock}
+% spell-checker: enable %
+The \pyv{.calculate_ionization_fraction} method iterates over each strand in the magnetic skeleton and uses the temperature and density as determined by the field-aligned model (\autoref{sec:field-aligned-modeling}) to compute the population fraction of each ion as a function of the field-aligned coordinate of the strand and store it in the file \pyv{fn_ionfrac}. By default, the population fractions are computed assuming ionization equilibrium (see \autoref{sec:ioneq}) though additional arguments can be passed to \pyv{.calculate_ionization_fraction} to account for time-dependent, out-of-equilibrium charge states (see \autoref{sec:nei}).
+
+Finally, the emissivity is computed for each transition of each ion specified above,
+% spell-checker: disable %
+\begin{pycode}[chapter4]
+fn_emiss = os.path.join(ch4.data_dir, 'emiss_table.h5')
+\end{pycode}
+\begin{pyblock}[chapter4][baselinestretch=1,xleftmargin=3em]
+em_model.calculate_emissivity(fn_emiss)
+\end{pyblock}
+% spell-checker: enable %
+Calculating the level population using \autoref{eq:level_pop} is computationally expensive, particular for ions with many known transitions. \pyv{.calculate_emissivity} computes the product $N_jA_{ji}$ for each transition of each ion over the temperature-density grid defined by \pyv{T} and \pyv{n} and stores it as a look-up table in the file \pyv{fn_emiss}. The emissivity as given by \autoref{eq:emissivity_simplified} can then be efficiently calculated for any loop and transition by looking up the precomputed values for $f_{X,k}$ and $N_jA_{ji}$.
+
+\section{Instrument Effects}\label{sec:instrument-effects}
+
+Now that the magnetic skeleton has been constructed, the thermal structure calculated, and the emissivities tabulated for the relevant ions, the last step in the synthesizAR pipeline is to account for the observing instrument. As in previous steps, the instrument is defined in an object-oriented manner and then passed as an argument,
+% spell-checker: disable %
+\begin{pyblock}[chapter4][baselinestretch=1,xleftmargin=3em]
+from synthesizAR.instruments import InstrumentSDOAIA
+aia = InstrumentSDOAIA(
+    [0,1]*u.s, noaa12733.magnetogram.observer_coordinate)
+from synthesizAR import Observer
+observer = Observer(noaa12733, [aia],)
+\end{pyblock}
+\begin{pycode}[chapter4]
+observer.build_detector_files(ch4.data_dir, 0.05*u.Mm)
+\end{pycode}
+% spell-checker: enable %
+The \pyv{InstrumentSDOAIA} object defines all of the properties of the instrument, including the temporal cadence, the spatial resolution, and the wavelength and temperature response functions for all six of the EUV channels of AIA (see \autoref{sec:aia_response}).
+
+% spell-checker: disable %
+\begin{pycode}[chapter4]
+dir_results = ch4.data_dir
+\end{pycode}
+\begin{pyblock}[chapter4][baselinestretch=1,xleftmargin=3em]
+observer.flatten_detector_counts(emission_model=em_model)
+observer.bin_detector_counts(dir_results)
+\end{pyblock}
+% spell-checker: enable %
+
+% spell-checker: disable %
+\begin{pycode}[chapter4]
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=1,
+    height_ratio=1.025,
+    figure_width_context='figurewidth',
+))
+for i,c in enumerate([94, 131, 211, 335]):
+    m = Map(os.path.join(ch4.data_dir, f'SDO_AIA/{c}/map_t000000.fits'))
+    m = m.submap(
+        SkyCoord(*[-75,125]*u.arcsec, frame=m.coordinate_frame),
+        SkyCoord(*[75,275]*u.arcsec, frame=m.coordinate_frame)
+    )
+    ax = fig.add_subplot(2,2,i+1,projection=m)
+    m.plot(
+        axes=ax,
+        annotate=False,
+        norm=ImageNormalize(vmin=0, vmax=m.data.max(),
+                            stretch=AsinhStretch(0.01))
+    )
+    lon, lat = ax.coords[0], ax.coords[1]
+    lon.set_ticks(color='w',)
+    lat.set_ticks(color='w',)
+    lon.frame.set_linewidth(0)
+    lat.frame.set_linewidth(0)
+    if i != 2:
+        lon.set_ticklabel_visible(False)
+        lat.set_ticklabel_visible(False)
+    else:
+        lat.set_ticklabel(rotation='vertical')
+        lon.set_axislabel('Helioprojective Longitude')
+        lat.set_axislabel('Helioprojective Latitude')
+    ax.grid(alpha=0)
+    xt,yt = m.world_to_pixel(
+        SkyCoord(*[-70,270]*u.arcsec, frame=m.coordinate_frame))
+    ax.text(xt.value, yt.value, f'{c} ' + r'\si{\angstrom}', 
+            verticalalignment='top', horizontalalignment='left', color='w')
+plt.subplots_adjust(wspace=0.02, hspace=0.02)
+tfig = ch4.save_figure('aia-intensities', fext='.pdf')
+tfig.caption = r'Predicted intensities, in \si{\dn\per\pixel\per\second}, for \AR{} NOAA 12733 as observed by four out of the six AIA EUV channels: \SIlist{94;131;211;335}{\angstrom}. The colorbar is on an $\arcsinh$ scale from 0 to the maximum intensity in that channel and the color tables are the standard AIA color tables as defined in SunPy. The coordinate frame of each map is a helioprojective coordinate system defined by an observer at the location of the SDO satellite on 2019 January 24 14:00:22 UTC.'
+\end{pycode}
+\py[chapter4]|tfig|
+% spell-checker: enable %
 
 % define instrument
 % define observer

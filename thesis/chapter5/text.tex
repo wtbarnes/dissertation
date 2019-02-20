@@ -1,4 +1,207 @@
 % Text for Chapter 5
 \chapter{Inferring Heating Properties of ``Hot'' Plasmas in Active Region Cores}\label{ch:inferring_hot_plasma}
 
-This is an adaptation of the text of Barnes et al. (2016a).
+% spell-checker: disable %
+\begin{pycode}[chapter5]
+name = 'chapter5'
+ch5 = texfigure.Manager(
+    pytex,
+    os.path.join('.', name),
+    number=5,
+    **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
+)
+from run_ebtel import run_ebtel
+from dem import calculate_em, fit_slope, plot_hist
+# Base ebtel++ configuration
+base_config = {
+    'total_time': 5e3,
+    'tau': 0.1,
+    'tau_max': 10,
+    'loop_length': 4e9,
+    'saturation_limit': 1,
+    'force_single_fluid': False,
+    'use_c1_loss_correction': True,
+    'use_c1_grav_correction': True,
+    'use_flux_limiting': True,
+    'use_power_law_radiative_losses': True,
+    'calculate_dem': False,
+    'save_terms': False,
+    'use_adaptive_solver': False,
+    'adaptive_solver_error': 1e-8,
+    'adaptive_solver_safety': 0.5,
+    'c1_cond0': 6.0,
+    'c1_rad0': 0.6,
+    'helium_to_hydrogen_ratio': 0.075,
+    'surface_gravity': 1.0,
+    'heating': OrderedDict({
+        'partition': 1.,
+        'background': 3.5e-5,}),
+}
+# Simulation parameters
+total_energy = 10.0
+durations = [20.0, 40.0, 200.0, 500.0]
+flux_limiters = [
+    (1.0, True),
+    (0.53, True),
+    (1.0/6.0, True),
+    (0.1, True),
+    (1.0/30.0, True),
+    (1.0, False)
+]
+bins_T = 10**(np.arange(4, 8.5, 0.01))*u.K
+\end{pycode}
+% spell-checker: enable %
+
+% brief intro summarizing chapter
+% note that we dont use synthesizar here
+% note that this is based on Barnes et al (2016)
+
+\section{Introduction}\label{hot-plasma:sec:intro}
+
+Observations of the magnetically closed solar corona from the \textit{Hinode} \citep{kosugi_hinode_2007} and Solar Dynamics Observatory \citep[SDO,][]{pesnell_solar_2012} spacecraft have led, for the first time, to quantitative studies of the distribution of coronal plasma as a function of temperature, and preliminary deductions about the heating process \citep[see papers in][]{de_moortel_recent_2015}. The key to this has been the ability to make measurements of the corona over a wide range of temperatures from the EUV Imaging Spectrometer \citep[EIS,][]{culhane_euv_2007} and X-Ray Telescope \citep[XRT,][]{golub_x-ray_2007} instruments on \textit{Hinode}, and the Atmospheric Imaging Assembly \citep[AIA,][]{lemen_atmospheric_2012} on SDO. Underpinning this work is the concept of nanoflare heating of the corona. Nanoflares \citep[e.g.][]{parker_nanoflares_1988} are small bursts of energy release, which, despite the implication in their name, have unknown magnitude and duration. While commonly attributed to small-scale magnetic reconnection, nanoflares can occur in other heating scenarios \citep[e.g.][]{ofman_self-consistent_1998}.
+
+One example of this approach has been studies of active region (AR) core loops \citep{warren_constraints_2011,warren_systematic_2012,winebarger_using_2011,tripathi_emission_2011,schmelz_cold_2012,bradshaw_diagnosing_2012,reep_diagnosing_2013,del_zanna_evolution_2015}. These are the brightest structures in ARs, spanning the magnetic polarity line, and are observed over a wide range of temperatures. An important result has been the determination of the emission measure distribution as a function of temperature ($\emd[T]\sim n^2dh$) along a line of sight. These workers showed that the emission measure peaked at $T = T_m = $\SIrange{e6.5}{e6.6}{\kelvin} with $\emd[T_m]$ of order \SIrange{e27}{e28}{\cm\tothe{-5}}. Below $T_m$ a relation of the form $\emd[T] \propto T^a$ was found, with $2\lesssim a\lesssim 5$. This distribution can be understood by a combination of radiative cooling of the corona to space and an enthalpy flux to the transition region (TR) \citep[e.g.][]{bradshaw_cooling_2010,bradshaw_new_2010} and and has significant implications for nanoflare heating. Defining low- and high-frequency (LF and HF, respectively) nanoflares by the ratio of the average time between nanoflares on a magnetic strand or sub-loop ($\langle t_\textup{wait} \rangle$) to the plasma cooling time from the peak emission measure ($\tau_\textup{cool}$), LF (HF) nanoflares have $\langle t_\textup{wait} \rangle > \tau_\textup{cool}$ and HF nanoflares have $\langle t_\textup{wait} \rangle < \tau_\textup{cool}$. LF nanoflares have $a \sim$ 2 - 3 and thus do not account for many of the observations. In fact, \citet{cargill_active_2014} argued that these results implied a heating mechanism with $\langle t_\textup{wait} \rangle$ of order \SIrange{1000}{2000}{\second} between nanoflares, with the value of $t_\textup{wait}$ associated with each nanoflare being proportional to its energy. Such intermediate frequency (IF) nanoflares have different energy build-up requirements from the commonly assumed LF scenario \citep{cargill_active_2014}.
+
+A second outcome of AR studies is the detection of a ``hot'' non-flaring coronal component characterised by plasma with $T > T_m$, a long-predicted consequence of nanoflare heating \citep{cargill_implications_1994,cargill_diagnostics_1995}. This has been identified from \textit{Hinode} and SDO data \citep{reale_evidence_2009,schmelz_hinode_2009,testa_hinode/eis_2012}, and retrospectively from data obtained by the X-Ray Polychrometer (XRP) instrument flown on the Solar Maximum Mission \citep{del_zanna_elemental_2014}. While characterising this emission is difficult \citep[e.g.][]{testa_temperature_2011,winebarger_defining_2012}, a similar scaling, $\emd[T] \propto T^{-b}$ has been claimed \citep[e.g.][]{warren_systematic_2012}, with $b$ of order \numrange{7}{10}, though \citeauthor{del_zanna_elemental_2014} find larger values. \citeauthor{warren_systematic_2012} quote typical errors of $\pm$ \numrange{2.5}{3} on these values due to the very limited data available above $T_m$ and \citeauthor{winebarger_defining_2012} have noted that the paucity of data from \textit{Hinode} at these temperatures could be missing significant quantities of plasma with $T > T_m$.
+    
+In an effort to diminish uncertainty in this high temperature ``blind spot'' in $\emd[T]$, \citet{petralia_thermal_2014} analyzed an AR core by supplementing EIS spectral observations with broadband AIA and XRT measurements. By using concurrent observations from the  \SI{94}{\angstrom} channel of AIA and the Ti\_poly filter of XRT, the authors showed that the $\emd[T]$ peaked near $T_m = \SI{e6.6}{\kelvin}$ and had a weak, hot component. Additionally, \citet{miceli_x-ray_2012}, using the SphinX instrument \citep{sylwester_sphinx_2008,gburek_sphinx_2011}, analyzed full-disk X-ray spectra integrated over 17 days, during which time two prominent ARs were present. These authors found that a two-temperature model was needed to fit the resulting spectrum, a strong 3 MK component and a much weaker \SI{7}{\mega\kelvin} component.
+
+More recent data has come from rocket flights. The Focusing Optics X-ray Solar Imager \citep[FOXSI,][]{krucker_focusing_2013} first flew in November 2012 and observed an AR. A joint study with EIS and XRT by \citet{ishikawa_constraining_2014} suggested that while hot plasma existed up to \SI{10}{\mega\kelvin}, the \textit{Hinode} instruments over-estimated the amount of plasma there. A rocket flight reported by \citet{brosius_pervasive_2014} identified emission in an Fe XIX line with peak formation temperature of $\SI{e6.95}{\kelvin}$ and reported an emission measure that was 0.59 times the emission formed at $\SI{e6.2}{\kelvin}$. More recently, a pair of rocket flights gave observations from the Amptek X123-SDD soft X-ray spectrometer \citep{caspi_new_2015}. This provided comprehensive coverage of the \SIrange{3}{60}{\angstrom} wavelength range. \citeauthor{caspi_new_2015} demonstrated that the emission in this range could be fit by an emission measure with a power-law distribution slope of roughly $b = 6$. While all of these observations are very suggestive of nanoflare heating, it should also be noted that pixel-averaging, long time averages and/or inadequate instrument spatial resolution may lead to contamination of the $\dem[T]$ by multiple structures along the line of sight. It is desirable to obtain future measurements of plasma emission at $T>T_m$ from a single structure, such as a core active region loop, along the line of sight.
+
+Several other workers have combined model results with observations in an effort to better elucidate nanoflare signatures. Using a hydrodynamic loop model, \citet{reale_solar_2011} showed that emission from impulsively heated subarcsecond strands is finely structured and that this predicted structure can also be found in AR core emission as observed by the \SI{94}{\angstrom} channel of AIA. Most recently, \citet{tajfirouze_time-resolved_2016}, using a 0D hydrodynamic model, explored a large parameter space in event energy distribution, pulse duration, and number of loops. Using a probabilistic neural network, the authors compared their many forward-modeled light curves to  \SI{94}{\angstrom} AIA observations of a ``hot'' AR core. They found that the observed light curves were most consistent with a pulse duration of \SI{50}{\second} and a shallow event energy distribution, suggestive of nanoflare heating.
+
+While the distributions of temperature and density above $T_m$ are likely to be determined by nanoflare heating and conductive cooling, there are several complications arising from the low density and high temperature present there. These are (i) the breakdown of the usual Spitzer description of thermal conduction which leads to slower conductive cooling, (ii) recognition that in cases of heating in a weakly collisional or collisionless plasma, electrons and ions need not have the same temperature since when one is heated preferentially the time for the temperature to equilibrate is longer than the electron conductive cooling time, and (iii) a lack of ionization equilibrium that can underestimate the quantity of the plasma with a given electron temperature.
+
+Thus the aim of the this chapter and \citet[\citetalias{barnes_inference_2016-1} hereafter]{barnes_inference_2016-1} is to investigate this high temperature regime from a modeling viewpoint with the aim of obtaining information that can be of use in the interpretation of present and future observations. In this paper we focus on single-nanoflare simulations and build up an understanding of the role of the different pieces of physics. \citetalias{barnes_inference_2016-1} addresses the properties of nanoflare trains. Given the limitations of present observations, the results of both papers are in part predictive for a future generation of instruments. \autoref{hot-plasma:sec:phys_sum} addresses our methodology, including simple outlines of the physics expected from conductive cooling, the preferred heating of different species, and ionization non-equilibrium. \autoref{hot-plasma:sec:results} shows results for our single- and two-fluid models, and \autoref{hot-plasma:sec:discussion} provides discussion of the main points of our results.
+
+\section{Summary of Relevant Physics}\label{hot-plasma:sec:phys_sum}
+
+We begin by considering the situation when a coronal loop (or sub-loop) cools in response to a nanoflare by the evolution of a single-fluid plasma $(T_e = T_i)$ along a magnetic field line. We deal with the case of electron-ion non-equilibrium in  \autoref{hot-plasma:subsec:two_fluid_theory}. The energy equation is,
+\begin{equation}\label{hot-plasma:eq:energy_1d}
+    \frac{\partial E}{\partial t} = -\frac{\partial}{\partial s}[v(E+P)] - \frac{\partial F_c}{\partial s} + Q - n^2\Lambda(T),
+\end{equation}
+where $v$ is the velocity, $E=p/(\gamma -1) + \rho v^2/2$, $F_c=-\kappa_0 T^{5/2}\partial T/\partial s$ is the heat flux, $Q$ is a heating function that includes both steady and time-dependent components, $\Lambda(T)=\chi T^{\alpha}$ is the radiative loss function in an optically thin plasma \citep[e.g.][]{klimchuk_highly_2008} and $s$ is a spatial coordinate along the magnetic field. In addition the equations of mass and momentum conservation are solved. These equations are closed by $p=2nk_BT$, the equation of state. For a given initial state and $Q$, the plasma evolution can then be followed.
+
+In this paper, two approaches are used to solve \autoref{hot-plasma:eq:energy_1d}. One uses the HYDRAD code \citep{bradshaw_influence_2013} which solves the full field-aligned hydrodynamic two-fluid equations. The second develops further the zero-dimensional Enthalpy Based Thermal Evolution of Loops (EBTEL) approach which solves for average coronal plasma quantities \citep{klimchuk_highly_2008,cargill_enthalpy-based_2012,cargill_enthalpy-based_2012-1,cargill_modelling_2015}. In this paper we compare the HYDRAD and EBTEL results and outline some restrictions that apply to the use of EBTEL when modeling the hot coronal component. However, the value of the EBTEL approach lies in its simplicity and computational speed, and the consequent ability to model the corona as a multiplicity of thin loops for long times, as we do in \citetalias{barnes_inference_2016-1}. Such calculations remain challenging for field-aligned hydrodynamic models.
+
+The derivation of the single-fluid EBTEL equations can be found in \citep{klimchuk_highly_2008,cargill_enthalpy-based_2012}. We assume subsonic flows, and \autoref{hot-plasma:eq:energy_1d} and the equation of mass conservation are solved for nanoflare energy input. EBTEL treats the corona and TR as separate regions, matched at the top of the TR by continuity of conductive and enthalpy fluxes. It produces spatially-averaged, time-dependent quantities (e.g. $\bar{T}(t),\bar{n}(t)$) in the corona and can also compute quantities at the loop apex and the corona/TR boundary. The single-fluid EBTEL equations are,
+\begin{align}
+    \frac{1}{\gamma - 1}\frac{d\bar{p}}{dt} =& \,\bar{Q} - \frac{1}{L}(\mathcal{R}_C + \mathcal{R}_{TR}), \label{hot-plasma:eq:energy_0d} \\
+    \frac{\gamma}{\gamma - 1}(pv&)_0 + F_{c,0} + \mathcal{R}_{TR} = 0, \label{hot-plasma:eq:tr_energy_0d} \\
+    \frac{d\bar{n}}{dt} =& -\frac{c_2(\gamma - 1)}{2c_3\gamma Lk_B\bar{T}}(F_{c,0} + \mathcal{R}_{TR}).\label{hot-plasma:eq:mass_0d}
+\end{align}
+Here an overbar denotes a coronal average, $F_{c,0} = -(2/7)\kappa_0 T_a^{7/2}/L$ is the heat flux at the top of the TR (see also \autoref{hot-plasma:subsec:hf_theory}), $\mathcal{R}_C=\bar{n}^2\Lambda(\bar{T})L$, is the integrated coronal radiation, $\mathcal{R}_{TR}$ is the integrated TR radiation, and $L$ is the loop half-length. The subscript ``0'' denotes a quantity at the top of the TR and ``$a$'' denotes a quantity at the loop apex. Solving this set of equations requires the specification of three (semi-)constants that are defined by  $c_1=\mathcal{R}_{TR}/\mathcal{R}_C$, $c_2=\bar{T}/T_a$ and $c_3=T_0/T_a$. $c_2$ and $c_3$ can be taken as constant, with values of 0.9 and 0.6 respectively. \citet{cargill_enthalpy-based_2012} discuss the full implementation of $c_1 = c_1(T_a,L)$. \autoref{appendix_c1_corrections} provides a detailed discussion of the additional corrections we have applied to $c_1$ in order to ensure better agreement with HYDRAD for impulsive heating scenarios. \autoref{hot-plasma:eq:energy_0d} is a statement of energy conservation in the combined corona and TR. \autoref{hot-plasma:eq:tr_energy_0d} is the TR energy equation: if the heat flux into the TR is greater (smaller) than its ability to radiate then there is an enthalpy flux into (from) the corona. \autoref{hot-plasma:eq:mass_0d} combines \autoref{hot-plasma:eq:tr_energy_0d} with that of mass conservation.
+
+\subsection{Heat Flux Limiters}\label{hot-plasma:subsec:hf_theory}
+    
+It is well known that thermal conduction deviates from the familiar Spitzer-H{\"a}rm formula \citep{spitzer_transport_1953} at high temperatures \citep[e.g.][]{ljepojevic_heat_1989}. There is a firm upper limit on the heat flux: the free-streaming limit, $F_s=(1/2)fnk_BTV_e$, where $V_e$ is the electron thermal speed and $f$, a dimensionless constant, is determined from a combination of lab experiments, theory, and numerical models. The free-streaming flux is included in EBTEL and HYDRAD by a simple modification \citep{klimchuk_highly_2008},
+\begin{equation}
+    F_{c,0} = \frac{F_cF_s}{\sqrt{F_c^2 + F_s^2}},
+\end{equation}
+where $F_c$ is the Spitzer-H{\"a}rm heat flux. Smaller values of $f$ limit the heat flux to a greater degree. There is some disagreement on the optimal value of $f$. \citet{luciani_nonlocal_1983} use $f=0.1$ while \citet{karpen_nonlocal_1987} use $f=0.53$, and \citet{patsourakos_coronal_2005} choose $f=1/6$. Unless explicitly stated otherwise, we use $f = 1$ in order to compare EBTEL results with those of HYDRAD \citep[see appendix of][]{bradshaw_influence_2013}. The main aspect of inclusion of a free-streaming limit is to slow down conductive cooling. We do not consider here other conduction models \citep[e.g. the non-local model discussed in the coronal context by][]{karpen_nonlocal_1987,ciaravella_non-local_1991,west_lifetime_2008} since they lead to similar generic results.
+
+\subsection{Two-fluid Modeling}\label{subsec:two_fluid_theory}
+    
+In some parameter regimes nanoflare heating can also induce electron-ion non-equilibrium if the heating timescale is shorter than the electron-ion equilibration timescale. Interactions between electrons and ions in a fully-ionized hydrogen plasma like the solar corona are governed by binary Coulomb collisions. Thus, the equilbration timescale is $\tau_{ei}=1/\nu_{ei}$, where $\nu_{ei}$ is the collision frequency and is given by,
+\begin{equation}\label{eq:col_freq}
+    \nu_{ei} = \frac{16\sqrt{\pi}}{3}\frac{e^4}{m_em_i}\left(\frac{2k_BT_e}{m_e}\right)^{-3/2}n\ln{\Lambda},
+\end{equation}
+where $T_e$ is the electron temperature, $m_e,m_i$ are the electron and ion masses respectively, and $\ln{\Lambda}$ is the Coulomb logarithm \citep[see both Eq. 2.5e and Section 3 of][]{braginskii_transport_1965}. For $n\sim\SI{e9}{\per\cubic\cm}$ and $T_e\sim\SI{e7}{\kelvin}$, parameters typical of nanoflare heating, $\tau_{ei}\approx\SI{800}{\second}$. Thus, any heating that occurs on a timescale less than \SI{800}{\second}, such as a nanoflare with a duration of $\tau\le\SI{100}{\second}$, will result in electron-ion non-equilibrium. While chromospheric evaporation during and after the nanoflare will increase $n$ and thus decrease $\nu_{ei}$, we argue that during the early heating phase, $\tau_{ei}\gg\tau$, with \SI{800}{\second} being an upper bound on $\tau_{ei}$.
+
+While it is often assumed that the electrons are the recipients of the prescribed coronal heating function, ion heating in the solar corona should not be discounted since the exact mechanism behind coronal heating is still unknown. For example, ions may be heated via ion-cyclotron wave resonances \citep[e.g.][]{markovskii_intermittent_2004} or magnetic reconnection \citep[e.g.][]{ono_ion_1996,drake_onset_2014}. To address this possibility and include effects due to electron-ion non-equilibrium, we have applied the EBTEL analysis outlined in \citet{klimchuk_highly_2008} to the two-fluid hydrodynamic equations in the form given in the appendix of \citet{bradshaw_influence_2013}. Such an approach allows us to efficiently model a two-component impulsively-heated coronal plasma, and will be used extensively in \citetalias{barnes_inference_2016-1}.
+
+The two-fluid EBTEL equations are derived fully in \autoref{sec:ebtel} and are,
+\begin{align}
+    \frac{d}{dt}\bar{p}_e &=\,\frac{\gamma - 1}{L}[\psi_{TR} - (\mathcal{R}_{TR} + \mathcal{R}_C)] + \nonumber \\ & k_B\bar{n}\nu_{ei}(\bar{T}_i-\bar{T}_e) + (\gamma-1)\bar{Q}_{e},\label{eq:press_e_0d_2fl} \\[0.5em]
+    \frac{d}{dt}\bar{p}_i &=\,-\frac{\gamma - 1}{L}\psi_{TR} + k_B\bar{n}\nu_{ei}(\bar{T}_e-\bar{T}_i) + \nonumber \\ &(\gamma-1)\bar{Q}_{i},\label{eq:press_i_0d_2fl} \\[0.5em]
+    \frac{d}{dt}\bar{n} &=\,\frac{c_2(\gamma-1)}{c_3\gamma Lk_B\bar{T}_e}(\psi_{TR} - F_{ce,0}-\mathcal{R}_{TR}).	\label{eq:mass_0d_2fl}
+\end{align}
+This set of equations is closed by the equations of state $p_e=k_BnT_e$ and $p_i=k_BnT_i$. While the notation above is largely self-evident, we draw attention to the additional term $\psi_{TR}$ which originates in the need to maintain charge and current neutrality and is defined by \autoref{eq:psi_TR}. Additionally, in both the single- and two-fluid versions of EBTEL used here, we have implemented an adaptive time-stepping routine to ensure that we are correctly resolving the thermal conduction timescale.
+
+\subsection{Ionization Non-equilibrium}\label{hot-plasma:subsec:nei_theory}
+
+Ionization non-equilibrium has long been known to be an issue in the interpretation of data from the impulsive phase of flares, and more recently it has been discussed in the context of nanoflares \citep{bradshaw_explosive_2006,reale_nonequilibrium_2008}. The main issue is that when a tenuous plasma is heated rapidly, it takes a certain time to reach ionization equilibrium so that the ionization states present do not reflect the actual (electron) temperature, assuming that the heating occurs mainly to electrons (see \autoref{hot-plasma:subsec:two_fluid_theory} and \autoref{hot-plasma:subsec:two_fluid_res}) rather than the heavier ions such as Fe that contribute to the observed radiation. If the heating is sustained, then eventually ionization equilibrium will be reached, and this may occur in moderate to large flares. However, for nanoflares that may last for anywhere between a few seconds and a few minutes, a different scenario arises in which on termination of heating, rapid conductive cooling arises, so that the high ionization states may never be attained.
+
+\citet{bradshaw_explosive_2006}, \citet{reale_nonequilibrium_2008} and \citet{bradshaw_numerical_2009} have all addressed this point using slightly different approaches, but with similar conclusions, namely that short nanoflares in a low-density plasma are unlikely to be detectable. We now develop this work further to assess how the results in the first parts of \autoref{hot-plasma:sec:results} are altered. We follow these authors and calculate an ``effective temperature'' ($T_{eff}$) as a proxy for the deviation from ionization equilibrium. This involves taking a time-series of $T$ and $n$ (e.g. from EBTEL) and using the method described in \autoref{ap:nonequilibrium_implicit} to calculate the fractional ionization of as many states of various elements as needed and calculate $T_{eff}$ as described in \citet{bradshaw_numerical_2009}. We primarily consider Fe between Fe IX and Fe XXVII.
+
+The feature that will prove of great relevance in our results is that despite the different nanoflare durations, $T_{eff}$ does not exceed 10 MK. There is also an ``overshoot'' of $T_{eff}$ when it reaches its maximum value: this is saying that collisions are still not strong enough for the adjustment of the ionization state to be instantaneous.
+
+\section{Results}\label{hot-plasma:sec:results}
+
+We now show a series of simulations of a single nanoflare with our zero-dimensional single- and two-fluid hydrodynamic EBTEL models, and the HYDRAD code. \citetalias{barnes_inference_2016-1} discusses long trains of multiple nanoflares of varying frequency in multiple loops.
+
+An important output of all these models is the coronal emission measure. In EBTEL the emission measure for the entire coronal part of the loop is calculated using the familiar expression $\mathrm{EM}=n^2(2L)$, where $L$ is the loop half-length. We consider a temperature range of $4.0\le\log{T}\le8.5$ with bin sizes of $\Delta\log{T}=0.01$. At each time $t_i$, the coronal temperature range $[T_0,T_a]$ is calculated from $\bar{T}$ ($\bar{T}_e$ for the two-fluid model). For each bin that falls within $[T_0,T_a]$, $\bar{n}_i^2(2L)$ is added to that bin, where $\bar{n}_i$ is the spatially-averaged number density at $t_i$. The emission measure in each bin is then averaged over the entire simulation period. When measured observationally, $\mathrm{EM}(T)$ is a line-of-sight quantity. Assuming an aspect ratio (i.e. ratio of loop length to loop width) of 10, we apply a correction factor 1/10 to all calculated $\mathrm{EM}$ curves. The emission measure from HYDRAD is calculated using quantities averaged over the upper 80\% of the loop which corresponds to the coronal portion of the loop.
+
+\subsection{Single-fluid Parameter Variations}\label{hot-plasma:subsec:sf_par_var}
+
+% spell-checker: disable %
+\begin{pycode}[chapter5]
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=1,
+    height_ratio=1/2,
+))
+ax1 = plt.subplot2grid((2,2), (0,0))
+ax2 = plt.subplot2grid((2,2), (1,0))
+ax3 = plt.subplot2grid((2,2), (0,1), rowspan=2)
+for i,tau in enumerate(durations):
+    # Configure EBTEL run
+    config = copy.deepcopy(base_config)
+    config['force_single_fluid'] = True
+    config['heating']['partition'] = 0.5
+    config['heating']['events'] = [{'event': {
+        'magnitude': 2 * total_energy/tau,
+        'rise_start': 0.,
+        'rise_end': tau/2.,
+        'decay_start': tau/2.,
+        'decay_end': tau,
+    }}]
+    res = run_ebtel(config, EBTEL_DIR)
+    # Plot temperature and density
+    ax1.plot(res['time'], res['electron_temperature'].to(u.MK), color=PALETTE[i],
+             label=r'$\tau=$' + f'{tau:.0f}' + r' \si{\second}',)
+    ax2.plot(res['time'], res['density']/1e8, color=PALETTE[i])
+    # Plot emission measure
+    bins, em = calculate_em(
+        res['time'],
+        res['electron_temperature'],
+        res['density'],
+        2*config['loop_length'],
+        bins_T=bins_T,
+    )
+    plot_hist(ax3, em.value, bins.value, color=PALETTE[i],)
+    
+# Limits and scales
+ax1.set_xlim(0.5, config['total_time'])
+ax2.set_xlim(0.5, config['total_time'])
+ax1.set_ylim(0, 25)
+ax2.set_ylim(0, 50)
+ax1.set_xscale('log')
+ax2.set_xscale('log')
+ax3.set_xscale('log')
+ax3.set_yscale('log')
+ax3.set_ylim([1e+23, 1e+28])
+ax3.set_xlim([10**5.5, 10**7.5])
+ax1.xaxis.set_major_formatter(matplotlib.ticker.NullFormatter())
+ax1.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(nbins=4, prune='lower'))
+ax2.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(nbins=4,))
+ax3.yaxis.tick_right()
+ax3.yaxis.set_label_position('right')
+ax3.yaxis.set_major_locator(matplotlib.ticker.LogLocator(base=10.0, numticks=3))
+# Legend
+ax1.legend(frameon=False, ncol=len(durations), loc='lower center',
+           bbox_to_anchor=(1.05 , 1.02))
+# Labels
+ax1.set_ylabel(r'$T$ $[\si{\mega\kelvin}]$')
+ax2.set_ylabel(r'$n$ $[\num{e8}\si{\per\cubic\cm}]$')
+ax2.set_xlabel(r'$t$ $[\si{\second}]$')
+ax3.set_ylabel(r'$\textup{EM}(T)$ $[\si{\cm\tothe{-5}}]$')
+ax3.yaxis.set_label_position('right')
+ax3.set_xlabel(r'$T$ $[\si{\mega\kelvin}]$')
+plt.subplots_adjust(hspace=0., wspace=0.05)
+# Save
+tfig = ch5.save_figure('hot-plasma:sf_tnem', fext='.pgf')
+tfig.caption = r'\textit{Left:} Temperature (upper panel) and density (lower panel) profiles for a loop with $2L=\SI{80}{\mega\m}$. Each heating profile is triangular in shape with a steady background heating of $H_{bg}=\SI{3.5e-5}{\erg\per\cubic\cm\per\second}$. The duration of the heating pulse is varied according to $\tau=\SIlist[list-final-separator = {,}]{20;40;200;500}{\second}$, with each value of $\tau$ indicated by a different color, as shown in the right panel. The total energy injected into the loop is fixed at \SI{10}{\erg\per\cubic\cm}. Note that time is shown on a log scale to emphasize the behavior of the heating phase. \textit{Right:} Corresponding $\emd[T]$ for each pulse duration $\tau$. The relevant parameters and associated colors are shown in the legend. $\emd[T]$ is calculated according to the procedure outlined in the beginning of \autoref{hot-plasma:sec:results}. In all panels, the solid (dotted) lines show the corresponding EBTEL (HYDRAD) results (see \autoref{hot-plasma:subsubsec:hydrad_comparison_sf}).'
+\end{pycode}
+\py[chapter5]|tfig|
+% spell-checker: enable %

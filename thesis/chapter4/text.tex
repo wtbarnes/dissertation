@@ -499,7 +499,9 @@ Calculating the level population using \autoref{eq:level_pop} is computationally
 
 \section{Instrument Effects}\label{sec:instrument-effects}
 
-Now that the magnetic skeleton has been constructed, the thermal structure calculated, and the emissivities tabulated for the relevant ions, the last step in the synthesizAR pipeline is to account for the observing instrument. As in previous steps, the instrument is defined in an object-oriented manner and then passed as an argument,
+\subsection{Constructing the Virtual Observer}
+
+Now that the magnetic skeleton has been constructed, the thermal structure calculated, and the emissivities tabulated for the relevant ions, the last step in the synthesizAR pipeline is to account for the observing instrument. As in previous steps, the instrument is defined in an object-oriented manner and then passed in as an argument,
 % spell-checker: disable %
 \begin{pyblock}[chapter4][baselinestretch=1,xleftmargin=3em]
 from synthesizAR.instruments import InstrumentSDOAIA
@@ -516,8 +518,87 @@ except OSError:
 observer.build_detector_files(ch4.data_dir, 0.05*u.Mm)
 \end{pycode}
 % spell-checker: enable %
-The \pyv{InstrumentSDOAIA} object defines all of the properties of the instrument, including the temporal cadence, the spatial resolution, and the wavelength and temperature response functions for all six of the EUV channels of AIA (see \autoref{sec:aia_response}).
+The \pyv{InstrumentSDOAIA} object defines all of the properties of the instrument, including the temporal cadence, the spatial resolution, and the wavelength and temperature response functions for all six of the EUV channels of the AIA instrument (see \autoref{sec:aia_response}). When an instance of \pyv{InstrumentSDOAIA} is created, it accepts two arguments: the range of the observing time and the position of the observer. Because the plasma is assumed to be in hydrostatic equilibrium, the \AR{} only needs to be observed at $t=\SI{0}{\second}$. The position of this observer is specified in HGS coordinates as a \pyv{SkyCoord} object (see \autoref{sec:coordinates}) and in this case, is the same as the magnetogram shown in \autoref{fig:noaa12733-magnetogram}: the position of the SDO spacecraft 2019 January 24 14:00:22 UTC.
 
+This instrument object is then passed to the \pyv{Observer} object along with the \pyv{Field} object which contains the magnetic skeleton and information about the thermal structure along each strand. Notice that the instrument object is passed in as a list such that multiple virtual instruments can be passed to the same \pyv{Observer} in order to predict observations of the same \AR{} using multiple instruments. Though synthesizAR includes several predfined instruments, as in the case of the field-aligned model interfaces (see \autoref{sec:field-aligned-modeling}), a user can define their own instrument and pass it to the \pyv{Observer} without modifying the underlying package code. To maximize code reuse and make it easier to define custom instrument classes, synthesizAR also provides an \pyv{InstrumentBase} class from which user-defined instruments can inherit.
+
+\subsection{Projecting Along the LOS}
+
+Next, the wavelength response functions (see \autoref{fig:aia-wavelength-response}) defined in instrument class are used to evaluate the integrand of \autoref{eq:aia_intensity} for each channel of the instrument and each strand in the magnetic skeleton. The summation in \autoref{eq:temperature_response_discrete} is over all available transitions from CHIANTI for the four ions added to the emission model in \autoref{sec:atomic-physics} and the contribution from the continuum is not included. This quantity is computed as a function of field-aligned coordinate along the strand and time (for time-dependent loop models).
+
+% spell-checker: disable %
+\begin{pycode}[chapter4]
+from synthesizAR.util import SpatialPair
+# Select loops
+i_loops = np.argsort(
+    [l.full_length.value for l in noaa12733.loops])[::-1]
+loop_list = [noaa12733.loops[i] for i in i_loops[:10]]
+
+# Setup histogram
+_, bin_range = aia.make_detector_array(noaa12733)
+bins = SpatialPair(x=15*u.pixel, y=15*u.pixel, z=None)
+resolution = SpatialPair(
+    x=((bin_range.x[1] - bin_range.x[0]) / bins.x),
+    y=((bin_range.y[1] - bin_range.y[0]) / bins.y), z=None)
+x = np.hstack([l.coordinates.x.value for l in loop_list]) * u.cm
+y = np.hstack([l.coordinates.y.value for l in loop_list]) * u.cm
+z = np.hstack([l.coordinates.z.value for l in loop_list]) * u.cm
+loop = SkyCoord(
+    x=x, y=y, z=z,
+    frame=HeliographicStonyhurst,
+    representation_type='cartesian').transform_to(
+        Helioprojective(observer=aia.observer_coordinate))
+data, bin_edges_x, bin_edges_y = np.histogram2d(
+    loop.Tx.value, loop.Ty.value,
+    bins=(bins.x.value, bins.y.value),
+    range=(bin_range.x.value, bin_range.y.value))
+
+# Build map
+meta = aia.make_fits_header(noaa12733, aia.channels[0])
+meta['cdelt1'] = resolution.x.value
+meta['cdelt2'] = resolution.y.value
+meta['crpix1'] = (bins.x.value + 1.0)/2.0
+meta['crpix2'] = (bins.y.value + 1.0)/2.0
+m = GenericMap(data.T, meta, mask=data.T<=0)
+
+# Setup figure
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=0.65,
+    height_ratio=1,
+))
+ax = fig.gca(projection=m)
+m.plot(axes=ax, cmap='Blues', annotate=False)
+for l in loop_list:
+    ax.plot_coord(l.coordinates.transform_to(m.coordinate_frame), color='k', ls='-')
+# Ticks and labels
+lon, lat = ax.coords[0], ax.coords[1]
+lon.grid(color='k', lw=1.5, ls='-', alpha=0.5)
+lat.grid(color='k', lw=1.5, ls='-', alpha=0.5)
+lon.set_ticks(values=bin_edges_x*u.arcsec)
+lat.set_ticks(values=bin_edges_y*u.arcsec)
+lon.set_ticklabel_visible(False)
+lat.set_ticklabel_visible(False)
+lon.set_ticks_visible(False)
+lat.set_ticks_visible(False)
+
+# Save figure
+tfig = ch4.save_figure('projection-illustration', fext='.pdf')
+tfig.caption = r'Coordinates for a sample of ten strands binned into a histogram defined by the HPC frame of the specified observer. The actual coordinates of the strands are shown in black and the unweighted binned values are shown in blue. The grid lines denote the edges of the bins. The resolution has been reduced to $\approx\SI{20}{\arcsecond\per\pixel}$ in both coordinates for illustrative purposes.'
+tfig.figure_width = r'0.65\textwidth'
+\end{pycode}
+\py[chapter4]|tfig|
+% spell-checker: enable %
+
+To compute the integration along the LOS in \autoref{eq:aia_intensity} for each pixel, the coordinates of each strand are first converted to the HPC frame defined by the observer passed to the constructor of the instrument class. Then, the coordinates of all the strands are binned into a two-dimensional histogram where the width of each bin, or pixel, is equal to the angular resolution of the detector and the range of the bins is dependent on the extent of the magnetic strands in the HPC frame defined by the observer. An illustration of the projection of the coordinates into the histogram bins for a few sample strands is shown in \autoref{fig:projection-illustration}.
+
+Each coordinate is weighted by the integrand of \autoref{eq:aia_intensity} at that coordinate multiplied by the differential in the distance along the LOS, $\Delta d$ (see \autoref{eq:hcc_hpc_transform}), such that \autoref{eq:aia_intensity}, the intensity in each pixel $p$ is approximated by,
+\begin{equation}\label{eq:approximate-intensity}
+I_{p,c} \approx \sum_{\{i\}}\Delta d n_i^2 K_c(T_i,n_i),
+\end{equation}
+where $c$ denotes the channel, $\{i\}$ denotes the set of all coordinates that fall into pixel $p$, $K_c$ is given by the second term in \autoref{eq:temperature_response_discrete}, and $T_i$ and $n_i$ denote the temperature and density at coordinate $i$. This is carried out for each channel and for each time step. A Gaussian filter is applied to each histogram to emulate the point spread function (PSF) of the instrument which accounts for scatter by the mirrors in the telescope, pixelization, and diffraction due to the filters on each telescope \citep{grigis_aia_2012}. The approximate Gaussian width of the PSF for each of the EUV channels on AIA is given in Table 3 of \citet{grigis_aia_2012}.
+
+In the synthesizAR pipeline, the above steps are encapsulated in two method calls,
 % spell-checker: disable %
 \begin{pycode}[chapter4]
 dir_results = ch4.data_dir
@@ -527,6 +608,13 @@ observer.flatten_detector_counts(emission_model=em_model)
 observer.bin_detector_counts(dir_results)
 \end{pyblock}
 % spell-checker: enable %
+The first line computes $n^2K_c$ (\autoref{eq:approximate-intensity}) at every coordinate of every strand at each time step and ``flattens'' it to a single array of dimension $n_t\times\sum_sn_s$, where $n_s$ is the total number of coordinates in strand $s$ and $n_t$ is the total number of time steps at the cadence of the instrument (\SI{12}{\second}for AIA), for each channel. Each strand is interpolated in time to match the cadence of the instrument and interpolated in space along the field-aligned direction such that,
+\begin{equation}
+    \Delta s \lesssim D_{\solar}\min{(\Delta\theta_x,\Delta\theta_y)},
+\end{equation}
+where $\Delta s$ is the spatial resolution of the strand and $\Delta\theta_{x,y}$ are the spatial resolution of the instrument in the directions of HPC longitude and latitude. This condition ensures that the image is not ``patchy'' and is a consequence of the discrete points traced through the extrapolated volume in \autoref{sec:trace-fieldlines}. These results, along with the ``flattened'' coordinates in the HGS frame, are stored on-disk as an intermediate result. If no emission model is passed to this method, the tabulated temperature response functions interpolated to the temperature at each coordinate are used to evaluate $K_c$.
+
+The second line in the above code sample computes the weighted histogram according to the procedure above using the interpolated values produced in the first line for each time step and each channel. The resulting Gaussian-filtered image is then saved in the Flexible Image Transport System (FITS) format \citep{wells_fits_1981}, the standard file format in astronomy and solar physics for storing image data. Additionally, the header of each FITS file includes a description of the helioprojective frame in which the image is defined using the standard keywords defined by the World Coordinate System \citep{greisen_representations_2002}. Because synthesizAR follows the same formatting conventions as real observations, data products from synthesizAR are portable and can be treated in the exact same manner as observational data.
 
 % spell-checker: disable %
 \begin{pycode}[chapter4]
@@ -574,7 +662,18 @@ tfig.caption = r'Predicted intensities, in \si{\dn\per\pixel\per\second}, for \A
 \py[chapter4]|tfig|
 % spell-checker: enable %
 
-% define instrument
-% define observer
-% interpolate and produce maps as a function of time
-% mention PSF, show an alternate observer
+\autoref{fig:aia-intensities} shows the final output of the synthesizAR forward modeling pipeline as applied to NOAA 12733. Each panel shows a map of the intensity across the \AR{} for four out of the six EUV channels of AIA. Since the thermal structure of each strand was modeled using the hydrostatic scaling laws of \citet{martens_scaling_2010}, only one map is produced per channel. Note that in the top right panel, the intensity is greatest near the base of each loop because the \SI{131}{\angstrom} channel is most sensitive to cool plasma (\autoref{fig:aia-temperature-response}) and the temperature along each strand decreases with decreasing height (\autoref{fig:martens-loops}). In the other three channels, the core is much brighter as \SIlist{94;211;335}{\angstrom} are all sensitive to much warmer plasma.
+
+Because the coronal emission is optically-thin, an important consideration when interpreting observations is the angle between the observer and the object of interest as the temperature structure along the LOS will change depending on the viewing angle. Because synthesizAR defines the projection in terms of a HPC frame, changing the viewing angle is only a matter of specifying a different \pyv{SkyCoord} object for the observer. For example, to view the \AR{} off-limb rather than on-disk, the HGS longitude is changed to $\Phi=\SI{-90}{\degree}$ and the new observer is passed to the instrument object,
+% spell-checker: disable %
+\begin{pyblock}[chapter4][baselinestretch=1,xleftmargin=3em]
+new_observer = SkyCoord(
+    lon=-90*u.deg,
+    lat=noaa12733.magnetogram.observer_coordinate.lat,
+    radius=noaa12733.magnetogram.observer_coordinate.radius,
+    frame=HeliographicStonyhurst,
+)
+new_aia = InstrumentSDOAIA([0,1]*u.s, new_observer)
+\end{pyblock}
+% spell-checker: enable %
+Note that the mathematics of the projection are entirely encapsulated in the coordinate transformation to the HPC frame defined by the observer. By defining the positions of each strand as coordinate-aware \pyv{SkyCoord} objects provided by Astropy, synthesizAR provides an intuitive interface to exploring how the observed emission varies due to the changing temperature structure along the LOS. 

@@ -608,7 +608,7 @@ observer.flatten_detector_counts(emission_model=em_model)
 observer.bin_detector_counts(dir_results)
 \end{pyblock}
 % spell-checker: enable %
-The first line computes $n^2K_c$ (\autoref{eq:approximate-intensity}) at every coordinate of every strand at each time step and ``flattens'' it to a single array of dimension $n_t\times\sum_sn_s$, where $n_s$ is the total number of coordinates in strand $s$ and $n_t$ is the total number of time steps at the cadence of the instrument (\SI{12}{\second}for AIA), for each channel. Each strand is interpolated in time to match the cadence of the instrument and interpolated in space along the field-aligned direction such that,
+The first line computes $n^2K_c$ (\autoref{eq:approximate-intensity}) at every coordinate of every strand at each time step and ``flattens'' it to a single array of dimension $n_t\times\sum_sn_s$, where $n_s$ is the total number of coordinates in strand $s$ and $n_t$ is the total number of time steps at the cadence of the instrument (\SI{12}{\second} for AIA), for each channel. Each strand is interpolated in time to match the cadence of the instrument and interpolated in space along the field-aligned direction such that,
 \begin{equation}
     \Delta s \lesssim D_{\solar}\min{(\Delta\theta_x,\Delta\theta_y)},
 \end{equation}
@@ -676,4 +676,4 @@ new_observer = SkyCoord(
 new_aia = InstrumentSDOAIA([0,1]*u.s, new_observer)
 \end{pyblock}
 % spell-checker: enable %
-Note that the mathematics of the projection are entirely encapsulated in the coordinate transformation to the HPC frame defined by the observer. By defining the positions of each strand as coordinate-aware \pyv{SkyCoord} objects provided by Astropy, synthesizAR provides an intuitive interface to exploring how the observed emission varies due to the changing temperature structure along the LOS. 
+Note that the mathematics of the projection are entirely encapsulated in the coordinate transformation to the HPC frame defined by the observer. By defining the positions of each strand as coordinate-aware \pyv{SkyCoord} objects, synthesizAR provides an intuitive interface to exploring how the observed emission varies due to the changing temperature structure along the LOS. 

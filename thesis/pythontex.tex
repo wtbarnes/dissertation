@@ -35,8 +35,10 @@
 %% Setup PythonTeX and TeXFigure
 \begin{pythontexcustomcode}{py}
 import os
+import sys
 from collections import OrderedDict
 from fractions import Fraction
+import copy
 
 import texfigure
 pytex.formatter = texfigure.repr_latex_formatter
@@ -87,6 +89,9 @@ if 'DEMREG_DIR' not in os.environ:
 	DEMREG_DIR = '/Users/willbarnes/Documents/work/codes/demreg/idl/'
 else:
 	DEMREG_DIR = os.environ['DEMREG_DIR']
+
+# Add global thesis Python directory to the path
+sys.path.append('./python/')
 
 # Set some plot styling here
 rc = {

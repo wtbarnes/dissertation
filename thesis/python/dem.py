@@ -8,10 +8,10 @@ import astropy.units as u
 def calculate_em(t, T, n, L, bins_T=None):
     # Create bins
     if bins_T is None:
-        bins_T = 10**(np.arange(4,8.5,0.05))*u.K
+        bins_T = 10**(np.arange(4, 8.5, 0.05))*u.K
     bins_t = np.concatenate((t[:1], (t[1:] + t[:-1])/2., t[-1:])).value*t.unit
     # Make 2D histogram
-    H,_,_ = np.histogram2d(
+    H, _, _ = np.histogram2d(
         T.value, t.value,
         bins=(bins_T.value, bins_t.value),
         weights=np.gradient(t)/np.gradient(t).sum()*L*n.value**2
@@ -43,6 +43,8 @@ def plot_hist(ax, vals, bins, **kwargs):
     """
     ymin = ax.get_ylim()[0]
     ax.step(bins[:-1], vals, where='post', **kwargs)
-    ax.step(bins[-2:],[vals[-1],vals[-1]], where='pre', **kwargs)
+    if 'label' in kwargs:
+        del kwargs['label']
+    ax.step(bins[-2:], [vals[-1], vals[-1]], where='pre', **kwargs)
     ax.vlines(bins[0], ymin, vals[0], **kwargs)
     ax.vlines(bins[-1], ymin, vals[-1], **kwargs)

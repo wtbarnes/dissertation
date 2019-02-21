@@ -112,11 +112,11 @@ While it is often assumed that the electrons are the recipients of the prescribe
 
 The two-fluid EBTEL equations are derived fully in \autoref{sec:ebtel} and are,
 \begin{align}
-    \frac{d}{dt}\bar{p}_e &=\,\frac{\gamma - 1}{L}[\psi_{TR} - (\mathcal{R}_{TR} + \mathcal{R}_C)] + \nonumber \\ & k_B\bar{n}\nu_{ei}(\bar{T}_i-\bar{T}_e) + (\gamma-1)\bar{Q}_{e},\label{eq:press_e_0d_2fl} \\[0.5em]
-    \frac{d}{dt}\bar{p}_i &=\,-\frac{\gamma - 1}{L}\psi_{TR} + k_B\bar{n}\nu_{ei}(\bar{T}_e-\bar{T}_i) + \nonumber \\ &(\gamma-1)\bar{Q}_{i},\label{eq:press_i_0d_2fl} \\[0.5em]
-    \frac{d}{dt}\bar{n} &=\,\frac{c_2(\gamma-1)}{c_3\gamma Lk_B\bar{T}_e}(\psi_{TR} - F_{ce,0}-\mathcal{R}_{TR}).	\label{eq:mass_0d_2fl}
+    \frac{d}{dt}\bar{p}_e &= \frac{\gamma - 1}{L}[\psi_{TR} - (\mathcal{R}_{TR} + \mathcal{R}_C)] + k_B\bar{n}\nu_{ei}(\bar{T}_i-\bar{T}_e) + (\gamma-1)\bar{Q}_{e},\label{eq:press_e_0d_2fl} \\[0.5em]
+    \frac{d}{dt}\bar{p}_i &= -\frac{\gamma - 1}{L}\psi_{TR} + k_B\bar{n}\nu_{ei}(\bar{T}_e-\bar{T}_i) + (\gamma-1)\bar{Q}_{i},\label{eq:press_i_0d_2fl} \\[0.5em]
+    \frac{d}{dt}\bar{n} &= \frac{c_2(\gamma-1)}{c_3\gamma Lk_B\bar{T}_e}(\psi_{TR} - F_{ce,0}-\mathcal{R}_{TR}).	\label{eq:mass_0d_2fl}
 \end{align}
-This set of equations is closed by the equations of state $p_e=k_BnT_e$ and $p_i=k_BnT_i$. While the notation above is largely self-evident, we draw attention to the additional term $\psi_{TR}$ which originates in the need to maintain charge and current neutrality and is defined by \autoref{eq:psi_TR}. Additionally, in both the single- and two-fluid versions of EBTEL used here, we have implemented an adaptive time-stepping routine to ensure that we are correctly resolving the thermal conduction timescale.
+This set of equations is closed by the equations of state $p_e=k_BnT_e$ and $p_i=k_BnT_i$. While the notation above is largely self-evident, we draw attention to the additional term $\psi_{TR}$ which originates in the need to maintain charge and current neutrality and is defined by \autoref{hot-plasma:eq:psi_TR}. Additionally, in both the single- and two-fluid versions of EBTEL used here, we have implemented an adaptive time-stepping routine to ensure that we are correctly resolving the thermal conduction timescale.
 
 \subsection{Ionization Non-equilibrium}\label{hot-plasma:subsec:nei_theory}
 
@@ -130,7 +130,7 @@ The feature that will prove of great relevance in our results is that despite th
 
 We now show a series of simulations of a single nanoflare with our zero-dimensional single- and two-fluid hydrodynamic EBTEL models, and the HYDRAD code. \citetalias{barnes_inference_2016-1} discusses long trains of multiple nanoflares of varying frequency in multiple loops.
 
-An important output of all these models is the coronal emission measure. In EBTEL the emission measure for the entire coronal part of the loop is calculated using the familiar expression $\mathrm{EM}=n^2(2L)$, where $L$ is the loop half-length. We consider a temperature range of $4.0\le\log{T}\le8.5$ with bin sizes of $\Delta\log{T}=0.01$. At each time $t_i$, the coronal temperature range $[T_0,T_a]$ is calculated from $\bar{T}$ ($\bar{T}_e$ for the two-fluid model). For each bin that falls within $[T_0,T_a]$, $\bar{n}_i^2(2L)$ is added to that bin, where $\bar{n}_i$ is the spatially-averaged number density at $t_i$. The emission measure in each bin is then averaged over the entire simulation period. When measured observationally, $\mathrm{EM}(T)$ is a line-of-sight quantity. Assuming an aspect ratio (i.e. ratio of loop length to loop width) of 10, we apply a correction factor 1/10 to all calculated $\mathrm{EM}$ curves. The emission measure from HYDRAD is calculated using quantities averaged over the upper 80\% of the loop which corresponds to the coronal portion of the loop.
+An important output of all these models is the coronal emission measure. In EBTEL the emission measure for the entire coronal part of the loop is calculated using the familiar expression $\mathrm{EM}=n^2(2L)$, where $L$ is the loop half-length. We consider a temperature range of $4.0\le\log{T}\le8.5$ with bin sizes of $\Delta\log{T}=0.01$. At each time $t_i$, the spatially-averaged coronal temperature $\bar{T}$, weighted by $\bar{n}_i^2(2L)$, where $\bar{n}_i$ is the spatially-averaged number density at $t_i$, is binned in temperature. The emission measure in each bin is then averaged over the entire simulation period. When measured observationally, $\mathrm{EM}(T)$ is a line-of-sight quantity. The emission measure from HYDRAD is calculated using quantities averaged over the upper 90\% of the loop which corresponds to the coronal portion of the loop.
 
 \subsection{Single-fluid Parameter Variations}\label{hot-plasma:subsec:sf_par_var}
 
@@ -139,12 +139,13 @@ An important output of all these models is the coronal emission measure. In EBTE
 fig = plt.figure(figsize=texfigure.figsize(
     pytex,
     scale=1,
-    height_ratio=1/2,
+    height_ratio=2/3,
 ))
 ax1 = plt.subplot2grid((2,2), (0,0))
 ax2 = plt.subplot2grid((2,2), (1,0))
 ax3 = plt.subplot2grid((2,2), (0,1), rowspan=2)
 for i,tau in enumerate(durations):
+    # EBTEL
     # Configure EBTEL run
     config = copy.deepcopy(base_config)
     config['force_single_fluid'] = True
@@ -159,7 +160,7 @@ for i,tau in enumerate(durations):
     res = run_ebtel(config, EBTEL_DIR)
     # Plot temperature and density
     ax1.plot(res['time'], res['electron_temperature'].to(u.MK), color=PALETTE[i],
-             label=r'$\tau=$' + f'{tau:.0f}' + r' \si{\second}',)
+             label=f'$\\tau={tau:.0f}$' + r' \si{\second}',)
     ax2.plot(res['time'], res['density']/1e8, color=PALETTE[i])
     # Plot emission measure
     bins, em = calculate_em(
@@ -170,6 +171,20 @@ for i,tau in enumerate(durations):
         bins_T=bins_T,
     )
     plot_hist(ax3, em.value, bins.value, color=PALETTE[i],)
+    # HYDRAD
+    # Read results
+    with h5py.File(os.path.join(ch5.data_dir, 'hydrad_results.h5'), 'r') as hf:
+        t = u.Quantity(hf['time'], hf['time'].attrs['unit'])
+        T = u.Quantity(hf[f'/single/tau{tau:.0f}/electron_temperature'],
+                       hf[f'/single/tau{tau:.0f}/electron_temperature'].attrs['unit'])
+        n = u.Quantity(hf[f'/single/tau{tau:.0f}/density'],
+                       hf[f'/single/tau{tau:.0f}/density'].attrs['unit'])
+    # Plot temperature and density
+    ax1.plot(t, T.to(u.MK), color=PALETTE[i], ls=':')
+    ax2.plot(t, n/1e8, color=PALETTE[i], ls=':')
+    # Plot emission measure
+    bins, em = calculate_em(t, T, n, 2*config['loop_length'], bins_T=bins_T)
+    plot_hist(ax3, em.value, bins.value, color=PALETTE[i], linestyle=':')
     
 # Limits and scales
 ax1.set_xlim(0.5, config['total_time'])
@@ -190,18 +205,285 @@ ax3.yaxis.set_label_position('right')
 ax3.yaxis.set_major_locator(matplotlib.ticker.LogLocator(base=10.0, numticks=3))
 # Legend
 ax1.legend(frameon=False, ncol=len(durations), loc='lower center',
-           bbox_to_anchor=(1.05 , 1.02))
+           bbox_to_anchor=(1.02 , 1.01))
 # Labels
 ax1.set_ylabel(r'$T$ $[\si{\mega\kelvin}]$')
 ax2.set_ylabel(r'$n$ $[\num{e8}\si{\per\cubic\cm}]$')
 ax2.set_xlabel(r'$t$ $[\si{\second}]$')
 ax3.set_ylabel(r'$\textup{EM}(T)$ $[\si{\cm\tothe{-5}}]$')
 ax3.yaxis.set_label_position('right')
-ax3.set_xlabel(r'$T$ $[\si{\mega\kelvin}]$')
-plt.subplots_adjust(hspace=0., wspace=0.05)
+ax3.set_xlabel(r'$T$ $[\si{\kelvin}]$')
+plt.subplots_adjust(hspace=0.03, wspace=0.025)
 # Save
-tfig = ch5.save_figure('hot-plasma:sf_tnem', fext='.pgf')
+tfig = ch5.save_figure('hot-plasma:sf-tnem', fext='.pgf')
 tfig.caption = r'\textit{Left:} Temperature (upper panel) and density (lower panel) profiles for a loop with $2L=\SI{80}{\mega\m}$. Each heating profile is triangular in shape with a steady background heating of $H_{bg}=\SI{3.5e-5}{\erg\per\cubic\cm\per\second}$. The duration of the heating pulse is varied according to $\tau=\SIlist[list-final-separator = {,}]{20;40;200;500}{\second}$, with each value of $\tau$ indicated by a different color, as shown in the right panel. The total energy injected into the loop is fixed at \SI{10}{\erg\per\cubic\cm}. Note that time is shown on a log scale to emphasize the behavior of the heating phase. \textit{Right:} Corresponding $\emd[T]$ for each pulse duration $\tau$. The relevant parameters and associated colors are shown in the legend. $\emd[T]$ is calculated according to the procedure outlined in the beginning of \autoref{hot-plasma:sec:results}. In all panels, the solid (dotted) lines show the corresponding EBTEL (HYDRAD) results (see \autoref{hot-plasma:subsubsec:hydrad_comparison_sf}).'
 \end{pycode}
 \py[chapter5]|tfig|
 % spell-checker: enable %
+
+\subsubsection{Varying Pulse Duration}\label{hot-plasma:subsubsec:pulse_res}
+
+In the first set of results we assume the plasma behaves as a single fluid, use a flux limiter of $f=1$, and ignore ionization non-equilibrium. The solid curves in \autoref{fig:hot-plasma:sf-tnem} show average temperature (upper left panel) and density (lower left panel) as a function of time for a single nanoflare in a loop with $2L = \SI{80}{\mega\m}$ where the EBTEL approach is used.  The heating function takes the form of a triangular pulse for four different pulse durations, $\tau=$ 20, 40, 200, and 500 s, as indicated by the legend in the right panel. The peak heating rate is varied such that the total energy input is \SI{10}{\erg\per\cubic\cm} for all cases. These parameters correspond roughly to bright AR core loops \citep{warren_systematic_2012}. In order to ensure that the temperature and density do not become negative, a small background heating of magnitude $H_{bg}=\SI{3.5e-5}{\erg\per\cubic\cm\per\second}$ is enforced at all times. It can be seen that shorter pulses give higher temperatures, as expected. Furthermore, in this early heating phase, one would expect the maximum temperature to scale roughly as $H_0^{2/7}$ (where $H_0$ is the peak heating rate); this is approximately what is found. On the other hand, the different pulse durations give approximately the same maximum density, with the shortest pulse reaching its peak value roughly \SI{200}{\second} before the longest.
+
+The solid lines in the right panel of \autoref{fig:hot-plasma:sf-tnem} show the corresponding EBTEL emission measure distributions, $\emd[T]$. The temperature of maximum emission ($T_m$) and the peak emission measure ($\emd[T_m]$)are the same in all cases and are consistent with those found in the studies of AR core loops \citep[e.g.][]{warren_systematic_2012}. While shorter pulses lead to higher initial temperatures, the shape of the emission measure below $T_m$ is independent of the properties of the heating pulse, indicating that this part of the emission measure distribution cannot provide information about the actual nanoflare duration or intensity. All cases show evidence of the heating phase, namely the bump on $\mathrm{EM}(T)$ at $\log{(T)}=\numlist[list-final-separator = {,}]{6.85;7;7.2;7.3}$. Below these bumps to just above $T = T_m$, $\emd[T]$ scales as $T^{-5}-T^{-5.5}$ for all cases, again indicating that information about the heating process is lost at these temperatures. However, detection of emission above $T_m$ in a single structure would still be evidence for nanoflare heating, though of undetermined duration.
+
+For integration over the lifetime of unresolved structures lying transverse to the line of sight, one can write down an expression $\emd[T] \sim n^2\tau_\textup{cool}(n, T)$ which simply states that what matters for determining $\emd[T]$ is how long the plasma spends at any given temperature \citep[e.g.][]{cargill_implications_1994,cargill_nanoflare_2004}. For an analytic solution for the cooling, one can formally define $\tau_{cool}(n, T) = (T/(dT/dt))$. In the absence of a formal solution, order of magnitude scalings can be used: the difference with analytic solutions being a numerical factor. To obtain an expression $\emd[T]\propto T^{-b}$, one needs to provide a relation between $T$ and $n$. For conductive cooling of the corona, one can write $\tau_{cool} \sim nL^2T^{-5/2}$, giving $\emd[T]\sim n^3L^2T^{-5/2}$. In determining the relationship between $T$ and $n$, two limits are those of constant density and constant pressure. The former gives static conductive cooling \citep[e.g.][]{antiochos_influence_1976} and the latter evaporative cooling with constant thermal energy \citep[e.g.][]{antiochos_evaporative_1978}, which then lead to $b = \numlist[list-final-separator = {,}]{5/2;11/2}$, respectively. Fitting the EBTEL $\emd[T]$ results for $\tau\le200$ s (see right panel of \autoref{fig:hot-plasma:sf-tnem}) to $T^{-b}$ on $10^{6.8}<T<10^{7}$ K yields $b\sim4.5-5$ which are more consistent with the latter.
+
+\subsubsection{HYDRAD Comparison}\label{hot-plasma:subsubsec:hydrad_comparison_sf}
+
+We now compare EBTEL and HYDRAD results for the different values of $\tau$. The dotted lines in all three panels of \autoref{fig:hot-plasma:sf-tnem} show the corresponding HYDRAD results, where averaging is over the upper 90\% of the loop. The background heating in the two codes has been adjusted to ensure that EBTEL and HYDRAD start with the the same initial density since the initial temperature rise will depend on the assumed background density.
+
+There is good agreement between the HYDRAD and EBTEL results for $\tau\ge\SI{200}{\second}$ with the well-documented result that EBTEL gives somewhat higher density maxima than HYDRAD \citep[see][]{cargill_enthalpy-based_2012}. For $\tau=\SIlist[list-final-separator]{20;40}{\second}$, while the peak temperatures are at a level of agreement consistent with previous work \citep{cargill_enthalpy-based_2012}, there are notable differences in the initial temperature decay from the maximum in the upper left panel of \autoref{fig:hot-plasma:sf-tnem} due to the difference in the initial density response.
+
+It can be seen that the EBTEL density begins to rise almost immediately following the onset of heating, while there is a lag in the HYDRAD density. This is due to a delay in the upflow of material from the TR because a finite time is required to get material moving up the loop, an effect absent from 0D models. The slower density rise seen with HYDRAD leads to the faster conductive cooling. Another feature of the short pulses is the very spiky density profile as a function of time. This is a well-known effect, particularly in flare simulations, and is due to pairs of oppositely-directed flows colliding at the loop top, and subsequently bouncing back and forth.
+
+As a result of this discrepancy in the density behavior, while the emission measure calculated from the EBTEL model ``sees'' temperatures well in excess of 10 MK for short pulses, in the HYDRAD model this will not be the case. This is evident from the short pulses in the right panel of \autoref{fig:hot-plasma:sf-tnem}: the emission above 10 MK predicted by EBTEL is not present in the HYDRAD runs, the emission cutting off just above \SI{e7}{\kelvin}. For the longer pulses, EBTEL still shows emission at higher temperatures, but the difference with HYDRAD is evident now over a smaller temperature range. Also, the characteristic bumps on the emission measure seen with EBTEL are largely eliminated in the HYDRAD runs.
+
+This regime of short heating pulses was not considered in our earlier work using EBTEL, and the associated comparisons with field-aligned hydrodynamic codes \citep{klimchuk_highly_2008,cargill_enthalpy-based_2012}, where pulses of order \SI{200}{\second} or greater were considered. Other workers have used short pulses with EBTEL, albeit much less intense \citep{tajfirouze_euv_2016,tajfirouze_time-resolved_2016}. Clearly the more gentle the heating profile used, the slower the rise in the EBTEL density, leading to results closer to those found using HYDRAD. Thus it appears that caution is warranted in the use of approximate models for short, intense heating pulses. This restriction only applies to the high temperature regime: as can be seen from \autoref{fig:hot-plasma:sf-tnem}, the emission measure profiles below \SI{e6.8}{\kelvin} are not affected. Nonetheless, the absence of emission near \SI{10}{\mega\kelvin} for short pulses constitutes one of many obstacles to quantifying any hot plasma component due to nanoflares.
+
+\subsubsection{Heat Flux Limiter}\label{hot-plasma:subsubsec:hf_res}
+
+% spell-checker: disable %
+\begin{pycode}[chapter5]
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=0.65,
+    height_ratio=1,
+))
+ax = fig.gca()
+for i,fl in enumerate(flux_limiters):
+    config = copy.deepcopy(base_config)
+    config['force_single_fluid'] = True
+    config['heating']['partition'] = 0.5
+    config['heating']['events'] = [{'event': {
+        'magnitude': 2*total_energy/durations[2],
+        'rise_start': 0.,
+        'rise_end': durations[2]/2.,
+        'decay_start': durations[2]/2.,
+        'decay_end': durations[2],
+    }}]
+    config['saturation_limit'] = fl[0]
+    config['use_flux_limiting'] = fl[1]
+    res = run_ebtel(config, EBTEL_DIR)
+    bins, em = calculate_em(
+        res['time'],
+        res['electron_temperature'],
+        res['density'],
+        2*config['loop_length'],
+        bins_T=bins_T,
+    )
+    if fl[1]:
+        frac = Fraction(fl[0]).limit_denominator()
+        if frac.numerator == 1 and frac.denominator != 1:
+            label = r'$f=$' + f'{frac.numerator:.0f}/{frac.denominator:.0f}'
+        else:
+            label = r'$f=$' + f'{fl[0]:.2f}'
+    else:
+        label='Spitzer'
+    plot_hist(ax, em.value, bins.value, color=PALETTE[i], label=label, linestyle='-')
+
+# Labels and limits
+ax.set_xscale('log')
+ax.set_yscale('log')
+ax.set_ylim([1e+23, 1e+28])
+ax.set_xlim([10**6.5, 10**7.5])
+ax.legend(frameon=False, loc=1)
+ax.yaxis.set_major_locator(matplotlib.ticker.LogLocator(base=10.0, numticks=3))
+ax.xaxis.set_major_locator(matplotlib.ticker.LogLocator(base=10.0, numticks=1))
+ax.set_ylabel(r'$\textup{EM}(T)$ $[\si{\cm\tothe{-5}}]$')
+ax.set_xlabel(r'$T$ $[\si{\kelvin}]$')
+# Save
+tfig = ch5.save_figure('hot-plasma:sf-hf-em', fext='.pgf')
+tfig.caption = r'$\emd[T]$ calculated from the single-fluid EBTEL model when only pure Spitzer conduction is used and when a flux limiter is imposed according to \autoref{hot-plasma:subsec:hf_theory}. In the free-streaming limit, five different values of $f$ are considered (see legend). The pulse duration is $\tau=200$ s. All other parameters are the same as those discussed in \autoref{hot-plasma:subsubsec:pulse_res}. Note that here we only show $\emd[T]$ for $T>T_m$ as the cool side of $\emd[T]$ is unaffected by our choice of $f$.'
+tfig.figure_width = r'0.65\textwidth'
+\end{pycode}
+\py[chapter5]|tfig|
+% spell-checker: enable %
+
+\autoref{fig:hot-plasma:sf-hf-em} shows the effect of using a flux limiter versus Spitzer conduction on the emission measure distribution. Five different values of $f$ are shown: 1 \citep[consistent with HYDRAD]{bradshaw_influence_2013}, 0.53 \citep{karpen_nonlocal_1987}, $1/6$ \citep{patsourakos_coronal_2005}, 0.1 \citep{luciani_nonlocal_1983}, and $1/30$. The pulse duration is \SI{200}{\second} and only the EBTEL results are shown. Note that for this pulse length, the HYDRAD results are expected to be similar.
+
+As expected, inclusion of a limiter extends $\emd[T]$ to higher temperatures, though this is only notable above 10 MK. As the temperature falls to this value, evaporative upflows have increased the coronal density so that the Spitzer description is recovered. Above 10 MK flux limiting gradually becomes important, albeit with a small emission measure. Using $f=0.53,1$ yield $\emd[T]$ that are not discernibly different from that produced by pure Spitzer conduction while $f=1/6,0.1$ extend $\emd[T]$ to significantly hotter temperatures. $f=1/30$, the most extreme flux limiter, yields an emission well above $\SI{e7.5}{\kelvin}$. Note that for all cases, $\emd[T]$ converges to the same value for $T\le\SI{10}{\mega\kelvin}$.
+
+For flux-limited thermal conduction, $\tau_{cool} \sim LT^{-1/2}$ so that the parameter $b$ lies between 1/2 and 5/2, depending on the assumption about $n$. For $f = 1/30$, $b = 5/2$ is found in \autoref{fig:hot-plasma:sf-hf-em} by fitting $\emd[T]$ to $T^{-b}$ on $\SI{e7}{\kelvin} \le T \le \SI{e7.5}{\kelvin}$. Since the free-streaming limit slows conduction cooling relative to that given by Spitzer, the plasma will spend more time at any given temperature, leading to smaller values of $b$. Similar conclusions hold for other conduction models \citep[e.g. the non-local model discussed in the coronal context by][]{karpen_nonlocal_1987,west_lifetime_2008} since they all inhibit conduction. While limiting of conduction is often regarded as an important process in coronal cooling, these results suggest that for nanoflare heating it may not be that important unless extreme values of the limiting parameter are used.
+
+\subsection{Two-fluid Effects}\label{hot-plasma:subsec:two-fluid-res}
+
+\subsubsection{Electron Heating}\label{hot-plasma:subsubsec:electron-heating}
+
+% spell-checker: disable %
+\begin{pycode}[chapter5]
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=1,
+    height_ratio=2/3,
+))
+ax1 = plt.subplot2grid((3,2), (0,0))
+ax2 = plt.subplot2grid((3,2), (1,0))
+ax3 = plt.subplot2grid((3,2), (2,0))
+ax4 = plt.subplot2grid((3,2), (0,1), rowspan=3)
+for i,tau in enumerate(durations):
+    # EBTEL
+    # Configure EBTEL run
+    config = copy.deepcopy(base_config)
+    config['force_single_fluid'] = False
+    config['heating']['partition'] = 1.0
+    config['heating']['events'] = [{'event': {
+        'magnitude': 2 * total_energy/tau,
+        'rise_start': 0.,
+        'rise_end': tau/2.,
+        'decay_start': tau/2.,
+        'decay_end': tau,
+    }}]
+    res = run_ebtel(config, EBTEL_DIR)
+    # Plot temperature and density
+    ax1.plot(res['time'], res['electron_temperature'].to(u.MK), color=PALETTE[i],
+             label=f'$\\tau={tau:.0f}$' + r' \si{\second}',)
+    ax2.plot(res['time'], res['ion_temperature'].to(u.MK), color=PALETTE[i],)
+    ax3.plot(res['time'], res['density']/1e8, color=PALETTE[i])
+    # Plot emission measure
+    bins, em = calculate_em(
+        res['time'],
+        res['electron_temperature'],
+        res['density'],
+        2*config['loop_length'],
+        bins_T=bins_T,
+    )
+    plot_hist(ax4, em.value, bins.value, color=PALETTE[i],)
+    # HYDRAD
+    # Read results
+    with h5py.File(os.path.join(ch5.data_dir, 'hydrad_results.h5'), 'r') as hf:
+        t = u.Quantity(hf['time'], hf['time'].attrs['unit'])
+        Te = u.Quantity(hf[f'/electron/tau{tau:.0f}/electron_temperature'],
+                        hf[f'/electron/tau{tau:.0f}/electron_temperature'].attrs['unit'])
+        Ti = u.Quantity(hf[f'/electron/tau{tau:.0f}/ion_temperature'],
+                        hf[f'/electron/tau{tau:.0f}/ion_temperature'].attrs['unit'])
+        n = u.Quantity(hf[f'/electron/tau{tau:.0f}/density'],
+                       hf[f'/electron/tau{tau:.0f}/density'].attrs['unit'])
+    # Plot temperature and density
+    ax1.plot(t, Te.to(u.MK), color=PALETTE[i], ls=':')
+    ax2.plot(t, Ti.to(u.MK), color=PALETTE[i], ls=':')
+    ax3.plot(t, n/1e8, color=PALETTE[i], ls=':')
+    # Plot emission measure
+    bins, em = calculate_em(t, Te, n, 2*config['loop_length'], bins_T=bins_T)
+    plot_hist(ax4, em.value, bins.value, color=PALETTE[i], linestyle=':')
+    
+# Limits
+ax1.set_xlim(0.5, config['total_time'])
+ax2.set_xlim(0.5, config['total_time'])
+ax3.set_xlim(0.5, config['total_time'])
+ax4.set_xlim([10**5.5, 10**7.5])
+ax1.set_ylim(0, 25)
+ax2.set_ylim(0, 8)
+ax3.set_ylim(0, 50)
+ax4.set_ylim([1e+23, 1e+28])
+# Scales
+ax1.set_xscale('log')
+ax2.set_xscale('log')
+ax3.set_xscale('log')
+ax4.set_xscale('log')
+ax4.set_yscale('log')
+# Ticks
+ax1.xaxis.set_major_formatter(matplotlib.ticker.NullFormatter())
+ax2.xaxis.set_major_formatter(matplotlib.ticker.NullFormatter())
+ax1.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(nbins=4, prune='lower'))
+ax2.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(nbins=4, prune='lower'))
+ax3.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(nbins=4,))
+ax4.yaxis.tick_right()
+ax4.yaxis.set_label_position('right')
+ax4.yaxis.set_major_locator(matplotlib.ticker.LogLocator(base=10.0, numticks=3))
+# Legend
+ax1.legend(frameon=False, ncol=len(durations), loc='lower center',
+            bbox_to_anchor=(1.02 , 1.01))
+# Labels
+ax1.set_ylabel(r'$T_e$ $[\si{\mega\kelvin}]$')
+ax2.set_ylabel(r'$T_i$ $[\si{\mega\kelvin}]$')
+ax3.set_ylabel(r'$n$ $[\num{e8}\si{\per\cubic\cm}]$')
+ax3.set_xlabel(r'$t$ $[\si{\second}]$')
+ax4.set_ylabel(r'$\textup{EM}(T)$ $[\si{\cm\tothe{-5}}]$')
+ax4.yaxis.set_label_position('right')
+ax4.set_xlabel(r'$T$ $[\si{\kelvin}]$')
+plt.subplots_adjust(hspace=0.04, wspace=0.025)
+# Save
+tfig = ch5.save_figure('hot-plasma:tfe-tnem', fext='.pgf')
+tfig.caption = r'Two-fluid EBTEL simulations for $\tau=\SIlist[list-final-separator = {,}]{20;40;200;500}{\second}$ in which only the electrons are heated. \textit{Left}: Electron temperature (upper panel), ion temperature (middle panel), and density (lower panel). \textit{Right:} Corresponding $\emd[T]$ calculated according to \autoref{hot-plasma:sec:results}. The pulse durations and associated colors for all panels are shown on the right. All parameters are the same as those discussed in \autoref{hot-plasma:subsubsec:pulse_res}. In all panels, the solid (dotted) lines show the corresponding EBTEL (HYDRAD) results.'
+\end{pycode}
+\py[chapter5]|tfig|
+% spell-checker: enable %
+
+We now use our two-fluid model to consider the role of separate electron or ion heating, focusing on cases when only the electrons or ions are heated in order to highlight the essential difference between the two scenarios. Intermediate cases of energy distribution will be considered in subsequent papers. The solid lines in the left panels of \autoref{fig:hot-plasma:tfe-tnem} show the electron temperature (upper panel), ion temperature (middle panel) and density (lower panel) as a function of time from the two-fluid EBTEL model for $\tau=\SIlist[list-final-separator = {,}]{20;40;200;500}{\second}$ for electron heating. The dotted lines show the corresponding HYDRAD results and are discussed in \autoref{hot-plasma:subsubsec:hydrad-comparison-tf} The electrons now cool by a combination of thermal conduction and temperature equilibration, the latter becoming significant at 150 (450) s for short (long) pulses. The ions thus heat rather slowly, reaching a peak temperature of 5 MK, which overshoots the electron temperature at that time. The ions then cool via ion thermal conduction and equilibration, with $T_e \approx T_i$ after typically a few hundred seconds.
+
+The solid lines in the right panel of \autoref{fig:hot-plasma:tfe-tnem} show the resulting $\emd[T]$. In the case of electron heating and $\tau<\SI{500}{\second}$, the emission measure slope over the temperature interval $\log{T_M}<\log{T}<6.8$ is considerably steeper compared to the single-fluid case. Recall that in the single-fluid case we assume that conduction is the only relevant cooling mechanism prior to the onset of radiative cooling such that under the assumption of constant pressure, $\emd[T] \propto T^{-11/2}$ (see \autoref{hot-plasma:subsec:sf-par-var}). When we allow for electron-ion non-equilibrium and heat only the electrons, both of these assumptions break down. Following the onset of conductive cooling, $T_e \gg T_i$, but the loop has now begun to fill. The equilibration term plays the part of a cooling term so long as $T_e>T_i$ and is the dominant cooling mechanism for several hundred seconds in between the peak electron temperature and the peak density (see \autoref{fig:hot-plasma:psi-tr-compare}). Thus, our expression for $\tau_\textup{cool}$ should include some contribution from the equilibration term in this temperature regime.
+
+% spell-checker: disable %
+\begin{pycode}[chapter5]
+# Setup figure and axes
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=0.65,
+    height_ratio=1,
+))
+ax = fig.gca()
+ax2 = ax.twinx()
+
+# Single fluid
+config = copy.deepcopy(base_config)
+config['force_single_fluid'] = True
+config['heating']['partition'] = 0.5
+config['heating']['events'] = [{'event': {
+    'magnitude': 2*total_energy/durations[2],
+    'rise_start': 0.,
+    'rise_end': durations[2]/2.,
+    'decay_start': durations[2]/2.,
+    'decay_end': durations[2],
+}}]
+res_sf = run_ebtel(config, EBTEL_DIR)
+
+# Two fluid
+config['force_single_fluid'] = False
+config['heating']['partition'] = 1.0
+res_tf = run_ebtel(config, EBTEL_DIR)
+
+# Plot pressure
+lnp = ax.plot(res_sf['electron_temperature'], res_sf['electron_pressure']+res_sf['ion_pressure'], 
+              color=PALETTE[0], ls='-', label=r'$p$')
+lnpe = ax.plot(res_tf['electron_temperature'], res_tf['electron_pressure'],
+               color=PALETTE[0], ls='--', label=r'$p_e$')
+lnpi = ax.plot(res_tf['electron_temperature'], res_tf['ion_pressure'],
+               color=PALETTE[0], ls=':', label=r'$p_i$')
+lnpepi = ax.plot(res_tf['electron_temperature'], res_tf['electron_pressure']+res_tf['ion_pressure'], 
+                 color=PALETTE[0], ls='-.', label=r'$p_e+p_i$')
+
+# Plot density
+lnns = ax2.plot(res_sf['electron_temperature'], res_sf['density'],
+                color=PALETTE[1], ls='-', label=r'$n_s$')
+lnnt = ax2.plot(res_tf['electron_temperature'], res_tf['density'],
+                color=PALETTE[1], ls='--', label=r'$n_t$')
+
+# Scales
+ax.set_xscale('log')
+ax2.set_xscale('log')
+ax.set_yscale('log')
+ax2.set_yscale('log')
+# Limits
+ax.set_xlim([10**5.5,10**7.2])
+ax2.set_xlim([10**5.5,10**7.2])
+ax.set_ylim(1e-2,1e1)
+ax2.set_ylim(1e8,1e10)
+# Labels
+ax.set_xlabel(r'$T$ $[\si{\kelvin}]$')
+ax.set_ylabel(r'$p$ $[\si{\dyne\per\square\cm}]$')
+ax2.set_ylabel(r'$n$ $[\si{\per\cubic\cm}]$')
+# Legend
+lines = lnp + lnpe + lnpi + lnpepi + lnns + lnnt
+labels = [l.get_label() for l in lines]
+ax.legend(lines,labels,loc=2,frameon=False,ncol=2)
+
+# Save
+tfig = ch5.save_figure('hot-plasma:pnt-state-space', fext='.pgf')
+tfig.caption = r'Pressure (left axis) and density (right axis) as a function of temperature for the $\tau=\SI{200}{\second}$ case. All parameters are the same as those discussed in \autoref{hot-plasma:subsubsec:pulse_res}. The single-fluid pressure $p$ and density $n$ are denoted by the solid blue and orange lines, respectively. The electron pressure, $p_e$, ion pressure, $p_i$, and two-fluid total pressure, $p_e+p_i$, are denoted by the dashed, dotted, and dot-dashed blue lines respectively. The two-fluid density is represented by the dashed orange line. Pressure, density, and temperature are all shown on a log scale.'
+tfig.figure_width = r'0.65\textwidth'
+\end{pycode}
+\py[chapter5]|tfig|
+% spell-checker: enable %
+
+\autoref{fig:hot-plasma:pnt-state-space} shows pressure (blue lines) and density (orange lines) as a function of temperature for the $\tau=\SI{200}{\second}$ case; both the single-fluid case and the case where only the electrons are heated are shown. While $p_e+p_i$ (blue dotted line), the total pressure, like the single-fluid pressure $p$ (blue solid line) is constant over the interval $\SI{e6.65}{\kelvin}<T<\SI{e6.8}{\kelvin}$, the electron pressure, $p_e$ (blue dashed line) is not, meaning $n\propto T_e^{-1}$ is not a valid scaling law in the two-fluid, electron-heating case. Comparing the two-fluid density (dashed orange line) and the single-fluid density (solid orange line) easily confirms this. To derive an emission measure slope for the case in which only the electrons are heated, these effects must be accounted for in the $\mathrm{EM}(T)\sim n^2\tau_{cool}(n,T)$ scaling. Thus, while a power-law $b$ may be calculated by fitting the hot part of the $\mathrm{EM}(T)$ to $T^{-b}$, it is difficult to gain any physical insight from such a fit using the scaling discussed in \autoref{hot-plasma:subsubsec:pulse_res}.

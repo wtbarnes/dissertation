@@ -43,6 +43,7 @@ import copy
 import texfigure
 pytex.formatter = texfigure.repr_latex_formatter
 
+import h5py
 import numpy as np
 from scipy.interpolate import interp1d, splev
 import matplotlib
@@ -101,6 +102,8 @@ rc = {
 		r'\DeclareSIUnit[number-unit-product={}]\dn{DN}',
 		r'\DeclareSIUnit[number-unit-product={}]\pixel{pixel}',
 		r'\DeclareSIUnit[number-unit-product={}]\photon{photon}',
+		r'\DeclareSIUnit[number-unit-product={}]\gauss{G}',
+		r'\DeclareSIUnit[number-unit-product={}]\dyne{dyne}',
 	],
 	'pgf.rcfonts': False,
 	'text.latex.preamble': [
@@ -110,6 +113,8 @@ rc = {
 		r'\DeclareSIUnit[number-unit-product={}]\dn{DN}',
 		r'\DeclareSIUnit[number-unit-product={}]\pixel{pixel}',
 		r'\DeclareSIUnit[number-unit-product={}]\photon{photon}',
+		r'\DeclareSIUnit[number-unit-product={}]\gauss{G}',
+		r'\DeclareSIUnit[number-unit-product={}]\dyne{dyne}',
 	],
 	'text.usetex': True,
 	'font.family': 'serif',

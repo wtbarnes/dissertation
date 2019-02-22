@@ -14,7 +14,9 @@
 %\end{pycode}
 % spell-checker: enable
 
-% conceptual comments on loops; maybe give MHD equations then say we dont need them
+% conceptual comments on loops
+% why is this treatment valid?
+% maybe give MHD equations then say we dont need them
 
 This is the chapter on coronal loops
 
@@ -36,13 +38,28 @@ This is the chapter on coronal loops
 
 \section{Hydrodynamics}
 
-%Do we need to derive the hydrodynamic equations?
+%show two-fluid hydro equations and how they relate to previously stated MHD equations
+% discuss physics of each term
 
-\subsection{Field-aligned Models}
+\subsection{The HYDRAD Model}
 
 %Discuss HYDRAD in here, advantages, maybe a sample solution
+% briefly discuss capabilities, numerical treatment
 
 \subsection{The EBTEL Model}\label{sec:ebtel}
 
 %Derive normal and two-fluid EBTEL equations, show examples
 
+\subsubsection{Two-fluid Model}\label{sec:ebtel-two-fluid}
+
+% Derivation of two-fluid model as given in second appendix of Barnes et al (2016a)
+% details of numerical approach in ebtel++
+
+\subsubsection{Single-fluid Model}\label{sec:ebtel-single-fluid}
+
+% Show how two-fluid equations simplify to single-fluid model
+% point out that this was original model, developed by Klimchuk, Cargill, et al.
+
+\subsubsection{Modifications to $c_1$ During the Conductive Cooling Phase}\label{sec:c1-correction}
+
+% First appendix in Barnes et al (2016a)

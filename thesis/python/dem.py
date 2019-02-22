@@ -3,9 +3,16 @@ Various functions for plotting and computing the DEM
 """
 import numpy as np
 import astropy.units as u
+from scipy.interpolate import interp1d
 
 
-def calculate_em(t, T, n, L, bins_T=None):
+def calculate_em(t, T, n, L, bins_T=None, interpolate=False):
+    if interpolate:
+        t_new = np.arange(t[0].to(u.s).value, t[-1].to(u.s).value, 1) * u.s
+        t_new = t_new.to(t.unit)
+        T = interp1d(t.value, T.value,)(t_new.value) * T.unit
+        n = interp1d(t.value, n.value,)(t_new.value) * n.unit
+        t = t_new
     # Create bins
     if bins_T is None:
         bins_T = 10**(np.arange(4, 8.5, 0.05))*u.K
@@ -14,7 +21,7 @@ def calculate_em(t, T, n, L, bins_T=None):
     H, _, _ = np.histogram2d(
         T.value, t.value,
         bins=(bins_T.value, bins_t.value),
-        weights=np.gradient(t)/np.gradient(t).sum()*L*n.value**2
+        weights=np.diff(bins_t)/np.diff(bins_t).sum()*L*n.value**2
     )
     return bins_T, H.sum(axis=1)*u.cm**(-5)
 

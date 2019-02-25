@@ -41,6 +41,23 @@ This is the chapter on coronal loops
 %show two-fluid hydro equations and how they relate to previously stated MHD equations
 % discuss physics of each term
 
+% need to expand on these expressions, detail the terms
+
+The two-fluid field-aligned hydrodynamic mass and energy equations, as given by \citet{bradshaw_influence_2013}, are:
+\begin{align}
+    \frac{\partial\rho}{\partial t} &= -\frac{\partial(\rho v)}{\partial s}, \label{eq:1dmass} \\
+    \frac{\partial E_e}{\partial t} + \frac{\partial}{\partial s} \lbrack(E_e+p_e)v\rbrack &= v\frac{\partial p_e}{\partial s} - \frac{\partial F_{ce}}{\partial s} + \frac{1}{\gamma - 1}k_Bn\nu_{ei}(T_i-T_e) -n^2\Lambda(T_e)+Q_{e} , \label{eq:1denergy_e} \\
+    \frac{\partial E_i}{\partial t} + \frac{\partial }{\partial s}\lbrack(E_i+p_i)v\rbrack &= -v\frac{\partial p_e}{\partial s} - \frac{\partial F_{ci}}{\partial s} + \frac{1}{\gamma - 1}k_Bn\nu_{ei}(T_e-T_i) + \frac{\partial}{\partial s}\left(\frac{4}{3}\mu_iv\frac{\partial v}{\partial s}\right) +\rho v g_{\parallel} + Q_{i},\label{eq:1denergy_i}
+\end{align}
+where,
+\begin{align}
+    E_e =& \frac{p_e}{\gamma - 1} \label{eq:ee_closure}, \\
+    E_i =& \frac{p_i}{\gamma - 1} + \frac{\rho v^2}{2}, \label{eq:ei_closure}
+\end{align}
+and we assume closure through the ideal gas law, $p_e=k_BnT_e,\,p_i=k_BnT_i$. Note that we have assumed quasi-neutrality such that $n_e=n_i=n$ and $v_e=v_i=v$. It then follows that $\rho=m_en_e+m_in_i\approx m_in$.
+
+Note the right-hand side of \autoref{eq:1denergy_e} and \autoref{eq:1denergy_i}: the first term represents the energy loss or gain as the fluids move through the electric field that maintains quasi-neutrality, given by $E=-(1/ne)\partial p_e/\partial s$; the third term models the exhange of energy between the electron and ion populations via binary Coulomb collisions and is attributed to \citet{braginskii_transport_1965}. Though the expression presented here differs by a factor of 2 compared to that of \citeauthor{braginskii_transport_1965}, we maintain that the electron-ion equilibration time is not significantly changed by this relatively small numerical factor.
+
 \subsection{The HYDRAD Model}
 
 %Discuss HYDRAD in here, advantages, maybe a sample solution
@@ -55,6 +72,83 @@ This is the chapter on coronal loops
 % Derivation of two-fluid model as given in second appendix of Barnes et al (2016a)
 % details of numerical approach in ebtel++
 
+Plugging in these expressions for $E_e$ and $E_i$ and using the assumptions of sub-sonic flows ($v<C_s$) and loops shorter than a gravitational scale height ($L<150$ Mm) as outlined in \citet{klimchuk_highly_2008}, the two-fluid field-aligned hydrodynamic energy equations can be written,
+\begin{align}
+    \frac{1}{\gamma - 1}\frac{\partial p_e}{\partial t} + \frac{\gamma}{\gamma - 1}\frac{\partial}{\partial s}(p_ev) &= v\frac{\partial p_e}{\partial s} - \frac{\partial F_{ce}}{\partial s} + \frac{1}{\gamma - 1}k_Bn\nu_{ei}(T_i-T_e) -n^2\Lambda(T_e)+Q_{e}, \label{eq:1denergy_e_simp} \\[0.5em]
+    \frac{1}{\gamma - 1}\frac{\partial p_i}{\partial t} + \frac{\gamma}{\gamma - 1}\frac{\partial }{\partial s}(p_iv)&= -v\frac{\partial p_e}{\partial s} - \frac{\partial F_{ci}}{\partial s} + \frac{1}{\gamma - 1}k_Bn\nu_{ei}(T_e-T_i) + Q_{i}. \label{eq:1denergy_i_simp}
+\end{align}
+Notice that we have dropped the ion viscous and gravitational terms from  \autoref{eq:1denergy_i} as well as the kinetic energy term from \autoref{eq:ei_closure}. $Q_{e}$ and $Q_{i}$ represent the electron and ion heating terms, respectively. $F_{ce}$ and $F_{ci}$ are the electron and ion heat flux terms, respectively. In the case of Spitzer conduction, $\kappa_{0,e}=7.8\times10^{-7}$ and $\kappa_{0,i}=3.2\times10^{-8}$.
+
+The analysis now follows that of \citet{klimchuk_highly_2008} and \citet{cargill_enthalpy-based_2012}. Assuming symmetry about the loop apex, we integrate \autoref{eq:1denergy_e_simp} and \autoref{eq:1denergy_i_simp} over the coronal loop half-length $L$,
+\begin{align}
+    \frac{L}{\gamma - 1}\frac{d \bar{p}_e}{dt} &= \frac{\gamma}{\gamma - 1}(p_ev)_0 + F_{ce,0} + \psi_C - \mathcal{R}_C + L\bar{Q}_{e},\label{eq:1denergy_e_C} \\[0.5em]
+    \frac{L}{\gamma - 1}\frac{d \bar{p}_i}{dt} &= \frac{\gamma}{\gamma - 1}(p_iv)_0 + F_{ci,0} - \psi_C + L\bar{Q}_{i},\label{eq:1denergy_i_C}
+\end{align}
+where we have assumed the enthalpy flux and heat flux go to zero at the loop apex, $R_C=\int_C\mathrm{d}s\,n^2\Lambda(T_e)$ and,
+\begin{equation}
+    \psi_C=\int_C\mathrm{d}s\,v\frac{\partial p_e}{\partial s} + \int_C\mathrm{d}s\,\frac{k_B}{\gamma - 1}n\nu_{ei}(T_i - T_e).
+\end{equation}
+
+Similarly, integrating over the TR portion of the loop of thickness $\ell$, we obtain,
+\begin{align}
+    \frac{\gamma}{\gamma - 1}(p_ev)_0 &= - F_{ce,0} + \psi_{TR} - \mathcal{R}_{TR}, \label{eq:1denergy_e_TR} \\[0.5em]
+    \frac{\gamma}{\gamma - 1}(p_iv)_0 &=  - F_{ci,0} - \psi_{TR}, \label{eq:1denergy_i_TR}
+\end{align}
+where several terms are neglected because $\ell\ll L$ \citep{klimchuk_highly_2008}. Additionally, we have assumed that the enthalpy flux and heat flux go to zero at the top of the chromosphere, $R_{TR}=\int_{TR}\mathrm{d}s\,n^2\Lambda(T_e)$ and
+\begin{equation}
+    \psi_{TR}=\int_{TR}\mathrm{d}s\,v\frac{\partial p_e}{\partial s} + \int_{TR}\mathrm{d}s\,\frac{k_B}{\gamma - 1}n\nu_{ei}(T_i - T_e).
+\end{equation}
+The second term in this expression is usually small, but is retained for completeness.  Plugging \autoref{eq:1denergy_e_TR} (\autoref{eq:1denergy_i_TR}) into \autoref{eq:1denergy_e_C} (\autoref{eq:1denergy_i_C}),
+\begin{align}
+    \frac{L}{\gamma - 1}\frac{d\bar{p}_e}{dt} =& \psi_{TR} + \psi_C -(\mathcal{R}_C + \mathcal{R}_{TR}) + L\bar{Q}_{e},\label{eq:0d_press_e_sub} \\[0.5em]
+    \frac{L}{\gamma - 1}\frac{d\bar{p}_i}{dt} =& -(\psi_{C} + \psi_{TR}) +  L\bar{Q}_{i}.\label{eq:0d_press_i_sub}
+\end{align}
+Note that adding \autoref{eq:0d_press_e_sub} and \autoref{eq:0d_press_i_sub} gives the correct single-fluid EBTEL model (i.e. \autoref{eq:energy_0d}).
+
+As in the single-fluid case, we find that the spatially-integrated coronal density evolution is described by,
+\begin{equation}
+    L\frac{d\bar{n}}{dt} = (nv)_0.
+\end{equation}
+Using \autoref{eq:1denergy_e_TR} and the equation of state for $p_e$, the above equation can be written as
+\begin{align}
+    (nv)_0 =& \frac{(p_ev)_0}{k_BT_{e,0}} = \frac{c_2(\gamma - 1)}{c_3\gamma k_B\bar{T}_e}(-F_{ce,0} - \mathcal{R}_{TR} + \psi_{TR}),\\
+    L\frac{d\bar{n}}{dt} =& \frac{c_2(\gamma - 1)}{c_3\gamma k_B\bar{T}_e}(-F_{ce,0} - \mathcal{R}_{TR} + \psi_{TR}).\label{eq:0d_mass_sub}
+\end{align}
+
+To obtain \autoref{eq:press_e_0d_2fl}, \autoref{eq:press_i_0d_2fl}, and \autoref{eq:mass_0d_2fl}, we need to find expressions for $\psi_C$ and $\psi_{TR}$. Recall that $\psi_C$ and $\psi_{TR}$ are comprised of terms associated with the quasi-neutral electric field and temperature equilibration. The integral of the former can be considered as the gain or loss of energy associated with plasma motion through the net electric potential. Consider the first integral in the definition of $\psi_C$. Using integration by parts,
+\begin{equation}
+    \int_C\mathrm{d}s\,v\frac{\partial p_e}{\partial s} = (p_ev)\Big|^{``a"}_{``0"} - \int_C\mathrm{d}v\,p_e = -(p_ev)_0 - \int_C\mathrm{d}v\,p_e\approx -(p_ev)_0 -\bar{p}_e\int_C\mathrm{d}v = -(p_ev)_0 + \bar{p}_ev_0 \approx 0.
+\end{equation}
+Thus, we can express $\psi_C$ as
+\begin{equation}
+    \psi_C\approx\frac{k_BL}{\gamma -1}\bar{n}\nu_{ei}(\bar{T}_i - \bar{T}_e),
+    \label{eq:psi_C}
+\end{equation}
+where $\nu_{ei}=\nu_{ei}(\bar{T}_e,\bar{n})$. To find an expression for $\psi_{TR}$, we first note that, using the equation of state for both the electrons and the ions and the quasi-neutrality condition ($n_e=n_i$),
+\begin{equation}
+    \frac{p_ev}{p_iv} = \frac{T_e}{T_i}.
+\end{equation}
+Evaluating this expression at the TR/corona interface (denoted by ``0''), plugging in \autoref{eq:1denergy_e_TR} and \autoref{eq:1denergy_i_TR},
+\begin{equation}
+    \frac{- F_{ce,0} + \psi_{TR} - \mathcal{R}_{TR}}{- F_{ci,0} - \psi_{TR}} = \xi,
+\end{equation}
+where $\xi\equiv T_{e,0}/T_{i,0}$. Solving for $\psi_{TR}$, we find,
+\begin{equation}
+    \psi_{TR} = \frac{1}{1+\xi}(F_{ce,0} + \mathcal{R}_{TR} - \xi F_{ci,0}).
+    \label{eq:psi_TR}
+\end{equation}
+
+Plugging \autoref{eq:psi_C} and \autoref{eq:psi_TR} into \autoref{eq:0d_press_e_sub}, \autoref{eq:0d_press_i_sub}, and \autoref{eq:0d_mass_sub} gives us our set of two-fluid EBTEL equations as given in \autoref{eq:press_e_0d_2fl}, \autoref{eq:press_i_0d_2fl}, and \autoref{eq:mass_0d_2fl}. The prescription for $c_1$, $c_2$, and $c_3$ is the same as the single-fluid version of EBTEL. As discussed in \citet{cargill_enthalpy-based_2012}, these play little role in the early heating phase when two-fluid effects are important.
+
+%% FIGURE HERE %%
+
+Plugging \autoref{eq:psi_TR} into \autoref{eq:press_e_0d_2fl}, the electron energy evolution equation can be written,
+\begin{equation}
+    \frac{1}{\gamma -1}\frac{d\bar{p}_e}{dt} = \frac{1}{L(1+\xi)}F_{ce,0} - \frac{\xi}{L(1+\xi)}F_{ci,0} - \frac{\xi(c_1+1) + 1}{L(1+\xi)}\mathcal{R}_C + \frac{k_B}{\gamma-1}\bar{n}\nu_{ei}(\bar{T}_i-\bar{T}_e) + \bar{Q}_e,
+    \label{eq:press_e_0d_2fl_breakdown}
+\end{equation}
+where the first two terms on the right-hand side represent the contributions from electron and ion thermal conduction, the third term represents losses from radiation, and the last two terms are as before. \autoref{fig:psi_tr_compare} shows the contribution of each term, with the exception of the heating term, $\bar{Q}_e$. As expected, (electron) thermal conduction dominates during the early heating and cooling phase and losses from radiation takeover in the late draining and cooling stage. Between these two phases, energy exchange between the two species is important to the evolution of the electron energy. $\psi_{TR}$, indicated by the black dotted line, is included to show its importance in the formation of the two-fluid EBTEL equations.
+
 \subsubsection{Single-fluid Model}\label{sec:ebtel-single-fluid}
 
 % Show how two-fluid equations simplify to single-fluid model
@@ -62,4 +156,19 @@ This is the chapter on coronal loops
 
 \subsubsection{Modifications to $c_1$ During the Conductive Cooling Phase}\label{sec:c1-correction}
 
-% First appendix in Barnes et al (2016a)
+In Section 3 of \citet{cargill_enthalpy-based_2012} we assumed that the parameter $c_1$ decreased from its equilibrium value at the time of maximum density, to that commensurate with radiative/enthalpy cooling as the loop drained. This was defined in terms of the ratio $n/n_{eq}$, where $n_{eq}$ was the loop density that would exist for the calculated temperature were the loop to be in static equilibrium \citep[Equation 17 of][]{cargill_enthalpy-based_2012}. In this radiative phase, $n > n_{eq}$. On the other hand, when $n < n_{eq}$, we assumed $c_1$ took on its equilibrium value, $c_{1,eq}$. Defining $\Delta\equiv(n_{\mathrm{EBTEL}} - n_{\mathrm{HYDRAD}})/n_{\mathrm{HYDRAD}}$, this gave $\Delta\lesssim0.2$, acceptable errors in the EBTEL value of $n$, as shown in the figures in \citet{cargill_enthalpy-based_2012}, in particular for the mild nanoflares we considered.
+
+It is now clear that a modified description of $c_1$ for $n < n_{eq}$ is needed for many of the examples discussed in the present paper. Specifically, for intense heating events, the coronal density calculated by the version of EBTEL in \citet{cargill_enthalpy-based_2012} is unacceptably high when compared to results from the HYDRAD code. Quantitatively, we find $\Delta\gtrsim0.3$ at $n_{max}$. While this may seem to be reasonable for an aproximate model, the high EBTEL density is a systematic feature, and requires further investigation.
+
+Examination of the HYDRAD results shows that EBTEL significantly underestimates the TR radiative losses during the heating and conductive cooling phases. At this time, the loop is under-dense \citep[e.g.][]{cargill_nanoflare_2004}, so that an excess of the conducted energy goes into evaporating TR material. We have modified $c_1$ as follows for $n < n_{eq}$,
+\begin{equation}
+    c_1 = \frac{2c_{1,eq} + c_{1,cond}((n_{eq}/n)^2-1)}{1+(n_{eq}/n)^2},
+    \label{eq:c1_mod}
+\end{equation}
+as a direct analogy to Eq. 18 of \citet{cargill_enthalpy-based_2012}. In the early phases of an event, $n \ll n_{eq}$, so that $c_1 \approx c_{1,cond}$. When $n = n_{eq}$, $c_1 = c_{1,eq}$. After some experimentation, we have settled on a choice of $c_{1,cond} = 6$ since that gives reasonable agreement between EBTEL and HYDRAD. There is no impact on the solution for $n > n_{eq}$.
+
+\autoref{tab:table_c1_compare} shows a set of runs we have carried out to compare the results from HYDRAD and EBTEL with $c_1=c_{1,eq}=2$ (fifth column) and with $c_1$ given by \autoref{eq:c1_mod} (sixth column), when $n<n_{eq}$. We find that using the modification in \autoref{eq:c1_mod} gives, for the more intense heating cases with $\tau\ge200$ s, $\Delta\sim0.1$ at $n_{max}$. For the more gentle heating profiles of \citet{cargill_enthalpy-based_2012} and \citet{bradshaw_influence_2013} (i.e. rows 3, 4, 6, and 8 of \autoref{tab:table_c1_compare}), we continue to find $\Delta\lesssim0.2$, confirming that the modification proposed here is applicable to a wide range of heating scenarios. For short, intense pulses like the $\tau=20,40$ s cases addressed in this paper, we still find $\Delta>0.2$. The limitations of such cases are addressed in \autoref{hot-plasma:subsubsec:hydrad_comparison_sf}.
+
+% RESULTS TABLE HERE %
+
+\autoref{eq:c1_mod} is motivated by simplicity while including the essential physics. Alternative, more complex determinations of $c_1$ have been considered, but involve limitations on how EBTEL can be used both now and in the future.

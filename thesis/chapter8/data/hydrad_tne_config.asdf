@@ -1,0 +1,111 @@
+#ASDF 1.0.0
+#ASDF_STANDARD 1.2.0
+%YAML 1.1
+%TAG ! tag:stsci.edu:asdf/
+--- !core/asdf-1.1.0
+asdf_library: !core/software-1.0.0 {author: Space Telescope Science Institute, homepage: 'http://github.com/spacetelescope/asdf',
+  name: asdf, version: 2.0.3}
+history:
+  extensions:
+  - !core/extension_metadata-1.0.0
+    extension_class: astropy.io.misc.asdf.extension.AstropyAsdfExtension
+    software: {name: astropy, version: 3.0.4}
+  - !core/extension_metadata-1.0.0
+    extension_class: asdf.extension.BuiltinExtension
+    software: {name: asdf, version: 2.0.3}
+general:
+  footpoint_height: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 cm, value: 500000000.0}
+  force_single_fluid: false
+  heat_flux_limiting_coefficient: 0.16666666666666666
+  heat_flux_timestep_limit: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 s, value: 1.0e-10}
+  logging_frequency: 1000
+  loop_inclination: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 deg, value: 0.0}
+  loop_length: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 Mm, value: 120.0}
+  minimum_collisional_coupling_timescale: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 s,
+    value: 0.01}
+  output_interval: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 s, value: 10.0}
+  total_time: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 h, value: 24.0}
+  use_kinetic_model: false
+  write_file_equation_terms: false
+  write_file_hydrogen_level_populations: false
+  write_file_ion_populations: false
+  write_file_physical: true
+  write_file_timescales: false
+grid:
+  adapt: true
+  adapt_every_n_time_steps: 10
+  enforce_conservation: false
+  linear_restriction: true
+  maximum_cells: 30000
+  maximum_fractional_difference: 0.2
+  maximum_refinement_level: 12
+  maximum_variation: 0.1
+  minimum_cells: 150
+  minimum_delta_s: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 cm, value: 1.0}
+  minimum_fractional_difference: 0.1
+  refine_on_density: true
+  refine_on_electron_energy: true
+  refine_on_hydrogen_energy: false
+heating:
+  alfven_wave_heating: false
+  background_heating: true
+  beam_heating: false
+  events:
+  - decay_duration: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 s, value: 0.0}
+    location: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 Mm, value: 5.0}
+    rate: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 cm-3 erg s-1, value: 0.005}
+    rise_duration: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 s, value: 0.0}
+    scale_height: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 Mm, value: 10.0}
+    time_start: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 s, value: 10.0}
+    total_duration: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 h, value: 24.0}
+  - decay_duration: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 s, value: 0.0}
+    location: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 Mm, value: 115.0}
+    rate: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 cm-3 erg s-1, value: 0.005}
+    rise_duration: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 s, value: 0.0}
+    scale_height: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 Mm, value: 10.0}
+    time_start: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 s, value: 10.0}
+    total_duration: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 h, value: 24.0}
+  heat_electrons: true
+initial_conditions:
+  footpoint_density: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 cm-3, value: 100000000000.0}
+  footpoint_temperature: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 K, value: 20000.0}
+  heating_location: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 Mm, value: 55.0}
+  heating_range_fine_tuning: 10000.0
+  heating_range_lower_bound: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 cm-3 erg
+      s-1, value: 1.0e-08}
+  heating_range_step_size: 0.01
+  heating_range_upper_bound: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 cm-3 erg
+      s-1, value: 100.0}
+  heating_scale_height: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 cm, value: 1.0e+300}
+  isothermal: false
+  use_poly_fit_gravity: false
+radiation:
+  abundance_dataset: asplund
+  decouple_ionization_state_solver: false
+  density_dependent_rates: false
+  elements_equilibrium: []
+  elements_nonequilibrium: []
+  emissivity_dataset: chianti_v7
+  nlte_chromosphere: false
+  optically_thick_radiation: false
+  ranges_dataset: ranges
+  rates_dataset: chianti_v7
+  use_power_law_radiative_losses: true
+solver:
+  cutoff_ion_fraction: 1.0e-06
+  epsilon: 0.01
+  epsilon_d: 0.1
+  epsilon_r: 1.8649415311920072
+  maximum_optically_thin_density: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 cm-3,
+    value: 1000000000000.0}
+  minimum_radiation_temperature: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 K, value: 20000.0}
+  minimum_temperature: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 K, value: 10000.0}
+  safety_advection: 1.0
+  safety_atomic: 1.0
+  safety_conduction: 1.0
+  safety_radiation: 0.1
+  safety_viscosity: 1.0
+  timestep_increase_limit: 0.05
+  zero_over_temperature_interval: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 K,
+    value: 500.0}
+...

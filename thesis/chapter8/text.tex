@@ -1,9 +1,115 @@
+% Text for chapter 8
 \chapter{Future Work and Conclusions}\label{ch:conclusions}
+
+% spell-checker: disable %
+\begin{pycode}[chapter8]
+name = 'chapter8'
+ch8 = texfigure.Manager(
+    pytex,
+    os.path.join('.', name),
+    number=8,
+    **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
+)
+from script import spatial_heating_profile
+\end{pycode}
+% spell-checker: enable %
 
 \section{Future Work}\label{sec:future-work}
 
 \subsection{Bundle Heating Model}\label{sec:bundle}
 
+% spell-checker: disable %
+\begin{pycode}[chapter8]
+channel_pairs = [(94,335), (335,171), (211,193), (171,131)]
+\end{pycode}
+% spell-checker: enable %
+
 \subsection{Thermal Non-equilibrium}\label{sec:tne}
+
+% spell-checker: disable %
+\begin{pycode}[chapter8]
+# Read in data
+i_start,i_stop,i_step = 0,-1,10
+with h5py.File(os.path.join(ch8.data_dir, 'hydrad_tne_results.h5'), 'r') as hf:
+    t_grid = u.Quantity(hf['time'][i_start:i_stop:i_step],hf['time'].attrs['unit'])
+    s_grid = u.Quantity(hf['coordinate'],hf['coordinate'].attrs['unit'])
+    Te_grid = u.Quantity(hf['electron_temperature'][i_start:i_stop:i_step,:],
+                         hf['electron_temperature'].attrs['unit'])
+    Ti_grid = u.Quantity(hf['ion_temperature'][i_start:i_stop:i_step,:],
+                         hf['ion_temperature'].attrs['unit'])
+    n_grid = u.Quantity(hf['density'][i_start:i_stop:i_step,:],
+                        hf['density'].attrs['unit'])
+    v_grid = u.Quantity(hf['velocity'][i_start:i_stop:i_step,:],
+                        hf['velocity'].attrs['unit'])
+\end{pycode}
+% spell-checker: enable %
+
+% spell-checker: disable %
+\begin{pycode}[chapter8]
+h_profile = spatial_heating_profile(s_grid, os.path.join(ch8.data_dir, 'hydrad_tne_config.asdf'))
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=0.65,
+    height_ratio=1,
+))
+ax = fig.gca()
+ax.plot(s_grid.to(u.Mm), h_profile)
+ax.set_xlim(s_grid.to(u.Mm)[[0,-1]].value)
+ax.set_ylim(0,5.1e-3)
+ax.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
+ax.set_xlabel(r'$s$ $[\si{\mega\m}]$')
+ax.set_ylabel(r'$E_H$ $[\si{\erg\per\cubic\cm\per\second}]$')
+tfig = ch8.save_figure('future-work:tne-heating', fext='.pgf')
+tfig.caption = r'Heating input as a function of field-aligned coordinate, $s$, for simulating TNE using the HYDRAD code. The full-length of the strand is \SI{120}{\mega\m}. The total heating profile is a combination of two Gaussian heating profiles of width \SI{10}{\mega\m} at the two footpoints, $s=\SI{5}{\mega\m}$ and $s=\SI{115}{\mega\m}$. The heating rates of both pulses \SI{5e-3}{\erg\per\cubic\cm\per\second}. The heating is turned on at $t=\SI{0}{\second}$ and is kept constant for the entire simulation.'
+tfig.figure_width = r'0.65\textwidth'
+\end{pycode}
+\py[chapter8]|tfig|
+% spell-checker: enable %
+
+% spell-checker: disable %
+\begin{pycode}[chapter8]
+# Setup grid
+tmesh, smesh = np.meshgrid(s_grid.to(u.Mm), t_grid.to(u.h))
+# Setup figure
+fig,axes = plt.subplots(2,1,figsize=texfigure.figsize(
+    pytex,
+    scale=1,
+    height_ratio=2/3,
+    figure_width_context='figurewidth',)
+)
+# Temperature
+im_T = axes[0].pcolormesh(
+    smesh, tmesh, Te_grid.to(u.MK),
+    cmap='plasma',
+    vmin=0.1,
+    vmax=3,
+    rasterized=True)
+# Density
+im_n = axes[1].pcolormesh(
+    smesh, tmesh, n_grid,
+    cmap='plasma',
+    norm=matplotlib.colors.LogNorm(vmin=1e9,vmax=1e10),
+    rasterized=True)
+# Labels, ticks
+axes[0].xaxis.set_major_locator(matplotlib.ticker.NullLocator())
+axes[0].yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(nbins=4, prune='lower'))
+axes[1].yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(nbins=4,))
+axes[1].set_xlabel(r'$t$ $[\si{\hour}]$')
+axes[0].set_ylabel(r'$s$ $[\si{\mega\m}]$')
+axes[1].set_ylabel(r'$s$ $[\si{\mega\m}]$')
+# Colorbars
+plt.subplots_adjust(hspace=0.05)
+pos = axes[0].get_position().get_points()
+cax = fig.add_axes([pos[1,0]+0.005,pos[0,1],0.015,pos[1,1]-pos[0,1]])
+cbar = fig.colorbar(im_T, cax=cax, orientation='vertical')
+pos = axes[1].get_position().get_points()
+cax = fig.add_axes([pos[1,0]+0.005,pos[0,1],0.015,pos[1,1]-pos[0,1]])
+cbar = fig.colorbar(im_n, cax=cax, orientation='vertical')
+# Save figure
+tfig = ch8.save_figure('future-work:tne-results', fext='.pdf')
+tfig.caption = r'Electron temperature, in \si{\mega\kelvin} (top), and density, in \si{\per\cubic\cm} (bottom), as a function of field-aligned coordinate, $s$, and time, $t$ as simulated by the HYDRAD code for a semi-circular loop of full-length $L=\SI{120}{\mega\m}$. The time-independent heating function is localized to the footpoints and is shown as a function of $s$ in \autoref{fig:future-work:tne-heating}.'
+\end{pycode}
+\py[chapter8]|tfig|
+% spell-checker: enable %
 
 \section{Conclusions}\label{sec:conclusions}

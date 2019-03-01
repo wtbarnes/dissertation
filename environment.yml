@@ -20,6 +20,8 @@ dependencies:
 - pip:
   - plasmapy
   - hissw
+  - asdf
   - git+https://github.com/Cadair/texfigure.git
   - git+git://github.com/wtbarnes/fiasco.git
   - git+git://github.com/wtbarnes/synthesizAR.git
+  - git+git://github.com/rice-solar-physics/hydrad_tools.git

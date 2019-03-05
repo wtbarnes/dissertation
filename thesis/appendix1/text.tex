@@ -1,10 +1,24 @@
 % Text for appendix 1
 \chapter{fiasco: A Python Interface to the CHIANTI Atomic Database}\label{ap:fiasco}
 
-\section{Parsing Data}
+% spell-checker: disable %
+\begin{pycode}[appendix1]
+name = 'appendix1'
+ap1 = texfigure.Manager(
+    pytex,
+    os.path.join('.', name),
+    number=9,
+    **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
+)
+\end{pycode}
+% spell-checker: enable %
 
-\section{The \texttt{Ion} Class}
+As noted in \autoref{sec:chianti}, the CHIANTI atomic database is an invaluable resource in the field of solar physics, both for modeling and interpreting observations. During the course of my graduate work, I developed the fiasco\footnote{The name of the package derives from the Italian word \textit{fiasco}, the style of bottle typically used to serve a wine from the Chianti region of Italy.} package for interacting with CHIANTI in the Python programming language. fiasco provides an intuitive Python interface to every part of the CHIANTI database as well as many calculations for many common derived quantities. The goal of the fiasco package is to provide largely the same functionality as the CHIANTI IDL routines via an object-oriented interface (similar to ChiantiPy \citep{landi_chiantiatomic_2012,barnes_chiantipy_2017}) as well as improved interoperability with the greater Python ecosystems in astronomy and heliophysics. The following sections will briefly describe the fiasco software for parsing the raw atomic data and interacting with higher-level objects.
 
-\section{The \texttt{Element} Class}
+\section{Parsing Data}\label{sec:parsing-chianti}
+
+\section{The \texttt{Ion} Class}\label{sec:fiasco-ion}
+
+\section{The \texttt{Element} Class}\label{sec:fiasco-element}
 
 \section{Working with Multiple Ions}\label{sec:ion-collection}

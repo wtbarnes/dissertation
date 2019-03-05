@@ -40,6 +40,9 @@ from collections import OrderedDict
 from fractions import Fraction
 import copy
 
+# Add global thesis Python directory to the path
+sys.path.append('./python/')
+
 import texfigure
 pytex.formatter = texfigure.repr_latex_formatter
 
@@ -47,7 +50,6 @@ import h5py
 import numpy as np
 from scipy.interpolate import interp1d, splev
 import matplotlib
-# matplotlib.use('pdf')
 import matplotlib.pyplot as plt
 import matplotlib.colors
 import matplotlib.ticker
@@ -58,7 +60,7 @@ import astropy.time
 import astropy.units as u
 import astropy.constants as const
 from astropy.coordinates import SkyCoord
-from astropy.visualization import ImageNormalize, AsinhStretch, SqrtStretch
+from astropy.visualization import ImageNormalize, AsinhStretch, SqrtStretch, LogStretch
 import fiasco
 import synthesizAR
 import synthesizAR.atomic
@@ -71,14 +73,7 @@ manager_opts = {'python_dir': 'python', 'fig_dir': 'figures', 'data_dir': 'data'
 # Define color palette(s)
 PALETTE = seaborn.color_palette('colorblind', 100)
 #  Register colormaps
-seaborn_deep = seaborn.color_palette('deep')
-cmap1 = matplotlib.colors.LinearSegmentedColormap.from_list(
-    'better_RdBu', [seaborn_deep[3], 'w', seaborn_deep[0]]
-)
-matplotlib.cm.register_cmap(name=cmap1.name, cmap=cmap1)
-cmap2 = matplotlib.colors.LinearSegmentedColormap.from_list(
-    'better_RdBu_r', [seaborn_deep[0], 'w', seaborn_deep[3]])
-matplotlib.cm.register_cmap(name=cmap2.name, cmap=cmap2)
+from colormaps import *
 
 # Set location of ebtel++ code
 if 'EBTEL_DIR' not in os.environ:
@@ -90,9 +85,6 @@ if 'DEMREG_DIR' not in os.environ:
 	DEMREG_DIR = '/Users/willbarnes/Documents/work/codes/demreg/idl/'
 else:
 	DEMREG_DIR = os.environ['DEMREG_DIR']
-
-# Add global thesis Python directory to the path
-sys.path.append('./python/')
 
 # Set some plot styling here
 rc = {

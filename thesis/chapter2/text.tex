@@ -3,40 +3,125 @@
 
 % Figure manager for Chapter 2
 % spell-checker: disable
-%\begin{pycode}[chapter2]
-%name = 'chapter2'
-%ch1 = texfigure.Manager(
-%    pytex,
-%    os.path.join('.', name),
-%    number=2,
-%    **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
-%)
-%\end{pycode}
+\begin{pycode}[chapter2]
+name = 'chapter2'
+ch2 = texfigure.Manager(
+    pytex,
+    os.path.join('.', name),
+    number=2,
+    **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
+)
+from power_law_rad_loss import power_law_rad_loss
+\end{pycode}
 % spell-checker: enable
 
-% conceptual comments on loops
-% why is this treatment valid?
-% maybe give MHD equations then say we dont need them
+% conceptual comments on loops, see Reale (2010)
+% define plasma beta
+% define distinction between loops and strands
 
-This is the chapter on coronal loops
+% spell-checker: disable %
+\begin{pycode}[chapter2]
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=0.75,
+    height_ratio=1,
+    figure_width_context='figurewidth',
+))
+m = Map(os.path.join(ch2.data_dir, 'trace_example.fits'))
+m = Map(m.data, {**m.meta, 'wavelnth': m.meta['wave_len']},)
+ax = fig.add_subplot(111, projection=m)
+m.plot(axes=ax,
+       annotate=False,
+       norm=ImageNormalize(
+           vmin=max(0,m.data.min()),
+           vmax=m.data.max(),stretch=LogStretch()),
+)
+ax.grid(alpha=0)
+lon,lat = ax.coords[0],ax.coords[1]
+lon.set_axislabel(r'Helioprojective Longitude')
+lat.set_axislabel(r'Helioprojective Latitude')
 
-\section{Hydrostatic Equilibrium}
+# Save
+tfig = ch2.save_figure('trace-example', fext='.pdf')
+tfig.caption = r'An arcade of loops extending into the corona observed off the solar limb by the TRACE satellite on 6 November 1999. Adapted from Figure 11 of \citet{reale_coronal_2010}.'
+tfig.figure_width = r'0.75\textwidth'
+\end{pycode}
+\py[chapter2]|tfig|
+% spell-checker: enable %
 
-%Introduce hydrostatic equations
+\section{Hydrostatic Equilibrium}\label{sec:hydrostatic}
 
-%Talk about terms, what they mean
+\subsection{Energy Balanace Equations}\label{sec:hydrostatic_equations}
 
-\subsection{The Isothermal Limit}
+For a single strand in hydrostatic equilibrium with uniform cross-sectional area, the equations of pressure and energy balance as a function of $s$, the coordinate parallel to the magnetic field, are given by,
+\begin{align}
+Q &= n^2\Lambda(T) + \frac{d}{ds}F_c, \label{eq:hydrostatic_energy} \\
+\frac{d}{ds}p &= m_ing, \label{eq:hydrostatic_pressure} \\
+p &= 2k_BnT, \label{eq:ideal_gas_law}
+\end{align}
+where $Q$ is the heating rate, $\Lambda(T)$ is the radiative loss term, $F_c$ is the conductive flux, $p$ is the thermal pressure, $n$ is the number density, $T$ is the temperature, $m_i$ is the average ion mass, $g=g_\solar\left(\frac{r}{R_\solar}\right)^2\frac{dr}{ds}$ is the gravitational acceleration along the fieldline, $r$ is the radial distance from the center of the Sun, and $g_\solar$ is the gravitational acceleration at the solar surface ($r=R_\solar$).
+
+To determine $n$ and $T$ as a function of $s$ along the strand, one must solve \autoref{eq:hydrostatic_energy} and \autoref{eq:hydrostatic_pressure} given some predefined heating rate $Q$, which is, in general, a function of the loop coordinate and is often assumed to be proportional to powers of $n$ and $T$ \citep{priest_magnetohydrodynamics_2014}. Both of these equations are subject to closure by the equation of state given in \autoref{eq:ideal_gas_law}.
+
+\autoref{eq:hydrostatic_pressure} says that the downward gravitational pull on the plasma is balanced by the gradient of the thermal pressure. \autoref{eq:hydrostatic_energy} says that the energy lost by radiative losses and thermal conduction in the corona must be balanced by the coronal heating rate. I will now discuss the conductive flux and radiative loss terms in more detail. Several possible solution methods for \autoref{eq:hydrostatic_energy} and \autoref{eq:hydrostatic_pressure} are discussed in \autoref{sec:isothermal}, \ref{sec:scaling_laws}, and \ref{sec:hydrostatic_numerical}.
+
+\subsubsection{Conductive Flux Term}\label{sec:heat-flux}
+
+Thermal conduction efficiently transfers energy from regions of high temperature to regions of low temperature in the direction parallel to the magnetic field. However, thermal conduction is severely inhibited perpendicular to the magnetic field due to the low-$\beta$ nature of the corona such that energy transfer is limited to the field-aligned direction. 
+
+It is commonly assumed that the field-aligned thermal conduction, $F_c$, is well-described by expression of \citet{spitzer_transport_1953},
+\begin{equation}\label{eq:spitzer-harm}
+    F_c = -\kappa_0 T^{5/2} \frac{dT}{ds},
+\end{equation}
+where $\kappa_0\sim\SI{e-6}{\erg\per\cm\per\second\per\kelvin\tothe{7/2}}$ is the coefficient of thermal conduction in the field-aligned direction. Thermal conduction is an energy \textit{sink} in the corona, but in the TR, it is an energy \textit{source} because $F_c>0$ when $\frac{dT}{ds}<0$ and $F_c<0$ when $dT/ds>0$. Thus, the interface between the TR and the corona is defined as that point at which $F_c$ transitions from a source to a sink \citep{vesecky_numerical_1979,klimchuk_highly_2008,cargill_enthalpy-based_2012}. Note that the heat flux is not a loss term, but rather a mechanism for transferring energy between the corona and transition region provided the conductive flux to the cooler, underlying chromosphere is negligible.  
+
+According to \autoref{eq:spitzer-harm}, $F_c\to\infty$ as $\frac{dT}{ds}\to\infty$. However, at low densities, there may be an insufficient number of particles to support the implied heat flux such that the heat flux saturates at the \textit{free-streaming limit} \citep{patsourakos_coronal_2005,bradshaw_explosive_2006,bradshaw_collisional_2013}. Failure to account for this limiting of the heat flux can result in overestimation of the cooling due to thermal conduction, particularly in cases where the heating is very impulsive. A more detailed discussion of the free-streaming limit is given in \autoref{hot-plasma:subsec:hf_theory}.
+
+In a rarified, impulsively-heated plasma, the electron mean free path may become large relative to the temperature length scale of the plasma such that the electron distribution becomes non-Maxwellian \citep{bradshaw_collisional_2013}. In this case, non-local contributions to the heat flux may become important such that determining the heat flux at any one point along the loop requires integrating over the entire loop. This ``non-localization'' of the heat flux has been addressed by a number of authors \citep{ljepojevic_heat_1989,karpen_nonlocal_1987,luciani_nonlocal_1983,west_lifetime_2008} and is likely to have important consequences for the observability of hot, low-density plasmas.
+
+\subsubsection{Radiative Loss Term}\label{sec:rad-loss}
+
+% spell-checker: disable %
+\begin{pycode}[chapter2]
+with h5py.File(os.path.join(ch2.data_dir, 'chianti_rad_loss.h5'), 'r') as hf:
+    T = u.Quantity(hf['temperature'], hf['temperature'].attrs['unit'])
+    Lambda = u.Quantity(hf['radiative_loss'], hf['radiative_loss'].attrs['unit'])
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=0.75,
+    height_ratio=1,
+    figure_width_context='figurewidth',
+))
+ax = fig.gca()
+ax.plot(T, Lambda, color=PALETTE[0], label='CHIANTI')
+ax.plot(T, power_law_rad_loss(T), color=PALETTE[1], label='power-law')
+ax.set_xscale('log')
+ax.set_yscale('log')
+ax.set_xlim(T[[0,-1]].value)
+ax.set_ylim(5e-24,1e-21)
+ax.set_xlabel(r'$T$ $[\si{\kelvin}]$')
+ax.set_ylabel(r'$\Lambda$ $[\si{\erg\cubic\cm\per\second}]$')
+ax.legend(loc=1, frameon=False)
+tfig = ch2.save_figure('radiative-loss', fext='.pgf')
+tfig.caption = r'Radiative loss as a function of temperature for an optically thin plasma. The blue line shows the true value of $\Lambda$ computed by CHIANTI using the abundances of \citet{feldman_potential_1992} and assuming a constant density of \SI{e9}{\per\cubic\cm}. The orange line shows the power-law approximation of \citet{klimchuk_highly_2008}.'
+tfig.figure_width = r'0.75\textwidth'
+\end{pycode}
+\py[chapter2]|tfig|
+% spell-checker: enable %
+
+Energy from the coronal plasma is also lost to space by radiation. The radiative loss term is proportional to $n^2$ so it is most dominant in areas where the density is high. The amount of energy which the plasma radiates away also depends on the temperature through the radiative loss function, $\Lambda(T)$.
+
+\subsection{The Isothermal Limit}\label{sec:isothermal}
 
 \subsection{Scaling Laws}\label{sec:scaling_laws}
 
-%RTV, Serio, Martens
+%RTV, Serio, Martens (2 paragraphs)
 
-\subsection{Numerical Solutions}
+\subsection{Numerical Solutions}\label{sec:hydrostatic_numerical}
 
-%Show basic hydrostatic solutions via shooting method
+%Show basic hydrostatic solutions via shooting method (1 paragraph)
 
-\section{Hydrodynamics}
+\section{Hydrodynamics}\label{sec:hydrodynamics}
 
 %show two-fluid hydro equations and how they relate to previously stated MHD equations
 % discuss physics of each term
@@ -58,7 +143,7 @@ and we assume closure through the ideal gas law, $p_e=k_BnT_e,\,p_i=k_BnT_i$. No
 
 Note the right-hand side of \autoref{eq:1denergy_e} and \autoref{eq:1denergy_i}: the first term represents the energy loss or gain as the fluids move through the electric field that maintains quasi-neutrality, given by $E=-(1/ne)\partial p_e/\partial s$; the third term models the exhange of energy between the electron and ion populations via binary Coulomb collisions and is attributed to \citet{braginskii_transport_1965}. Though the expression presented here differs by a factor of 2 compared to that of \citeauthor{braginskii_transport_1965}, we maintain that the electron-ion equilibration time is not significantly changed by this relatively small numerical factor.
 
-\subsection{The HYDRAD Model}
+\subsection{The HYDRAD Model}\label{sec:hydrad}
 
 %Discuss HYDRAD in here, advantages, maybe a sample solution
 % briefly discuss capabilities, numerical treatment

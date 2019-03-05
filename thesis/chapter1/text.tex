@@ -3,20 +3,102 @@
 
 % Figure manager for Chapter 1
 % spell-checker: disable
-%\begin{pycode}[chapter1]
-%name = 'chapter1'
-%ch1 = texfigure.Manager(
-%    pytex,
-%    os.path.join('.', name),
-%    number=1,
-%    **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
-%)
-%\end{pycode}
+\begin{pycode}[chapter1]
+name = 'chapter1'
+ch1 = texfigure.Manager(
+    pytex,
+    os.path.join('.', name),
+    number=1,
+    **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
+)
+\end{pycode}
 % spell-checker: enable
 
 \section{The Structure of the Solar Atmosphere}
 
-\section{A History of Solar Observations}
+% diagram of structure of the corona
+
+\subsection{Interior}
+
+\subsubsection{Core}
+\subsubsection{Radiative Zone}
+\subsubsection{Convection Zone}
+
+\subsection{Photosphere}
+
+\subsection{Chromosphere}
+
+\subsection{Transition Region}
+
+\subsection{Corona}
+
+\subsection{Solar Wind}
+
+\section{A History of Coronal EUV and X-ray Observations}
+
+% fold this into previous section
+
+% one multi-panel figure: EIT, SXT, TRACE, XRT, AIA, SWAP
+
+% spell-checker: disable %
+\begin{pycode}[chapter1]
+# Import all maps
+maps = []
+instrs = [ 'sxt', 'eit', 'xrt', 'aia' ]
+for i in instrs:
+    maps.append(Map(os.path.join(ch1.data_dir, f'{i}_example.fits' )))
+# Fix TRACE metadata
+#maps[2] = Map(maps[2].data, {**maps[2].meta, 'wavelnth': maps[2].meta['wave_len']},)
+# Fix XRT metadata
+maps[2] = Map(maps[2].data, {**maps[2].meta, 'wavelnth': f'{maps[2].meta["ec_fw1_"]}/{maps[2].meta["ec_fw2_"]}'})
+
+# Make figure
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=1,
+    height_ratio=1,
+))
+for i,m in enumerate(maps):
+    ax = fig.add_subplot(2, 2, i+1, projection=m)
+    m.plot(
+        axes=ax,
+        annotate=False,
+        norm=ImageNormalize(
+            vmin=max(0,m.data.min()),
+            vmax=m.data.max(),stretch=LogStretch()),
+    )
+    ax.grid(alpha=0)
+    lon,lat = ax.coords[0],ax.coords[1]
+    lon.set_ticks_visible(False)
+    lon.set_ticklabel_visible(False)
+    lat.set_ticks_visible(False)
+    lat.set_ticklabel_visible(False)
+    lon.frame.set_linewidth(0)
+    lat.frame.set_linewidth(0)
+    name = f'{m.observatory}/{m.instrument.split(" ")[0]}' if m.observatory != m.instrument else m.observatory
+    try:
+        wvl = m.meta['wavelnth'] * u.Angstrom
+        wvl = f"{m.meta['wavelnth']} {u.Angstrom.to_string(format='latex')}"
+    except ValueError:
+        wvl = m.meta['wavelnth']
+    ax.text(0, m.dimensions.y.value-10, f'{name} {wvl}',
+            color='w',
+            fontsize=plt.rcParams['legend.fontsize'],
+            horizontalalignment='left',
+            verticalalignment='top',)
+    ax.text(m.dimensions.x.value,0,astropy.time.Time(m.date).strftime('%Y/%d/%m'),
+            color='w',
+            fontsize=plt.rcParams['legend.fontsize'],
+            horizontalalignment='right',
+            verticalalignment='bottom')
+plt.subplots_adjust(hspace=0.025,wspace=0.01)
+
+# Save figure
+tfig = ch1.save_figure('example-images', fext='.pdf')
+tfig.caption = r''
+\end{pycode}
+\py[chapter1]|tfig|
+% spell-checker: enable %
 
 \section{The Solar Magnetic Field}
 

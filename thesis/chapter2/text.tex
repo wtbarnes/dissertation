@@ -88,13 +88,14 @@ with h5py.File(os.path.join(ch2.data_dir, 'chianti_rad_loss.h5'), 'r') as hf:
     Lambda = u.Quantity(hf['radiative_loss'], hf['radiative_loss'].attrs['unit'])
 fig = plt.figure(figsize=texfigure.figsize(
     pytex,
-    scale=0.75,
-    height_ratio=1,
+    scale=0.85,
+    height_ratio=0.75,
     figure_width_context='figurewidth',
 ))
 ax = fig.gca()
 ax.plot(T, Lambda, color=PALETTE[0], label='CHIANTI')
-ax.plot(T, power_law_rad_loss(T), color=PALETTE[1], label='power-law')
+ax.plot(T, power_law_rad_loss(T, kind='klimchuk'), color=PALETTE[1], label='RK')
+ax.plot(T, power_law_rad_loss(T, kind='rtv'), color=PALETTE[2], label='RTV')
 ax.set_xscale('log')
 ax.set_yscale('log')
 ax.set_xlim(T[[0,-1]].value)
@@ -103,13 +104,23 @@ ax.set_xlabel(r'$T$ $[\si{\kelvin}]$')
 ax.set_ylabel(r'$\Lambda$ $[\si{\erg\cubic\cm\per\second}]$')
 ax.legend(loc=1, frameon=False)
 tfig = ch2.save_figure('radiative-loss', fext='.pgf')
-tfig.caption = r'Radiative loss as a function of temperature for an optically thin plasma. The blue line shows the true value of $\Lambda$ computed by CHIANTI using the abundances of \citet{feldman_potential_1992} and assuming a constant density of \SI{e9}{\per\cubic\cm}. The orange line shows the power-law approximation of \citet{klimchuk_highly_2008}.'
-tfig.figure_width = r'0.75\textwidth'
+tfig.caption = r'Radiative loss as a function of temperature for an optically thin plasma. The blue line shows the true value of $\Lambda$ computed by CHIANTI using the abundances of \citet{feldman_potential_1992} and assuming a constant density of \SI{e9}{\per\cubic\cm}. The orange line shows the Raymond-Klimchuk (RK) power-law approximation given in \citet{klimchuk_highly_2008} and the green line shows the power-law approximation of \citet[RTV]{rosner_dynamics_1978}.'
+tfig.figure_width = r'0.85\textwidth'
 \end{pycode}
 \py[chapter2]|tfig|
 % spell-checker: enable %
 
-Energy from the coronal plasma is also lost to space by radiation. The radiative loss term is proportional to $n^2$ so it is most dominant in areas where the density is high. The amount of energy which the plasma radiates away also depends on the temperature through the radiative loss function, $\Lambda(T)$.
+Energy from the coronal plasma is also lost to space by radiation. The radiative loss term is proportional to $n^2$ so it is most dominant in areas where the density is high. The amount of energy which the plasma radiates away by spectral line and continuum emission also depends on the temperature through the radiative loss function, $\Lambda(T)$, given by,
+\begin{equation}\label{eq:rad-loss}
+    \Lambda(T) = \sum_{X,k}\left(\sum_{\{ji\}}4\pi G_{ji}  + \int_0^\infty\dd{\lambda}P_{X,k}^\textup{cont.} \right),
+\end{equation}
+where $G_{ji}$ is the contribution function of transition $ji$ in ion $k$ of element $X$ as given by \autoref{eq:contribution_function}, $P_{X,k}^\textup{cont.}$ is the total continuum emissivity of ion $k$ in element $X$ (see \autoref{sec:continuum}), and $\{ji\}$ is the set of all atomic transitions in ion $k$ of element $X$. Practically speaking, the summations are taken over all elements, ions, and transitions in the CHIANTI atomic database (see \autoref{sec:chianti}). Note that $\Lambda(T)$ is also dependent on the density due to the density dependence of $G_{ji}$ though this dependence is relatively weak compared to that of $T$.
+
+Calculating $\Lambda(T)$ can be computationally expensive as it requires solving \autoref{eq:level_pop}, the level population equation, for each ion over a large temperature range. \citet{rosner_dynamics_1978} calculate an analytic fit to the radiative loss function of the form,
+\begin{equation}\label{eq:rad-loss-power-law}
+    \Lambda(T) = \chi T^\alpha,
+\end{equation}
+where $\chi$ and $\alpha$ are piecewise functions in $T$. The values of $\alpha$ and $\chi$ are given in Appendix A of \citet{rosner_dynamics_1978}. \citet{klimchuk_highly_2008} provide an improved piecewise fit to $\Lambda(T)$ of the same form as \autoref{eq:rad-loss-power-law} using updated atomic radiative loss calculations. Additionally, \citet{cargill_active_2014} provide a minor fix to the fits of \citet{klimchuk_highly_2008} given the results of \citet{reale_role_2012} who find that using the power-law fit of \citet{rosner_dynamics_1978} versus the full CHIANTI radiative loss function gives significantly different cooling behavior in an impulsively heated loop. \autoref{fig:radiative-loss} shows a comparison between the full radiative loss function as computed by \autoref{eq:rad-loss} (blue) and the power-law approximations of \citet[orange]{klimchuk_highly_2008} and \citet[green]{rosner_dynamics_1978}. 
 
 \subsection{The Isothermal Limit}\label{sec:isothermal}
 

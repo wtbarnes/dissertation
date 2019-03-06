@@ -11,32 +11,34 @@ ch1 = texfigure.Manager(
     number=1,
     **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
 )
+from matplotlib.path import Path
+import matplotlib.patches
+
+from formatting import remove_ticks_and_spines
 \end{pycode}
 % spell-checker: enable
+
+% lead with description of the 2017 eclipse
+% transition to discussion of ancient eclipse observations
+% sun affects us everyday: life, space weather, analogue for other stars
 
 \section{The Structure of the Solar Atmosphere}
 
 % diagram of structure of the corona
 
-\subsection{Interior}
-
-\subsubsection{Core}
-\subsubsection{Radiative Zone}
-\subsubsection{Convection Zone}
-
-\subsection{Photosphere}
-
-\subsection{Chromosphere}
-
-\subsection{Transition Region}
-
-\subsection{Corona}
-
-\subsection{Solar Wind}
-
-\section{A History of Coronal EUV and X-ray Observations}
-
-% fold this into previous section
+%\subsection{Interior}
+%
+%\subsubsection{Core}
+%\subsubsection{Radiative Zone}
+%\subsubsection{Convection Zone}
+%
+%\subsection{Photosphere}
+%
+%\subsection{Chromosphere}
+%
+%\subsection{Transition Region}
+%
+%\subsection{Corona}
 
 % one multi-panel figure: EIT, SXT, TRACE, XRT, AIA, SWAP
 
@@ -47,10 +49,17 @@ maps = []
 instrs = [ 'sxt', 'eit', 'xrt', 'aia' ]
 for i in instrs:
     maps.append(Map(os.path.join(ch1.data_dir, f'{i}_example.fits' )))
-# Fix TRACE metadata
-#maps[2] = Map(maps[2].data, {**maps[2].meta, 'wavelnth': maps[2].meta['wave_len']},)
 # Fix XRT metadata
-maps[2] = Map(maps[2].data, {**maps[2].meta, 'wavelnth': f'{maps[2].meta["ec_fw1_"]}/{maps[2].meta["ec_fw2_"]}'})
+maps[2] = Map(maps[2].data,{**maps[2].meta,
+                        'wavelnth': f'{maps[2].meta["ec_fw1_"]}/{maps[2].meta["ec_fw2_"]}'})
+# Set colormap normalization
+for m in maps:
+    m.plot_settings['norm'] = ImageNormalize(vmin=max(0,m.data.min()),
+                                             vmax=m.data.max(),
+                                             stretch=LogStretch())
+maps[-1].plot_settings['norm'] = ImageNormalize(vmin=max(0, maps[-1].data.min()),
+                                                vmax=maps[-1].data.max()*0.25,
+                                                stretch=AsinhStretch(0.1))
 
 # Make figure
 fig = plt.figure(figsize=texfigure.figsize(
@@ -60,13 +69,7 @@ fig = plt.figure(figsize=texfigure.figsize(
 ))
 for i,m in enumerate(maps):
     ax = fig.add_subplot(2, 2, i+1, projection=m)
-    m.plot(
-        axes=ax,
-        annotate=False,
-        norm=ImageNormalize(
-            vmin=max(0,m.data.min()),
-            vmax=m.data.max(),stretch=LogStretch()),
-    )
+    m.plot(axes=ax,annotate=False,)
     ax.grid(alpha=0)
     lon,lat = ax.coords[0],ax.coords[1]
     lon.set_ticks_visible(False)
@@ -75,23 +78,24 @@ for i,m in enumerate(maps):
     lat.set_ticklabel_visible(False)
     lon.frame.set_linewidth(0)
     lat.frame.set_linewidth(0)
-    name = f'{m.observatory}/{m.instrument.split(" ")[0]}' if m.observatory != m.instrument else m.observatory
     try:
         wvl = m.meta['wavelnth'] * u.Angstrom
         wvl = f"{m.meta['wavelnth']} {u.Angstrom.to_string(format='latex')}"
     except ValueError:
         wvl = m.meta['wavelnth']
-    ax.text(0, m.dimensions.y.value-10, f'{name} {wvl}',
+    ax.text(0, m.dimensions.y.value-10,
+            f'{m.observatory}/{m.instrument.split(" ")[0]} {wvl}',
             color='w',
-            fontsize=plt.rcParams['legend.fontsize'],
+            fontsize=plt.rcParams['legend.fontsize']*0.75,
             horizontalalignment='left',
             verticalalignment='top',)
-    ax.text(m.dimensions.x.value,0,astropy.time.Time(m.date).strftime('%Y/%d/%m'),
+    ax.text(m.dimensions.x.value,0,
+            astropy.time.Time(m.date).strftime('%Y/%d/%m'),
             color='w',
-            fontsize=plt.rcParams['legend.fontsize'],
+            fontsize=plt.rcParams['legend.fontsize']*0.75,
             horizontalalignment='right',
             verticalalignment='bottom')
-plt.subplots_adjust(hspace=0.025,wspace=0.01)
+plt.subplots_adjust(hspace=0.01,wspace=0.01)
 
 # Save figure
 tfig = ch1.save_figure('example-images', fext='.pdf')
@@ -100,13 +104,123 @@ tfig.caption = r''
 \py[chapter1]|tfig|
 % spell-checker: enable %
 
+%\subsection{Solar Wind}
+
+% very briefly
+
 \section{The Solar Magnetic Field}
 
 \subsection{Flux Emergence}
 
+% should the MHD equations go here?
+
 % dynamo, flux emergence, formation of ARs (define AR)
 
-\subsection{Reconnection}
+\subsection{Reconnection}\label{sec:reconnection}
+
+After the magnetic field is forced into the solar atmosphere by the bouyant motion of the convective zone, it remains rooted in the photosphere, whether it is an \textit{open} (flux tube extends radially outward, possibly connecting with the interplanetary magnetic field) or \textit{closed} (both ends attached to the solar surface) field line. Because the field is \textit{line-tied}, or frozen into the photospheric plasma, the turbulent motion of the photosphere deforms and stresses the overlying field, leading to the storage of magnetic energy. This motion can eventually lead to a topological restructuring of the magnetic field as it relaxes from a stressed to an equilibrium state, a process commonly referred to as \textit{magnetic reconnection}.
+
+% spell-checker: disable %
+\begin{pycode}[chapter1]
+arrow_style = {
+    'lw': 3,
+    'head_width': 0.0125,
+    'head_length': 0.01,
+    'edgecolor': 'k',
+    'facecolor': 'k'
+}
+dot_style = { 'marker': 'o', 'markersize': 7.5, 'ls': ''}
+
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=1,
+    height_ratio=2/5,
+))
+
+# Panel 1
+ax = fig.add_subplot(131)
+ax.set_aspect(aspect=1.5)
+ax.set_xlim(-0.1,1.1)
+ax.set_ylim(-0.1,1.1)
+remove_ticks_and_spines(ax)
+# First curve
+patch = matplotlib.patches.PathPatch(
+    Path([(0,0),(0.6,0.5),(0,1),], [Path.MOVETO,Path.CURVE3,Path.CURVE3,]),
+    facecolor='none', edgecolor=DEEP_PALETTE[3], lw=2)
+ax.add_patch(patch)
+ax.plot([0,0], [0,1], **dot_style, color=DEEP_PALETTE[3])
+# Second curve
+patch = matplotlib.patches.PathPatch(
+    Path([(1,0),(0.4,0.5),(1,1),], [Path.MOVETO,Path.CURVE3,Path.CURVE3,]),
+    facecolor='none',edgecolor=DEEP_PALETTE[0],lw=2)
+ax.add_patch(patch)
+ax.plot([1,1],[0,1], **dot_style, color=DEEP_PALETTE[0])
+
+# Panel 2
+ax = fig.add_subplot(132)
+ax.set_aspect(aspect=1.5)
+ax.set_xlim(-0.1,1.1)
+ax.set_ylim(-0.1,1.1)
+remove_ticks_and_spines(ax)
+# First curve
+patch = matplotlib.patches.PathPatch(
+    Path([(0,0),(0.625,0.1),(0.625,0.9),(0,1),],
+         [Path.MOVETO,Path.CURVE4,Path.CURVE4,Path.CURVE4]),
+    facecolor='none', edgecolor=DEEP_PALETTE[3], lw=2)
+ax.add_patch(patch)
+ax.plot([0,0],[0,1], **dot_style, color=DEEP_PALETTE[3])
+# Second curve
+patch = matplotlib.patches.PathPatch(
+    Path([(1,0),(0.375,0.1),(0.375,0.9),(1,1),],
+         [Path.MOVETO,Path.CURVE4,Path.CURVE4,Path.CURVE4]),
+    facecolor='none', edgecolor=DEEP_PALETTE[0], lw=2)
+ax.add_patch(patch)
+ax.plot([1,1],[0,1], **dot_style, color=DEEP_PALETTE[0])
+# Arrows
+ax.arrow(0.1, 0.5, 0.2, 0, **arrow_style)
+ax.arrow(0.9, 0.5, -0.2, 0, **arrow_style)
+# Box
+rect = matplotlib.patches.Rectangle(
+    (0.425,0.25), 0.15, 0.5,
+    fill=True, alpha=0.45, color='grey', linewidth=0)
+ax.add_patch(rect)
+
+# Panel 3
+ax = fig.add_subplot(133)
+ax.set_aspect(aspect=1.5)
+ax.set_xlim(-0.1,1.1)
+ax.set_ylim(-0.1,1.1)
+remove_ticks_and_spines(ax)
+# First curve
+patch = matplotlib.patches.PathPatch(
+    Path([(0,1),(0.5,0.15),(1,1),], [Path.MOVETO,Path.CURVE3,Path.CURVE3]),
+    facecolor='none', edgecolor=DEEP_PALETTE[4], lw=2)
+ax.add_patch(patch)
+ax.plot([0,0],[0,1], **dot_style, color=DEEP_PALETTE[3])
+# Second curve
+patch = matplotlib.patches.PathPatch(
+    Path([(0,0),(0.5,0.85),(1,0),], [Path.MOVETO,Path.CURVE3,Path.CURVE3]),
+    facecolor='none', edgecolor=DEEP_PALETTE[4], lw=2)
+ax.add_patch(patch)
+ax.plot([1,1],[0,1], **dot_style, color=DEEP_PALETTE[0])
+# Arrows
+ax.arrow(0.5, 0.65, 0, 0.15, **arrow_style)
+ax.arrow(0.5, 0.35, 0, -0.15, **arrow_style)
+
+plt.subplots_adjust(wspace=0.0)
+
+# Save
+tfig = ch1.save_figure('reconnection-cartoon', fext='.pgf')
+tfig.caption = r'Cartoon illustrating the breaking and reconnecting of magnetic field lines. When two regions of oppositely directed field (red and blue, left panel) are brought together (middle panel), a discontinuity develops in the narrow \textit{diffusion region} (shaded gray box). Non-ideal effects cause the fieldlines to ``reconnect'' (right panel), thus changing the topology of the magnetic field. Adapted from Figure 6.1 of \citet{priest_magnetohydrodynamics_2014}.'
+\end{pycode}
+\py[chapter1]|tfig|
+% spell-checker: enable %
+
+Magnetic reconnection is thought to be a dominant process in a variety of space and astrophysical plasma environments, including Earth's magnetosphere, solar flares, and accretion disks. Recconnection has been observed in laboratory experiments as well such as the tokamak and the reversed field pinch \citep{priest_magnetic_2000}. It is also thought to be the primary driver of some coronal heating mechanisms (see \autoref{sec:nanoflares}). The basic idea behind reconnection is illustrated in \autoref{fig:reconnection-cartoon}. When two oppositely-directed field lines are brought together in a conducting fluid (such as a plasma), a tangential discontinuity develops between them with current-carrying plasma squeezed into this area of discontinuity. Because the field lines are frozen into the plasma, a large magnetic gradient develops at the discontinuity in an area called the \textit{diffusion region} (the gray box in \autoref{fig:reconnection-cartoon}). Because of these large gradients, the resistivity in this region becomes very high, allowing the magnetic field lines to diffuse through the plasma, reconnect, and relax to a topologically different, but more energetically favorable state. As the field lines reconnect and are pushed out of the diffusion region, they accelerate and heat the plasma. Reconnection is thus a non-ideal process as it allows for the conversion of stored magnetic energy to kinetic and thermal energy via dissipation \citep{priest_magnetic_2000}.
+
+While the idea behind reconnection was introduced by \citet{dungey_conditions_1953}, the first complete theory of reconnection was proposed by \citet{sweet_neutral_1958} and further developed by \citet{parker_sweets_1957,parker_solar-flare_1963}. In the so-called Sweet-Parker model a diffusion region of length $2L$ and width $2\ell$ is defined between two anti-parallel fields. The field lines are carried into the diffusion region with speed $v_i=\eta/\ell$, where $\eta$ is the magnetic diffusivity. Using Maxwell's equations and the mass and momentum conservation equations from magnetohydrodynamic (MHD) theory, the inflow velocity, or reconnection rate, can be rewritten as $v_i=v_{Ai}/\sqrt{R_{mi}}$, where $v_{Ai}$ is the Alfv\'{e}n speed and $R_{mi}=Lv_{Ai}/\eta$ is the Magnetic Reynolds number \citep{priest_magnetic_2000}. 
+
+The Sweet-Parker model predicts a reconnection rate far too slow to properly account for the energy release timescales observed in flare plasmas. In an effort to remedy the slow reconnection in the Sweet-Parker mechanism, \citet{petschek_magnetic_1964} suggested that magnetoacoustic shocks could provide an additional accleration mechanism for the reconnection rate. Additionally, he proposed a smaller diffusion region, further shortening the reconnection timescale. For many years following Petschek's work, it was thought that the problem of fast reconnection was solved. Today, however, thanks in part to increased computing power that makes three-dimensional and kinetic simulations possible, reconnection is now understood to be a far more subtle mechanism than previously thought, with the Petschek and Sweet-Parker models as only special cases \citep{priest_magnetic_2000}.
 
 \subsection{Observations}
 
@@ -115,8 +229,6 @@ tfig.caption = r''
 % show a synoptic map (GONG) or full-disk (HMI)
 
 \subsection{Field Extrapolation}\label{sec:field_extrapolation}
-
-% should we introduce MHD equations here?
 
 In general, determining the vector magnetic field in the corona requires solving the coupled, non-linear equations of \textit{magnetohydrodynamics} (MHD),
 \begin{align}
@@ -157,15 +269,28 @@ Several methods have been developed to solve \autoref{eq:laplace} for the corona
 
 The potential field represents the lowest possible energy state of the magnetic field and is likely to be an appropriate approximation provided the magnetic energy dominates over the thermal energy ($\beta<1$) and the field has had sufficient time to relax to the lowest energetic state \citep{priest_magnetohydrodynamics_2014}. Thus, a field with a non-zero current is in a higher energy state than a potential field. From \autoref{eq:mhd_ampere}, if $\mathbf{j}\neq0$ then $\alpha\neq0$. Provided \autoref{eq:force_free} holds, solutions to \autoref{eq:ampere_force_free} represent non-potential force-free fields and in general are much more difficult to compute than potential field solutions. If $\alpha$ is constant, the solution is a linear force-free field, but if $\alpha$ is a function of a position $\mathbf{r}$, the magnetic field is said to be non-linear force-free. See \citet{wiegelmann_solar_2012} for a comprehensive review of force-free magnetic fields in solar physics. 
 
-\section{Heating Processes in the Corona}
+\section{Heating in the Solar Corona}\label{sec:coronal-heating}
 
-\subsection{Waves versus Reconnection}
+The mystery of the anomalously-high temperatures in the Sun's outer atmosphere, the so-called ``coronal heating problem'', is a central question in the field of solar astrophysics. The discovery of the \SI{>e6}{\kelvin} corona was made over the course of nearly fifty years through a combination of eclipse observations and laboratory experiments. Spectroscopic measurements during the 1869 solar eclipse by Charles Young and William Harkness yielded a suprising result: an unknown ``coronal green line'' \citep{golub_solar_2010}. Because it could not be associated with any known element, the line was initially labeled as a new element, ``coronium''. Later examinations of the coronal spectrum revealed several more unidentifiable spectral lines, including a ``red line'' and a ``yellow line''.
 
-\subsection{Nanoflare Heating}
+\citet{grotrian_zur_1939} showed that these lines correspond to forbidden transitions in Fe XIV at \SI{5303}{\angstrom} (``green''), Fe X at \SI{6374}{\angstrom} (``red''), and Ca XV at \SI{5694}{\angstrom} (``yellow'') \citep[from Table 2.1 of][]{golub_solar_2010}. \citet{edlen_deutung_1943} later identified four additional coronal lines, Fe X, Fe XI, Ca XII, and Ca XIII. The presence of these high ionization states implies coronal temperatures in excess of \SI{e6}{\kelvin} and explained the high gas pressure needed to support extended corona seen in eclipse observations \citep{golub_solar_2010}.
 
-\section{Aims of this Work}
+Because of their work in coronal spectroscopy, \citet{grotrian_zur_1939} and \citet{edlen_deutung_1943} are generally credited with the discovery of the million-degree solar corona. However, some \citep[see][]{peter_discovery_2014} have argued that early coronal spectroscopists did not imply a million-degree corona and that it was in fact Nobel laureate Hannes Alfv\'{e}n, in \citet{alfven_solar_1941}, who first proposed a hot corona, even arguing that it was the interaction between the magnetic field and the charged particles in the solar atmosphere that lead to heating in the corona.
 
-% mention software here? put it in acknowledgements? could have a very short section about importance of software in this work, importance of open development
+\subsection{Waves versus Reconnection}\label{sec:waves-reconnection}
+
+Since the discovery the million-degree corona, a number of mechanisms have been proposed as candidates for heating the coronal plasma. Historically, these physical mechanisms have been divided into categories: \textit{AC}, mechanisms that rely on waves to transfer energy from the lower atmosphere into the corona and \textit{DC}, mechanisms that involve dissipation of energy stored in the stressed magnetic field. More rigorously, the AC- or DC-type heating classification depends on the timescale of the stressing motion: if it is longer than a characteristic crossing time of the coronal structure, it is classified as DC heating. If the timescale is shorter than a crossing time, it is classified as AC heating. In order to be successful, a given mechanism must be able to explain the energy source of the heating, how the energy is converted to heat, how the plasma responds and accurately predict any observables from the resulting plasma emission \citep[see Figure 1 of][]{klimchuk_solving_2006}.
+
+A variety of wave modes have been observed in both the open and closed corona, including acoustic waves, Alfv\'{e}n waves, and slow- and fast-mode MHD waves \citep{aschwanden_physics_2006}, but the simple existence of these waves is not enough to make them a viable candidate for coronal heating. They must be able to propagate into the corona with an adequate amount of energy and then efficiently dissipate this energy in order to heat the coronal plasma. For example, acoustic waves are capable of carrying an adequate amount of energy to heat the corona, but are almost entirely reflected by the steep density gradients in the transition region. Alfv\'{e}n waves may also be capable of carrying enough energy to heat the corona, but specific frequencies are required to avoid reflection at the transition region. These particular modes have also been found to be non-dissipative under coronal conditions, making it hard for these waves to actually heat the corona even if they make it to the upper atmosphere \citep{klimchuk_solving_2006}. Wave modes generated in the corona would of course overcome the problem of crossing the transition region boundary. However, while oscillations in the corona have been observed \citep{de_moortel_longitudinal_2002,de_moortel_longitudinal_2002-1}, the properties of these waves have not been measured precisely enough to say whether or not they are capable of heating the corona \citep{klimchuk_solving_2006}.
+
+\subsection{Nanoflare Heating}\label{sec:nanoflares}
+
+% Parker nanoflare mechanism
+
+% Klimchuk nanoflares (agnostic to underlying physics);
+% Note that this invalidates (somewhat) the previous categorization of the heating mechanisms into AC,DC
+
+\section{Aims of this Work}\label{sec:aims}
 
 % Nomenclature
 \nomenclature[a-rsun]{$R_{\solar}$}{radius of the Sun, $\approx\SI{6.957e10}{\cm}$}

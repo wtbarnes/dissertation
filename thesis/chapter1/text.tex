@@ -33,6 +33,8 @@ from formatting import remove_ticks_and_spines
 %\subsubsection{Convection Zone}
 %
 %\subsection{Photosphere}
+
+% three panel figure with 4500, 304, 131/193 showing transition from photosphere to chromosphere to corona
 %
 %\subsection{Chromosphere}
 %
@@ -40,7 +42,8 @@ from formatting import remove_ticks_and_spines
 %
 %\subsection{Corona}
 
-% one multi-panel figure: EIT, SXT, TRACE, XRT, AIA, SWAP
+% characteristics of the corona
+% discuss EUV and X-ray observations of the corona (ref figure)
 
 % spell-checker: disable %
 \begin{pycode}[chapter1]
@@ -110,15 +113,62 @@ tfig.caption = r''
 
 \section{The Solar Magnetic Field}
 
-\subsection{Flux Emergence}
+% comment on beta, frozen-in flux condition
 
-% should the MHD equations go here?
+\subsection{Flux Emergence}
 
 % dynamo, flux emergence, formation of ARs (define AR)
 
+\subsection{Observations}
+
+% comments on how we observe magnetic fields in the corona (Zeeeman, Hanle)
+% LOS vs vector magnetograms
+% show a synoptic map (GONG) or full-disk (HMI)
+
+\subsection{Field Extrapolation}\label{sec:field_extrapolation}
+
+In general, determining the vector magnetic field in the corona requires solving the coupled, non-linear equations of \textit{magnetohydrodynamics} (MHD),
+\begin{align}
+    &\frac{d}{dt}\rho + \rho\nabla\cdot\mathbf{v} = 0, \label{eq:mhd_continuity} \\
+    &\rho\frac{d}{dt}\mathbf{v} = \frac{1}{c}\mathbf{j}\times\mathbf{B} - \nabla p, \label{eq:mhd_momentum} \\
+    &\mathbf{j} = \frac{c}{4\pi}\nabla\times\mathbf{B}, \label{eq:mhd_ampere} \\
+    &\frac{\partial}{\partial t}\mathbf{B} = \nabla\times(\mathbf{v}\times\mathbf{B}) + \frac{\eta c^2}{4\pi}\nabla^2\mathbf{B}, \label{eq:mhd_faraday} \\
+    &\nabla\cdot\mathbf{B} = 0, \label{eq:mhd_divb} \\
+    &\frac{\rho^\gamma}{\gamma - 1}\frac{d}{dt}\left(\frac{p}{\rho^{\gamma}}\right) = -\nabla\cdot\mathbf{q} - R + H, \label{eq:mhd_energy}
+\end{align}
+where $\rho$ is the mass density, $\mathbf{v}$ is the bulk flow velocity, $\mathbf{j}$ is the current density, $\mathbf{B}$ is the magnetic field, $p$ is the thermal pressure, $\eta$ is the magnetic diffusivity, $\gamma=5/3$ is the ratio of specific heats, $\mathbf{q}$ is the heat flux, $R$ is the radiative loss term, $H$ is heating due to Ohmic and viscous dissipation, and $d/dt\equiv\partial/\partial t + \mathbf{v}\cdot\nabla$ \citep{priest_magnetohydrodynamics_2014}. Solving the MHD equations for the time-dependent, vector magnetic field in three-dimensions is an extremely challenging problem that requires sophisticated numerical tools and significant computational resources. However, several methods exist for efficiently approximating the coronal magnetic field in \textit{magnetohydrostatic equilibrium} given an observation of the photospheric LOS magnetic field.
+
+\textit{Magnetic field extrapolation} is a commonly-used technique for approximating the three-dimensional vector magnetic field in the corona. Following the treatment in \citet[Chapter 3]{priest_magnetohydrodynamics_2014}, \autoref{eq:mhd_momentum}, the ideal MHD momentum equation, in magnetohydrostatic balance can be written as,
+\begin{equation}\label{eq:magnetohydrostatic_balance}
+    0 = \frac{1}{c}\mathbf{j}\times\mathbf{B} - \nabla p.
+\end{equation}
+In a low-$\beta$ plasma where the magnetic pressure dominates over the thermal pressure (see \autoref{ch:loops}), the first term on the right-hand side can often be neglected such that \autoref{eq:magnetohydrostatic_balance} becomes,
+\begin{equation}\label{eq:force_free}
+    \mathbf{j}\times\mathbf{B} = 0.
+\end{equation}
+\autoref{eq:force_free} is the so-called \textit{force-free} condition. Combined with \autoref{eq:mhd_ampere}, Amp\'{e}re's law, this implies that,
+\begin{equation}\label{eq:ampere_force_free}
+    \nabla\times\mathbf{B} = \alpha\mathbf{B},
+\end{equation}
+where, in general, the scalar $\alpha$ may be some function of position $\mathbf{r}$.
+
+In the case of $\alpha=0$, $\mathbf{j}=0$ (from \autoref{eq:mhd_ampere}) and the magnetic field is said to be current-free or \textit{potential}. \autoref{eq:ampere_force_free} implies that $\mathbf{B}$ is also curl-free such that it can be expressed as,
+\begin{equation}\label{eq:b_potential}
+    \mathbf{B}=\nabla\phi,
+\end{equation}
+ where $\phi$ is some scalar potential. Combining this expression with the requirement from Maxwell's equations that the magnetic field must always be divergence-free (\autoref{eq:mhd_divb}) gives Laplace's equation,
+\begin{equation}\label{eq:laplace}
+    \nabla^2\phi = 0.
+\end{equation}
+If the normal component of the magnetic field is specified on the lower boundary (e.g. from a photospheric LOS magnetogram), the solution within a closed volume is unique \citep{priest_magnetohydrodynamics_2014}.
+
+Several methods have been developed to solve \autoref{eq:laplace} for the coronal magnetic field. The potential field source surface (PFSS) model of \citet{schatten_model_1969} solves \autoref{eq:laplace} for the global corona given a synoptic photospheric magnetogram as the lower boundary input and under the assumption that the field is purely radial at some ``source surface'', typically $2.5R_{\solar}$. Additionally, the Green's function method of \citet{schmidt_observable_1964} can be used to efficiently determine the potential magnetic field on the scale of a single \AR{} on a Cartesian grid given a LOS magnetogram. \autoref{sec:potential_field} will describe the latter method in detail. While the work presented in this thesis will only make use of photospheric LOS magnetogram data, there exist many techniques for computing field extrapolations from vector magnetograms as well \citep[see review by][]{welsch_deriving_2016}.
+
+The potential field represents the lowest possible energy state of the magnetic field and is likely to be an appropriate approximation provided the magnetic energy dominates over the thermal energy ($\beta<1$) and the field has had sufficient time to relax to the lowest energetic state \citep{priest_magnetohydrodynamics_2014}. Thus, a field with a non-zero current is in a higher energy state than a potential field. From \autoref{eq:mhd_ampere}, if $\mathbf{j}\neq0$ then $\alpha\neq0$. Provided \autoref{eq:force_free} holds, solutions to \autoref{eq:ampere_force_free} represent non-potential force-free fields and in general are much more difficult to compute than potential field solutions. If $\alpha$ is constant, the solution is a linear force-free field, but if $\alpha$ is a function of a position $\mathbf{r}$, the magnetic field is said to be non-linear force-free. See \citet{wiegelmann_solar_2012} for a comprehensive review of force-free magnetic fields in solar physics.
+
 \subsection{Reconnection}\label{sec:reconnection}
 
-After the magnetic field is forced into the solar atmosphere by the bouyant motion of the convective zone, it remains rooted in the photosphere, whether it is an \textit{open} (flux tube extends radially outward, possibly connecting with the interplanetary magnetic field) or \textit{closed} (both ends attached to the solar surface) field line. Because the field is \textit{line-tied}, or frozen into the photospheric plasma, the turbulent motion of the photosphere deforms and stresses the overlying field, leading to the storage of magnetic energy. This motion can eventually lead to a topological restructuring of the magnetic field as it relaxes from a stressed to an equilibrium state, a process commonly referred to as \textit{magnetic reconnection}.
+After the magnetic field is forced into the solar atmosphere by the bouyant motion of the convective zone, it remains rooted in the photosphere, whether it is \textit{open} (flux tube extends radially outward, possibly connecting with the interplanetary magnetic field) or \textit{closed} (both ends attached to the solar surface). Because the field is \textit{line-tied}, or frozen into the photospheric plasma, the turbulent motion of the photosphere deforms and stresses the overlying field, leading to the storage of magnetic energy. This motion can eventually lead to a topological restructuring of the magnetic field as it relaxes from a stressed to an equilibrium state, a process commonly referred to as \textit{magnetic reconnection}.
 
 % spell-checker: disable %
 \begin{pycode}[chapter1]
@@ -216,58 +266,11 @@ tfig.caption = r'Cartoon illustrating the breaking and reconnecting of magnetic 
 \py[chapter1]|tfig|
 % spell-checker: enable %
 
-Magnetic reconnection is thought to be a dominant process in a variety of space and astrophysical plasma environments, including Earth's magnetosphere, solar flares, and accretion disks. Recconnection has been observed in laboratory experiments as well such as the tokamak and the reversed field pinch \citep{priest_magnetic_2000}. It is also thought to be the primary driver of some coronal heating mechanisms (see \autoref{sec:nanoflares}). The basic idea behind reconnection is illustrated in \autoref{fig:reconnection-cartoon}. When two oppositely-directed field lines are brought together in a conducting fluid (such as a plasma), a tangential discontinuity develops between them with current-carrying plasma squeezed into this area of discontinuity. Because the field lines are frozen into the plasma, a large magnetic gradient develops at the discontinuity in an area called the \textit{diffusion region} (the gray box in \autoref{fig:reconnection-cartoon}). Because of these large gradients, the resistivity in this region becomes very high, allowing the magnetic field lines to diffuse through the plasma, reconnect, and relax to a topologically different, but more energetically favorable state. As the field lines reconnect and are pushed out of the diffusion region, they accelerate and heat the plasma. Reconnection is thus a non-ideal process as it allows for the conversion of stored magnetic energy to kinetic and thermal energy via dissipation \citep{priest_magnetic_2000}.
+Magnetic reconnection is thought to be a dominant process in a variety of space and astrophysical plasma environments, including Earth's magnetosphere, solar flares, and accretion disks. Reconnection is also observed in laboratory experiments like the tokamak and the reversed field pinch \citep{priest_magnetic_2000} and is thought to be the primary driver of some coronal heating mechanisms (see \autoref{sec:nanoflares}). The basic idea behind reconnection is illustrated in \autoref{fig:reconnection-cartoon}. When two oppositely-directed field lines are brought together in a conducting fluid (such as a plasma), a tangential discontinuity develops between them with current-carrying plasma squeezed into this area of discontinuity. Because the field lines are frozen into the plasma, a large magnetic gradient develops at the discontinuity and a current sheet forms. Because of these large gradients, the resistivity in this \textit{diffusion region} (the gray box in \autoref{fig:reconnection-cartoon}) becomes very high, allowing the magnetic field lines to diffuse through the plasma, reconnect, and relax to a topologically different, but more energetically favorable state. As the field lines reconnect and are pushed out of the end of the diffusion region by the enhanced pressure (right panel of \autoref{fig:reconnection-cartoon}), the current sheet diffuses away and the plasma is heated by Ohmic dissipation of the stored magnetic energy. Reconnection is thus a non-ideal process as it allows for the conversion of stored magnetic energy to kinetic and thermal energy via dissipation \citep{priest_magnetic_2000,priest_magnetohydrodynamics_2014}.
 
-While the idea behind reconnection was introduced by \citet{dungey_conditions_1953}, the first complete theory of reconnection was proposed by \citet{sweet_neutral_1958} and further developed by \citet{parker_sweets_1957,parker_solar-flare_1963}. In the so-called Sweet-Parker model a diffusion region of length $2L$ and width $2\ell$ is defined between two anti-parallel fields. The field lines are carried into the diffusion region with speed $v_i=\eta/\ell$, where $\eta$ is the magnetic diffusivity. Using Maxwell's equations and the mass and momentum conservation equations from magnetohydrodynamic (MHD) theory, the inflow velocity, or reconnection rate, can be rewritten as $v_i=v_{Ai}/\sqrt{R_{mi}}$, where $v_{Ai}$ is the Alfv\'{e}n speed and $R_{mi}=Lv_{Ai}/\eta$ is the Magnetic Reynolds number \citep{priest_magnetic_2000}. 
+While the idea behind reconnection was introduced by \citet{dungey_conditions_1953}, the first complete theory of reconnection was proposed by \citet{sweet_neutral_1958} and further developed by \citet{parker_sweets_1957,parker_solar-flare_1963}. In the so-called Sweet-Parker model a diffusion region of length $2L$ and width $2\ell$ is defined between two anti-parallel fields. The field lines are carried into the diffusion region with speed $v_i=\eta/\ell$, where $\eta$ is the magnetic diffusivity. Using \autoref{eq:mhd_divb}, \autoref{eq:mhd_continuity}, and \autoref{eq:mhd_momentum}, the inflow velocity, or reconnection rate, can be rewritten as $v_i=v_{Ai}/\sqrt{R_{mi}}$, where $v_{Ai}$ is the Alfv\'{e}n speed and $R_{mi}=Lv_{Ai}/\eta$ is the magnetic Reynolds number \citep{priest_magnetic_2000}. 
 
 The Sweet-Parker model predicts a reconnection rate far too slow to properly account for the energy release timescales observed in flare plasmas. In an effort to remedy the slow reconnection in the Sweet-Parker mechanism, \citet{petschek_magnetic_1964} suggested that magnetoacoustic shocks could provide an additional accleration mechanism for the reconnection rate. Additionally, he proposed a smaller diffusion region, further shortening the reconnection timescale. For many years following Petschek's work, it was thought that the problem of fast reconnection was solved. Today, however, thanks in part to increased computing power that makes three-dimensional and kinetic simulations possible, reconnection is now understood to be a far more subtle mechanism than previously thought, with the Petschek and Sweet-Parker models as only special cases \citep{priest_magnetic_2000}.
-
-\subsection{Observations}
-
-% comments on how we observe magnetic fields in the corona (Zeeeman, Hanle)
-% LOS vs vector magnetograms
-% show a synoptic map (GONG) or full-disk (HMI)
-
-\subsection{Field Extrapolation}\label{sec:field_extrapolation}
-
-In general, determining the vector magnetic field in the corona requires solving the coupled, non-linear equations of \textit{magnetohydrodynamics} (MHD),
-\begin{align}
-    &\frac{d}{dt}\rho + \rho\nabla\cdot\mathbf{v} = 0, \label{eq:mhd_continuity} \\
-    &\rho\frac{d}{dt}\mathbf{v} = \frac{1}{c}\mathbf{j}\times\mathbf{B} - \nabla p, \label{eq:mhd_momentum} \\
-    &\mathbf{j} = \frac{c}{4\pi}\nabla\times\mathbf{B}, \label{eq:mhd_ampere} \\
-    &\frac{\partial}{\partial t}\mathbf{B} = \nabla\times(\mathbf{v}\times\mathbf{B}) + \frac{\eta c^2}{4\pi}\nabla^2\mathbf{B}, \label{eq:mhd_faraday} \\
-    &\nabla\cdot\mathbf{B} = 0, \label{eq:mhd_divb} \\
-    &\frac{\rho^\gamma}{\gamma - 1}\frac{d}{dt}\left(\frac{p}{\rho^{\gamma}}\right) = -\nabla\cdot\mathbf{q} - R + H, \label{eq:mhd_energy}
-\end{align}
-where $\rho$ is the mass density, $\mathbf{v}$ is the bulk flow velocity, $\mathbf{j}$ is the current density, $\mathbf{B}$ is the magnetic field, $p$ is the thermal pressure, $\eta$ is the magnetic diffusivity, $\gamma=5/3$ is the ratio of specific heats, $\mathbf{q}$ is the heat flux, $R$ is the radiative loss term, $H$ is heating due to Ohmic and viscous dissipation, and $d/dt\equiv\partial/\partial t + \mathbf{v}\cdot\nabla$ \citep{priest_magnetohydrodynamics_2014}. Solving the MHD equations for the time-dependent, vector magnetic field in three-dimensions is an extremely challenging problem that requires sophisticated numerical tools and significant computational resources. However, several methods exist for efficiently approximating the coronal magnetic field in \textit{magnetohydrostatic equilibrium} given an observation of the photospheric LOS magnetic field.
-
-\textit{Magnetic field extrapolation} is a commonly-used technique for approximating the three-dimensional vector magnetic field in the corona. Following the treatment in \citet[Chapter 3]{priest_magnetohydrodynamics_2014}, \autoref{eq:mhd_momentum}, the ideal MHD momentum equation, in magnetohydrostatic balance can be written as,
-\begin{equation}\label{eq:magnetohydrostatic_balance}
-    0 = \frac{1}{c}\mathbf{j}\times\mathbf{B} - \nabla p.
-\end{equation}
-In a low-$\beta$ plasma where the magnetic pressure dominates over the thermal pressure (see \autoref{ch:loops}), the first term on the right-hand side can often be neglected such that \autoref{eq:magnetohydrostatic_balance} becomes,
-\begin{equation}\label{eq:force_free}
-    \mathbf{j}\times\mathbf{B} = 0.
-\end{equation}
-\autoref{eq:force_free} is the so-called \textit{force-free} condition. Combined with \autoref{eq:mhd_ampere}, Amp\'{e}re's law, this implies that,
-\begin{equation}\label{eq:ampere_force_free}
-    \nabla\times\mathbf{B} = \alpha\mathbf{B},
-\end{equation}
-where, in general, the scalar $\alpha$ may be some function of position $\mathbf{r}$.
-
-In the case of $\alpha=0$, $\mathbf{j}=0$ (from \autoref{eq:mhd_ampere}) and the magnetic field is said to be current-free or \textit{potential}. \autoref{eq:ampere_force_free} implies that $\mathbf{B}$ is also curl-free such that it can be expressed as,
-\begin{equation}\label{eq:b_potential}
-    \mathbf{B}=\nabla\phi,
-\end{equation}
- where $\phi$ is some scalar potential. Combining this expression with the requirement from Maxwell's equations that the magnetic field must always be divergence-free (\autoref{eq:mhd_divb}) gives Laplace's equation,
-\begin{equation}\label{eq:laplace}
-    \nabla^2\phi = 0.
-\end{equation}
-If the normal component of the magnetic field is specified on the lower boundary (e.g. from a photospheric LOS magnetogram), the solution within a closed volume is unique \citep{priest_magnetohydrodynamics_2014}.
-
-Several methods have been developed to solve \autoref{eq:laplace} for the coronal magnetic field. The potential field source surface (PFSS) model of \citet{schatten_model_1969} solves \autoref{eq:laplace} for the global corona given a synoptic photospheric magnetogram as the lower boundary input and under the assumption that the field is purely radial at some ``source surface'', typically $2.5R_{\solar}$. Additionally, the Green's function method of \citet{schmidt_observable_1964} can be used to efficiently determine the potential magnetic field on the scale of a single \AR{} on a Cartesian grid given a LOS magnetogram. \autoref{sec:potential_field} will describe the latter method in detail. While the work presented in this thesis will only make use of photospheric LOS magnetogram data, there exist many techniques for computing field extrapolations from vector magnetograms as well \citep[see review by][]{welsch_deriving_2016}.
-
-The potential field represents the lowest possible energy state of the magnetic field and is likely to be an appropriate approximation provided the magnetic energy dominates over the thermal energy ($\beta<1$) and the field has had sufficient time to relax to the lowest energetic state \citep{priest_magnetohydrodynamics_2014}. Thus, a field with a non-zero current is in a higher energy state than a potential field. From \autoref{eq:mhd_ampere}, if $\mathbf{j}\neq0$ then $\alpha\neq0$. Provided \autoref{eq:force_free} holds, solutions to \autoref{eq:ampere_force_free} represent non-potential force-free fields and in general are much more difficult to compute than potential field solutions. If $\alpha$ is constant, the solution is a linear force-free field, but if $\alpha$ is a function of a position $\mathbf{r}$, the magnetic field is said to be non-linear force-free. See \citet{wiegelmann_solar_2012} for a comprehensive review of force-free magnetic fields in solar physics. 
 
 \section{Heating in the Solar Corona}\label{sec:coronal-heating}
 
@@ -279,16 +282,26 @@ Because of their work in coronal spectroscopy, \citet{grotrian_zur_1939} and \ci
 
 \subsection{Waves versus Reconnection}\label{sec:waves-reconnection}
 
-Since the discovery the million-degree corona, a number of mechanisms have been proposed as candidates for heating the coronal plasma. Historically, these physical mechanisms have been divided into categories: \textit{AC}, mechanisms that rely on waves to transfer energy from the lower atmosphere into the corona and \textit{DC}, mechanisms that involve dissipation of energy stored in the stressed magnetic field. More rigorously, the AC- or DC-type heating classification depends on the timescale of the stressing motion: if it is longer than a characteristic crossing time of the coronal structure, it is classified as DC heating. If the timescale is shorter than a crossing time, it is classified as AC heating. In order to be successful, a given mechanism must be able to explain the energy source of the heating, how the energy is converted to heat, how the plasma responds and accurately predict any observables from the resulting plasma emission \citep[see Figure 1 of][]{klimchuk_solving_2006}.
+Since the discovery the million-degree corona, a number of mechanisms have been proposed as candidates for heating the coronal plasma. Historically, these physical mechanisms have been divided into categories: \textit{AC}, mechanisms that rely on waves to transfer energy from the lower atmosphere into the corona and \textit{DC}, mechanisms that involve dissipation of energy stored in the stressed magnetic field. More rigorously, the AC- or DC-type heating classification depends on the timescale of the stressing motion: if it is longer than a characteristic crossing time of the coronal structure, it is classified as DC heating. If the timescale is shorter than a crossing time, it is classified as AC heating. Any viable heating mechanism must be able to explain the energy source of the heating, how the energy is converted to heat, how the plasma responds and accurately predict any observables from the resulting plasma emission \citep[see Figure 1 of][]{klimchuk_solving_2006}.
 
-A variety of wave modes have been observed in both the open and closed corona, including acoustic waves, Alfv\'{e}n waves, and slow- and fast-mode MHD waves \citep{aschwanden_physics_2006}, but the simple existence of these waves is not enough to make them a viable candidate for coronal heating. They must be able to propagate into the corona with an adequate amount of energy and then efficiently dissipate this energy in order to heat the coronal plasma. For example, acoustic waves are capable of carrying an adequate amount of energy to heat the corona, but are almost entirely reflected by the steep density gradients in the transition region. Alfv\'{e}n waves may also be capable of carrying enough energy to heat the corona, but specific frequencies are required to avoid reflection at the transition region. These particular modes have also been found to be non-dissipative under coronal conditions, making it hard for these waves to actually heat the corona even if they make it to the upper atmosphere \citep{klimchuk_solving_2006}. Wave modes generated in the corona would of course overcome the problem of crossing the transition region boundary. However, while oscillations in the corona have been observed \citep{de_moortel_longitudinal_2002,de_moortel_longitudinal_2002-1}, the properties of these waves have not been measured precisely enough to say whether or not they are capable of heating the corona \citep{klimchuk_solving_2006}.
+\subsubsection{AC Heating}\label{sec:ac-heating}
+
+A variety of wave modes have been observed in both the open and closed corona, including acoustic waves, Alfv\'{e}n waves, and slow- and fast-mode MHD waves \citep{aschwanden_physics_2006}, but the simple existence of these waves is not enough to make them a viable candidate for coronal heating. They must be able to propagate into the corona with an adequate amount of energy and then efficiently dissipate this energy in order to heat the coronal plasma. For example, acoustic waves are capable of carrying an adequate amount of energy to heat the corona, but are almost entirely reflected by the steep density gradients in the TR. Alfv\'{e}n waves may also be capable of carrying enough energy to heat the corona, but specific frequencies are required to avoid reflection at the TR. These particular modes have also been found to be non-dissipative under coronal conditions, making it hard for these waves to actually heat the corona even if they make it to the upper atmosphere \citep{klimchuk_solving_2006}. Wave modes generated in the corona would of course overcome the problem of crossing the TR boundary. However, while oscillations in the corona have been observed \citep{de_moortel_longitudinal_2002,de_moortel_longitudinal_2002-1}, the properties of these waves have not been measured precisely enough to say whether or not they are capable of heating the corona \citep{klimchuk_solving_2006}.
+
+\subsubsection{DC Heating}\label{sec:dc-heating}
+
+The footpoints of magnetic flux tubes loops rooted in the photosphere are subject to the turbulent velocity field of the underlying convection zone and thus undergo a random walk across the surface. The turbulent motion of the footpoints causes the overlying loops to become twisted and braided around each other, leading to a highly stressed magnetic field above the solar surface. If the stressing and subsequent buildup of magnetic energy is sufficiently slow, the field can evolve through a series of equilibrium stages and store energy above the potential level of the field. However, if the stressing happens quickly such that the field does not have time to reach equilibrium, the stored energy is likely to be dissipated by reconnection, heating the plasma, and allowing the field to relax to a near-potential state \citep{priest_magnetohydrodynamics_2014}.
+
+\citet{gold_magnetic_1964} first proposed the idea of a twisted field created by photospheric footpoint motions, suggesting that it was the relaxation of the stressed field to its equilibrium (or force-free) state that provided the energy release mechanism needed to power flares. \citet{parker_magnetic_1983,parker_magnetic_1983-1} applied this same concept to the corona and showed analytically that closely-packed magnetic flux tubes are subject to ``dynamical nonequilibrium and reconnection'' and that such a configuration easily leads to braided and twisted field lines with enough free energy to power the corona.
 
 \subsection{Nanoflare Heating}\label{sec:nanoflares}
 
 % Parker nanoflare mechanism
+% show braiding cartoon
 
 % Klimchuk nanoflares (agnostic to underlying physics);
 % Note that this invalidates (somewhat) the previous categorization of the heating mechanisms into AC,DC
+% Note that we will use Klimchuk definition in this work
 
 \section{Aims of this Work}\label{sec:aims}
 

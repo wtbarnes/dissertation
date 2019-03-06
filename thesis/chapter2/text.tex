@@ -55,11 +55,11 @@ tfig.figure_width = r'0.75\textwidth'
 
 For a single strand in hydrostatic equilibrium with uniform cross-sectional area, the equations of pressure and energy balance as a function of $s$, the coordinate parallel to the magnetic field, are given by,
 \begin{align}
-Q &= n^2\Lambda(T) + \frac{d}{ds}F_c, \label{eq:hydrostatic_energy} \\
-\frac{d}{ds}p &= m_ing, \label{eq:hydrostatic_pressure} \\
-p &= 2k_BnT, \label{eq:ideal_gas_law}
+    Q &= n^2\Lambda(T) + \frac{d}{ds}F_c, \label{eq:hydrostatic_energy} \\
+    \frac{d}{ds}p &= m_ing, \label{eq:hydrostatic_pressure} \\
+    p &= 2k_BnT, \label{eq:ideal_gas_law}
 \end{align}
-where $Q$ is the heating rate, $\Lambda(T)$ is the radiative loss term, $F_c$ is the conductive flux, $p$ is the thermal pressure, $n$ is the number density, $T$ is the temperature, $m_i$ is the average ion mass, $g=g_\solar\left(\frac{r}{R_\solar}\right)^2\frac{dr}{ds}$ is the gravitational acceleration along the fieldline, $r$ is the radial distance from the center of the Sun, and $g_\solar$ is the gravitational acceleration at the solar surface ($r=R_\solar$).
+where $Q$ is the heating rate, $\Lambda(T)$ is the radiative loss term, $F_c$ is the conductive flux, $p$ is the thermal pressure, $n$ is the number density, $T$ is the temperature, $m_i$ is the average ion mass, $g=-g_\solar\left(\frac{R_\solar}{r}\right)^2\frac{dr}{ds}$ is the gravitational acceleration along the fieldline, $r$ is the radial distance from the center of the Sun, and $g_\solar$ is the gravitational acceleration at the solar surface ($r=R_\solar$).
 
 To determine $n$ and $T$ as a function of $s$ along the strand, one must solve \autoref{eq:hydrostatic_energy} and \autoref{eq:hydrostatic_pressure} given some predefined heating rate $Q$, which is, in general, a function of the loop coordinate and is often assumed to be proportional to powers of $n$ and $T$ \citep{priest_magnetohydrodynamics_2014}. Both of these equations are subject to closure by the equation of state given in \autoref{eq:ideal_gas_law}.
 
@@ -80,6 +80,12 @@ According to \autoref{eq:spitzer-harm}, $F_c\to\infty$ as $\frac{dT}{ds}\to\inft
 In a rarified, impulsively-heated plasma, the electron mean free path may become large relative to the temperature length scale of the plasma such that the electron distribution becomes non-Maxwellian \citep{bradshaw_collisional_2013}. In this case, non-local contributions to the heat flux may become important such that determining the heat flux at any one point along the loop requires integrating over the entire loop. This ``non-localization'' of the heat flux has been addressed by a number of authors \citep{ljepojevic_heat_1989,karpen_nonlocal_1987,luciani_nonlocal_1983,west_lifetime_2008} and is likely to have important consequences for the observability of hot, low-density plasmas.
 
 \subsubsection{Radiative Loss Term}\label{sec:rad-loss}
+
+Energy from the coronal plasma is also lost to space by radiation. The radiative loss term is proportional to $n^2$ so it is most dominant in areas where the density is high. The amount of energy which the plasma radiates away by spectral line and continuum emission also depends on the temperature through the radiative loss function, $\Lambda(T)$, given by,
+\begin{equation}\label{eq:rad-loss}
+    \Lambda(T) = \sum_{X,k}\left(\sum_{\{ji\}}4\pi G_{ji}  + \int_0^\infty\dd{\lambda}P_{X,k}^\textup{cont.} \right),
+\end{equation}
+where $G_{ji}$ is the contribution function of transition $ji$ in ion $k$ of element $X$ as given by \autoref{eq:contribution_function}, $P_{X,k}^\textup{cont.}$ is the total continuum emissivity of ion $k$ in element $X$ (see \autoref{sec:continuum}), and $\{ji\}$ is the set of all atomic transitions in ion $k$ of element $X$. Practically speaking, the summations are taken over all elements, ions, and transitions in the CHIANTI atomic database (see \autoref{sec:chianti}). Note that $\Lambda(T)$ is also dependent on the density due to the density dependence of $G_{ji}$ though this dependence is relatively weak compared to that of $T$.
 
 % spell-checker: disable %
 \begin{pycode}[chapter2]
@@ -110,12 +116,6 @@ tfig.figure_width = r'0.85\textwidth'
 \py[chapter2]|tfig|
 % spell-checker: enable %
 
-Energy from the coronal plasma is also lost to space by radiation. The radiative loss term is proportional to $n^2$ so it is most dominant in areas where the density is high. The amount of energy which the plasma radiates away by spectral line and continuum emission also depends on the temperature through the radiative loss function, $\Lambda(T)$, given by,
-\begin{equation}\label{eq:rad-loss}
-    \Lambda(T) = \sum_{X,k}\left(\sum_{\{ji\}}4\pi G_{ji}  + \int_0^\infty\dd{\lambda}P_{X,k}^\textup{cont.} \right),
-\end{equation}
-where $G_{ji}$ is the contribution function of transition $ji$ in ion $k$ of element $X$ as given by \autoref{eq:contribution_function}, $P_{X,k}^\textup{cont.}$ is the total continuum emissivity of ion $k$ in element $X$ (see \autoref{sec:continuum}), and $\{ji\}$ is the set of all atomic transitions in ion $k$ of element $X$. Practically speaking, the summations are taken over all elements, ions, and transitions in the CHIANTI atomic database (see \autoref{sec:chianti}). Note that $\Lambda(T)$ is also dependent on the density due to the density dependence of $G_{ji}$ though this dependence is relatively weak compared to that of $T$.
-
 Calculating $\Lambda(T)$ can be computationally expensive as it requires solving \autoref{eq:level_pop}, the level population equation, for each ion over a large temperature range. \citet{rosner_dynamics_1978} calculate an analytic fit to the radiative loss function of the form,
 \begin{equation}\label{eq:rad-loss-power-law}
     \Lambda(T) = \chi T^\alpha,
@@ -123,6 +123,30 @@ Calculating $\Lambda(T)$ can be computationally expensive as it requires solving
 where $\chi$ and $\alpha$ are piecewise functions in $T$. The values of $\alpha$ and $\chi$ are given in Appendix A of \citet{rosner_dynamics_1978}. \citet{klimchuk_highly_2008} provide an improved piecewise fit to $\Lambda(T)$ of the same form as \autoref{eq:rad-loss-power-law} using updated atomic radiative loss calculations. Additionally, \citet{cargill_active_2014} provide a minor fix to the fits of \citet{klimchuk_highly_2008} given the results of \citet{reale_role_2012} who find that using the power-law fit of \citet{rosner_dynamics_1978} versus the full CHIANTI radiative loss function gives significantly different cooling behavior in an impulsively heated loop. \autoref{fig:radiative-loss} shows a comparison between the full radiative loss function as computed by \autoref{eq:rad-loss} (blue) and the power-law approximations of \citet[orange]{klimchuk_highly_2008} and \citet[green]{rosner_dynamics_1978}. 
 
 \subsection{The Isothermal Limit}\label{sec:isothermal}
+
+I now discuss several methods for solving the hydrostatic energy and pressure equations. First, consider the case of an isothermal, semi-circular loop where $T(s)=T$ such that $dT/ds=0$ and $F_c=0$ in the case where heat flux, $F_c$, is given by \autoref{eq:spitzer-harm}. \autoref{eq:hydrostatic_energy} and \autoref{eq:hydrostatic_pressure} then become,
+\begin{align}
+Q &= n^2\Lambda(T), \\
+\frac{d}{ds}p &= -p\frac{m_ig_\solar}{2k_BT}\frac{R_\solar^2}{r^2(s)}\cos{\left(\frac{\pi s}{2L}\right)},
+\end{align}
+where $r(s) = R_\solar + \frac{2L}{\pi}\sin{\left(\frac{\pi s}{2L}\right)}$ and $L$ is the half-length of the loop. Note that in this case, the heating term is now balanced only by the radiative loss term. 
+
+Defining the hydrostatic scale height as $\lambda_h=2k_BT/m_ig_\solar$, making a change of variables $\xi=r(s)$ such that $d\xi=\cos{(\pi s / 2L)}ds$, and separating variables, the pressure equation becomes,
+\begin{align}
+    \int_{p_0}^p\dd{p^\prime}\frac{1}{p^\prime} &= -\frac{R_\solar^2}{\lambda_h}\int_{R_\solar}^\xi\dd{\xi^\prime}\frac{1}{\xi^{\prime2}},\nonumber \\
+    \ln\left(\frac{p}{p_0}\right) &= \frac{R_\solar^2}{\lambda_h}\left(\frac{1}{\xi} - \frac{1}{R_\solar}\right),\nonumber \\
+    p(s) &= p_0\exp{\left[-\frac{1}{\lambda_h}\frac{(2L/\pi)\sin{(\pi s/2L)}}{1 + (2L/\pi R_\solar)\sin{(\pi s/2L)}}\right]}, \label{eq:isothermal_pressure}
+\end{align}
+where $p_0$ is the pressure at $s=0$. At the apex of the loop, $s=L$, the pressure is,
+\begin{equation*}
+    p(L) = p_0\exp{\left[-\frac{2L/\pi}{\lambda_h(1 + 2L/\pi R_\solar)}\right]}.
+\end{equation*}
+
+In the limit of a vertical flux tube such that the loop has no curvature, \autoref{eq:isothermal_pressure} becomes,
+\begin{equation*}
+    p(s) = p_0\exp{\left[-\frac{s}{\lambda_h(1 + s/R_\solar)}\right]} = p_0\exp{\left[-\frac{h}{\lambda_p}\right]},
+\end{equation*}
+where $\lambda_p=\lambda_h(1 + h/R_\solar)$ is the pressure scale height. 
 
 \subsection{Scaling Laws}\label{sec:scaling_laws}
 

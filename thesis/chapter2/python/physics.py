@@ -1,9 +1,12 @@
 """
-Quick implementation of the Raymond-Klimchuk power-law radiative loss function.
-See Eq. 3 of Klimchuk et al. (2008)
+Modeling basic loop physics
 """
 import numpy as np
 import astropy.units as u
+import astropy.constants as const
+import sunpy.sun.constants as sun_const
+
+__all__ = ['power_law_rad_loss', 'isothermal_loop']
 
 
 @u.quantity_input
@@ -69,3 +72,33 @@ def power_law_rad_loss(T: u.K, kind='klimchuk') -> u.erg * u.cm**3 / u.s:
         raise ValueError('Unrecognized power-law fit type.')
 
     return chi * T.to(u.K).value**alpha * u.erg * u.cm**3 / u.s
+
+
+def isothermal_loop(s, T, n0, vertical=False):
+    """
+    Solve hydrostatic equations in the isothermal limit.
+    
+    Parameters
+    ----------
+    s {[type]} -- [description]
+    T {[type]} -- [description]
+    n0 {[type]} -- [description]
+    vertical {bool} -- [description] (default: {False})
+    
+    Returns
+    -------
+    n, p, Q
+    """
+    L = np.diff(s).sum()
+    pis2L = (np.pi*s/2/L).decompose().value
+    lambda_p = 2. * const.k_B * T / const.m_p / sun_const.equatorial_surface_gravity
+    Rsol = const.R_sun
+    p0 = 2 * const.k_B * n0 * T
+    if vertical:
+        p = p0 * np.exp(-s/lambda_p/(1 + s/Rsol))
+        n = n0 * np.exp(-s/lambda_p/(1 + s/Rsol))
+    else:
+        p = p0 * np.exp(-2*L*np.sin(pis2L)/np.pi/lambda_p/(1 + 2*L*np.sin(pis2L)/np.pi/Rsol))
+        n = n0 * np.exp(-2*L*np.sin(pis2L)/np.pi/lambda_p/(1 + 2*L*np.sin(pis2L)/np.pi/Rsol))
+    
+    return n, p, n**2 * power_law_rad_loss(T)

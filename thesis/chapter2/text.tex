@@ -11,7 +11,7 @@ ch2 = texfigure.Manager(
     number=2,
     **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
 )
-from power_law_rad_loss import power_law_rad_loss
+from physics import power_law_rad_loss, isothermal_loop
 \end{pycode}
 % spell-checker: enable
 
@@ -142,11 +142,55 @@ where $p_0$ is the pressure at $s=0$. At the apex of the loop, $s=L$, the pressu
     p(L) = p_0\exp{\left[-\frac{2L/\pi}{\lambda_h(1 + 2L/\pi R_\solar)}\right]}.
 \end{equation*}
 
+% spell-checker: disable %
+\begin{pycode}[chapter2]
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=0.85,
+    height_ratio=3/4,
+))
+ax = fig.gca()
+
+temps = u.Quantity([1e5, 5e5, 1e6, 2e6, 5e6],'K')
+s = np.linspace(0, 500, 100)*u.Mm
+n0 = 1e10 * u.cm**(-3)
+
+for i,t in enumerate(temps):
+    n_v,_,_ = isothermal_loop(s, t, n0,vertical=True)
+    n_c,_,_ = isothermal_loop(s, t, n0,vertical=False)
+    ax.plot(s, n_v, color=f'C{i}', ls='--')
+    ax.plot(s, n_c, color=f'C{i}', ls='-',
+            label=r'\SI{{{:1.0g}}}{{\kelvin}}'.format(t.to(u.K).value))
+
+ax.set_xlim(s[[0,-1]].value)
+ax.set_ylim(1e6, n0.value)
+ax.set_yscale('log')
+ax.set_xlabel(r'$s$ $[\si{\mega\m}]$')
+ax.set_ylabel(r'$n$ $[\si{\per\cubic\cm}]$')
+ax.legend(frameon=False, loc='lower center',ncol=2)
+
+tfig = ch2.save_figure('isothermal-loop', fext='.pgf')
+tfig.caption = r'Density as a function of field-aligned coordinate, $s$, for an isothermal flux tube assuming a vertical (dashed) and semi-circular (solid) geometry for a half length of $L=\SI{500}{\mega\m}$ and a footpoint density of $n_0=\SI{e10}{\per\cubic\cm}$. The different colors correspond to different temperatures, $T$, as denoted in the legend.'
+tfig.figure_width = r'0.85\textwidth'
+\end{pycode}
+\py[chapter2]|tfig|
+% spell-checker: enable %
+
 In the limit of a vertical flux tube such that the loop has no curvature, \autoref{eq:isothermal_pressure} becomes,
 \begin{equation*}
     p(s) = p_0\exp{\left[-\frac{s}{\lambda_h(1 + s/R_\solar)}\right]} = p_0\exp{\left[-\frac{h}{\lambda_p}\right]},
 \end{equation*}
-where $\lambda_p=\lambda_h(1 + h/R_\solar)$ is the pressure scale height. 
+where $\lambda_p=\lambda_h(1 + h/R_\solar)$ is the pressure scale height. Similarly, from \autoref{eq:ideal_gas_law}, the density can be expressed as,
+\begin{equation*}
+    n(s) = n_0\exp{\left[-\frac{h}{\lambda_p}\right]},
+\end{equation*} 
+where $n_0=p_0/2k_BT$. Thus, in a vertical, gravitationally stratified flux tube, the pressure and density fall of exponentially with a scale height $\lambda_p$. For short loops ($h\ll R_\solar$), gravitational stratification plays only a minor role in the pressure (and density) structure and $\lambda_p\approx\lambda_h$. In the case of longer loops, gravitational stratification becomes more important. Additionally, note that $\lambda_h\propto T$ such that hotter loops are less stratified. \autoref{fig:isothermal-loop} shows the density as a function of $s$ for a vertical flux tube and half of a semi-circular flux tube for a range of temperatures. As the temperature increases, the gravitational stratification of the density decreases such that hot plasma is likely to be found at higher altitudes while cooler plasma is more likely to be found near the base of the loop.
+
+Continuing with the assumption of a vertical flux tube, the heating term can now be expressed as,
+\begin{equation}
+    Q = n_0^2 \Lambda(T) \exp{\left(-\frac{h}{\lambda_p/2}\right)}.
+\end{equation}
+Note that the heating falls off twice as fast as the pressure such that in long loops, the heating needed to balance losses from radiation will be concentrated near the footpoints.
 
 \subsection{Scaling Laws}\label{sec:scaling_laws}
 

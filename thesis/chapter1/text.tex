@@ -292,16 +292,53 @@ A variety of wave modes have been observed in both the open and closed corona, i
 
 The footpoints of magnetic flux tubes loops rooted in the photosphere are subject to the turbulent velocity field of the underlying convection zone and thus undergo a random walk across the surface. The turbulent motion of the footpoints causes the overlying loops to become twisted and braided around each other, leading to a highly stressed magnetic field above the solar surface. If the stressing and subsequent buildup of magnetic energy is sufficiently slow, the field can evolve through a series of equilibrium stages and store energy above the potential level of the field. However, if the stressing happens quickly such that the field does not have time to reach equilibrium, the stored energy is likely to be dissipated by reconnection, heating the plasma, and allowing the field to relax to a near-potential state \citep{priest_magnetohydrodynamics_2014}.
 
-\citet{gold_magnetic_1964} first proposed the idea of a twisted field created by photospheric footpoint motions, suggesting that it was the relaxation of the stressed field to its equilibrium (or force-free) state that provided the energy release mechanism needed to power flares. \citet{parker_magnetic_1983,parker_magnetic_1983-1} applied this same concept to the corona and showed analytically that closely-packed magnetic flux tubes are subject to ``dynamical nonequilibrium and reconnection'' and that such a configuration easily leads to braided and twisted field lines with enough free energy to power the corona.
+\citet{gold_magnetic_1964} first proposed the idea of a twisted field created by photospheric footpoint motions, suggesting that it was the relaxation of the stressed field to its equilibrium (or force-free) state that provided the energy release mechanism needed to power flares. Later, \citet{parker_topological_1972} proposed that closely-packed flux tubes in the corona will lead to a braided and twisted field and that current sheets will form at the boundaries between braided field lines. Dissipation of these current sheets then provides sufficient energy to power the corona \citep{parker_magnetic_1983,parker_magnetic_1983-1}. Recent observations by \citet{cirtain_energy_2013} using the High-resolution Coronal Imager (\textit{Hi-C}) sounding rocket provide possible evidence of braiding of the coronal magnetic field.
 
 \subsection{Nanoflare Heating}\label{sec:nanoflares}
 
-% Parker nanoflare mechanism
-% show braiding cartoon
+\citet{parker_nanoflares_1988} suggests that the observed X-ray corona is due to the superposition of many \textit{nanoflares}, small-scale reconnections in the twisted and braided coronal magnetic field. Current sheets develop at discontinuities between adjacent flux tubes and when these discontinuities reach some critical value, the field reconnects and the current sheet dissipates, heating the plasma. Based on the hard X-ray observations of \citet{lin_solar_1984} and the EUV observations of \citet{brueckner_observations_1983}, \citeauthor{parker_nanoflares_1988} estimate that each reconnection releases \SI{e24}{\erg} on average though the amount could be as high as \SI{e27}{\erg}. A simplified ``cartoon'' version of this process is illustrated in \autoref{fig:nanoflare-cartoon}.
 
-% Klimchuk nanoflares (agnostic to underlying physics);
-% Note that this invalidates (somewhat) the previous categorization of the heating mechanisms into AC,DC
-% Note that we will use Klimchuk definition in this work
+\begin{figure}
+    \centering
+    \includegraphics[width=0.75\textwidth]{chapter1/figures/nanoflare-cartoon.pdf}
+    \caption{Illustration of the nanoflare heating scenario of \citet{parker_nanoflares_1988}. The flux tubes have been straightened out such that both the top and bottom gray surfaces correspond to the photosphere. Flux tubes in an initially uniform field (a) are braided when their footpoints are shuffled by the underlying convective motions of the photosphere (b). At some critical angle between the braided flux tubes, they reconnect (c) and relax back to some lower energy state (d). The axes in panel (a) indicate the directions parallel and perpendicular to the magnetic field. Adapted from Figures 5 and 7 of \citet{klimchuk_key_2015}.}
+    \label{fig:nanoflare-cartoon}
+\end{figure}
+
+% spell-checker: disable %
+\begin{pycode}[chapter2]
+# Estimate critical angle
+B_parallel = 1e2*u.G
+F = 1e7 * u.erg / u.cm / u.cm / u.s
+v = 0.5 * u.km / u.s
+theta_c = np.arctan(4*np.pi*F.value/B_parallel.value**2/v.to(u.cm/u.s).value)
+theta_c = theta_c * u.radian
+\end{pycode}
+% spell-checker: enable %
+
+Following \citet{parker_nanoflares_1988}, the nanoflare energy can be estimated as follows. Consider the simplified geometry shown in \autoref{fig:nanoflare-cartoon} in which a flux tube extends from $s=0$ to $s=2L$, where both surfaces correspond to the photosphere and the flux tube has been straightened. Let the footpoint at $s=2L$ be fixed and the footpoint at $s=0$ move randomly across the surface with velocity $v$. The angle $\theta$ between the vertical and the displaced flux tube as a function of time $t$ is,
+\begin{equation}
+    \tan{\theta(t)} \approx \frac{vt}{2L},
+\end{equation}
+provided the angle is small (i.e. $\theta(t)<1$). If $B_\parallel$ is the vertical component of the field, the resulting perpendicular component can be expressed as,
+\begin{equation}
+    B_\perp = B_\parallel\tan{\theta(t)} \approx \frac{B_\parallel vt}{2L}.
+\end{equation}
+The Poynting flux associated with the work done by the footpoint motion on the field is given by,
+\begin{equation}
+    F = -\frac{1}{4\pi}B_\parallel\mathbf{B}_\perp\cdot\mathbf{v}_\perp = \frac{B_\parallel^2 v}{4\pi}\tan{\theta(t)} \approx \frac{B_\parallel^2 v^2 t}{4\pi(2L)}.
+\end{equation}
+For typical \AR{} values of $F=\SI{e7}{\erg\per\square\cm\per\second}$ \citep{withbroe_mass_1977}, $B_\parallel=\SI{100}{\gauss}$, and $v=\SI{0.5}{\km\per\second}$, $\theta\approx\py[chapter2]|f'{theta_c.to(u.degree).value:.0f}'|\si{\degree}$. Once $\theta$, the angle between $B_\perp$ and $B_\parallel$, reaches this critical value, the energy is rapidly dissipated by reconnection and the field relaxes back to its equilibrium state, destroying $B_\perp$. Note that the absence of dissipation and reconnection would result in an infinite build-up of stress in the field \citep{klimchuk_key_2015}.
+
+Furthermore, the energy associated with each of these discontinuities in the field can be written as,
+\begin{equation}
+    \varepsilon = \ell^2\Delta L \frac{B_\perp^2}{8\pi},
+\end{equation}
+where $\ell$ is the length of each random step and $\Delta L$ is the length of winding along the neighboring flux tube. Assuming the lifetime of each step is $\approx\SI{500}{\second}$, $\ell=\SI{250}{\km}$ and $\Delta L=\ell/\tan{\theta}=\SI{e3}{\km}$. Thus, the free energy associated with the winding of the field is $\varepsilon\approx\SI{6e24}{\erg}$, in approximate agreement with observations. \citet{parker_nanoflares_1988} notes that the energy of the resulting nanoflare will, on average, be less than this value.
+
+Much progress has been made in understanding the role of nanoflares in heating the solar corona. Early efforts by \citet{cargill_implications_1994} and \citet{cargill_nanoflare_2004} showed that nanoflare heating leads to a broad distribution of temperatures and can produce ``very hot'' plasma at temperatures in excess of \SI{8e6}{\kelvin}. 
+
+Though the original nanoflare concept of \citet{parker_nanoflares_1988} was explicitly tied to reconnection, the modern definition of a nanoflare is far more general. Throughout the remainder of this thesis, I adopt the definition of \citet{klimchuk_key_2015} that a nanoflare is \textit{an impulsive energy release on a small cross-field spatial scale without regard to physical mechanism}. Nanoflares may be caused by waves or by reconnection as both have been shown to be impulsive. Rather than probing a specific physical mechanism, the work in this thesis is focused on constraining the properties of the heating, regardless of the underlying driver.
 
 \section{Aims of this Work}\label{sec:aims}
 

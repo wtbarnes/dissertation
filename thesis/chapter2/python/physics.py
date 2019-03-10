@@ -100,5 +100,39 @@ def isothermal_loop(s, T, n0, vertical=False):
     else:
         p = p0 * np.exp(-2*L*np.sin(pis2L)/np.pi/lambda_p/(1 + 2*L*np.sin(pis2L)/np.pi/Rsol))
         n = n0 * np.exp(-2*L*np.sin(pis2L)/np.pi/lambda_p/(1 + 2*L*np.sin(pis2L)/np.pi/Rsol))
-    
+
     return n, p, n**2 * power_law_rad_loss(T)
+
+
+@u.quantity_input
+def B_gary(h: u.Mm, kind='sunspot'):
+    h_s = 0.5 * u.Mm
+    h_f = 75 * u.Mm
+    h_w = 696 * u.Mm
+    if kind == 'plage':
+        b_f = 100*u.G
+        b_s = 50*u.G
+        b_w = 0.005*u.G
+    elif kind == 'sunspot':
+        b_f = 2500*u.G
+        b_s = 50*u.G
+        b_w = 1*u.G
+    else:
+        raise ValueError(f'Unrecognized kind: {kind}')
+
+    return b_s / (1 + h/h_s)**3 + b_f / (1 + h/h_f)**3 + b_w / (1 + h/h_w)**3
+
+
+@u.quantity_input
+def p_gary(h: u.Mm):
+    Rsol = const.R_sun
+    r = Rsol + h
+    p_c = 1.5 * u.dyn / (u.cm**2)
+    p_k = 1e5 * u.dyn / (u.cm**2)
+    h_c = (55 * u.Mm) * (r/Rsol)**2
+    h_k = 0.12 * u.Mm
+    return p_c * np.exp(-h*r/h_c/Rsol) + p_k * np.exp(-h*r/h_k/Rsol)
+
+
+def beta_gary(h, kind):
+    return p_gary(h) / (B_gary(h, kind=kind)**2 / 8 / np.pi)

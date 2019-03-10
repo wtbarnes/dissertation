@@ -18,7 +18,7 @@ from hydrad_tools.configure import Configure
 from hydrad_tools.parse import Profile, Strand
 from synthesizAR.physics import RTVScalingLaws
 
-from physics import power_law_rad_loss, isothermal_loop
+from physics import power_law_rad_loss, isothermal_loop, beta_gary
 \end{pycode}
 % spell-checker: enable
 
@@ -30,28 +30,54 @@ from physics import power_law_rad_loss, isothermal_loop
 \begin{pycode}[chapter2]
 fig = plt.figure(figsize=texfigure.figsize(
     pytex,
-    scale=0.75,
-    height_ratio=1,
-    figure_width_context='figurewidth',
+    scale=1,
+    height_ratio=2/3,
 ))
+
+# Beta versus height
+h = np.logspace(-2, 4, 1000) * u.Mm
+beta_s = beta_gary(h, 'sunspot')
+beta_p = beta_gary(h, 'plage')
+ax1 = plt.subplot2grid((1,3),(0,0),)
+ax1.plot(beta_s, h, label='sunspot', color=PALETTE[0])
+ax1.plot(beta_p, h, label='plage', color=PALETTE[1])
+ax1.axvline(x=1, ls='--', color='k')
+ax1.axhline(y=(250*u.km).to(u.Mm).value, ls=':', color='k')
+ax1.axhline(y=(2500*u.km).to(u.Mm).value, ls=':', color='k')
+ax1.axhline(y=(2*const.R_sun).to(u.Mm).value, ls=':', color='k')
+ax1.set_xscale('log')
+ax1.set_yscale('log')
+ax1.set_xlim(6e-6,2e2)
+ax1.set_ylim(1e-2,1e4)
+ax1.set_xlabel(r'$\beta$')
+ax1.set_ylabel(r'$h$ $[\si{\mega\m}]$')
+ax1.legend(loc='lower left', frameon=False)
+
+# TRACE Map
 m = Map(os.path.join(ch2.data_dir, 'trace_example.fits'))
 m = Map(m.data, {**m.meta, 'wavelnth': m.meta['wave_len']},)
-ax = fig.add_subplot(111, projection=m)
-m.plot(axes=ax,
+m = m.submap(
+    SkyCoord(Tx=-1150*u.arcsec,Ty=100*u.arcsec,frame=m.coordinate_frame),
+    SkyCoord(Tx=-850*u.arcsec,Ty=400*u.arcsec,frame=m.coordinate_frame),
+)
+ax2 = plt.subplot2grid((1,3),(0,1),colspan=2,projection=m)
+m.plot(axes=ax2,
        annotate=False,
        norm=ImageNormalize(
            vmin=max(0,m.data.min()),
-           vmax=m.data.max(),stretch=LogStretch()),
+           vmax=m.data.max(),stretch=AsinhStretch(0.005)),
 )
-ax.grid(alpha=0)
-lon,lat = ax.coords[0],ax.coords[1]
-lon.set_axislabel(r'Helioprojective Longitude')
-lat.set_axislabel(r'Helioprojective Latitude')
+ax2.grid(alpha=0)
+lon,lat = ax2.coords[0],ax2.coords[1]
+lon.set_ticks_visible(False)
+lat.set_ticks_visible(False)
+lon.set_ticklabel_visible(False)
+lat.set_ticklabel_visible(False)
+plt.subplots_adjust(wspace=0.1)
 
 # Save
-tfig = ch2.save_figure('trace-example', fext='.pdf')
-tfig.caption = r'An arcade of loops extending into the corona observed off the solar limb by the TRACE satellite on 6 November 1999. Adapted from Figure 11 of \citet{reale_coronal_2010}.'
-tfig.figure_width = r'0.75\textwidth'
+tfig = ch2.save_figure('beta-trace', fext='.pdf')
+tfig.caption = r'\textit{Left:} A simple empirical model of $\beta$ as a function of height, $h$, above the solar surface as calculated by Equation 2 and Equation 3 of \citet{gary_plasma_2001} for the magnetic field above a sunspot (blue) and a plage region (orange). The dotted lines indicate the tops of the photosphere, chromosphere and corona. The dashed line denotes $\beta=1$. Adapted from Figure 3 of \citet{gary_plasma_2001}. \textit{Right:} An arcade of loops extending into the corona observed off the solar limb by the TRACE satellite on 6 November 1999. Adapted from Figure 11 of \citet{reale_coronal_2010}.'
 \end{pycode}
 \py[chapter2]|tfig|
 % spell-checker: enable %

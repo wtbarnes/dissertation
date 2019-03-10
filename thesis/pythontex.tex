@@ -76,6 +76,11 @@ DEEP_PALETTE = seaborn.color_palette('deep', 100)
 # Register colormaps
 from colormaps import *
 
+# Set location of HYDRAD code
+if 'HYDRAD_DIR' not in os.environ:
+	HYDRAD_DIR = '/Users/willbarnes/Documents/work/codes/HYDRAD'
+else:
+	HYDRAD_DIR = os.environ['HYDRAD_DIR']
 # Set location of ebtel++ code
 if 'EBTEL_DIR' not in os.environ:
 	EBTEL_DIR = '/Users/willbarnes/Documents/work/codes/ebtelPlusPlus/'

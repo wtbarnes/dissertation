@@ -1,4 +1,4 @@
-% Text for chapter 1
+% Text for chapter 2
 \chapter{The Physics of Coronal Loops}\label{ch:loops}
 
 % Figure manager for Chapter 2
@@ -11,6 +11,13 @@ ch2 = texfigure.Manager(
     number=2,
     **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
 )
+import tempfile
+import shutil
+
+from hydrad_tools.configure import Configure
+from hydrad_tools.parse import Profile, Strand
+from synthesizAR.physics import RTVScalingLaws
+
 from physics import power_law_rad_loss, isothermal_loop
 \end{pycode}
 % spell-checker: enable
@@ -63,11 +70,11 @@ where $Q$ is the heating rate, $\Lambda(T)$ is the radiative loss term, $F_c$ is
 
 To determine $n$ and $T$ as a function of $s$ along the strand, one must solve \autoref{eq:hydrostatic_energy} and \autoref{eq:hydrostatic_pressure} given some predefined heating rate $Q$, which is, in general, a function of the loop coordinate and is often assumed to be proportional to powers of $n$ and $T$ \citep{priest_magnetohydrodynamics_2014}. Both of these equations are subject to closure by the equation of state given in \autoref{eq:ideal_gas_law}.
 
-\autoref{eq:hydrostatic_pressure} says that the downward gravitational pull on the plasma is balanced by the gradient of the thermal pressure. \autoref{eq:hydrostatic_energy} says that the energy lost by radiative losses and thermal conduction in the corona must be balanced by the coronal heating rate. I will now discuss the conductive flux and radiative loss terms in more detail. Several possible solution methods for \autoref{eq:hydrostatic_energy} and \autoref{eq:hydrostatic_pressure} are discussed in \autoref{sec:isothermal}, \ref{sec:scaling_laws}, and \ref{sec:hydrostatic_numerical}.
+\autoref{eq:hydrostatic_pressure} says that the downward gravitational pull on the plasma is balanced by the gradient of the thermal pressure. \autoref{eq:hydrostatic_energy} says that the energy lost by radiation and thermal conduction in the corona must be balanced by coronal heating. I will now discuss the conductive flux and radiative loss terms in more detail. Several possible solution methods for \autoref{eq:hydrostatic_energy} and \autoref{eq:hydrostatic_pressure} are discussed in \autoref{sec:isothermal}, \ref{sec:scaling_laws}, and \ref{sec:hydrostatic_numerical}.
 
 \subsubsection{Conductive Flux Term}\label{sec:heat-flux}
 
-Thermal conduction efficiently transfers energy from regions of high temperature to regions of low temperature in the direction parallel to the magnetic field. However, thermal conduction is severely inhibited perpendicular to the magnetic field due to the low-$\beta$ nature of the corona such that energy transfer is limited to the field-aligned direction. 
+Thermal conduction efficiently transfers energy from regions of high temperature to regions of low temperature in the direction parallel to the magnetic field and opposite to the temperature gradient. However, cross-field (i.e. perpendicular to the magnetic field) thermal conduction is severely inhibited due to the low-$\beta$ nature of the corona such that energy transfer is limited to the field-aligned direction. 
 
 It is commonly assumed that the field-aligned thermal conduction, $F_c$, is well-described by expression of \citet{spitzer_transport_1953},
 \begin{equation}\label{eq:spitzer-harm}
@@ -77,7 +84,7 @@ where $\kappa_0\sim\SI{e-6}{\erg\per\cm\per\second\per\kelvin\tothe{7/2}}$ is th
 
 According to \autoref{eq:spitzer-harm}, $F_c\to\infty$ as $\frac{dT}{ds}\to\infty$. However, at low densities, there may be an insufficient number of particles to support the implied heat flux such that the heat flux saturates at the \textit{free-streaming limit} \citep{patsourakos_coronal_2005,bradshaw_explosive_2006,bradshaw_collisional_2013}. Failure to account for this limiting of the heat flux can result in overestimation of the cooling due to thermal conduction, particularly in cases where the heating is very impulsive. A more detailed discussion of the free-streaming limit is given in \autoref{hot-plasma:subsec:hf_theory}.
 
-In a rarified, impulsively-heated plasma, the electron mean free path may become large relative to the temperature length scale of the plasma such that the electron distribution becomes non-Maxwellian \citep{bradshaw_collisional_2013}. In this case, non-local contributions to the heat flux may become important such that determining the heat flux at any one point along the loop requires integrating over the entire loop. This ``non-localization'' of the heat flux has been addressed by a number of authors \citep{ljepojevic_heat_1989,karpen_nonlocal_1987,luciani_nonlocal_1983,west_lifetime_2008} and is likely to have important consequences for the observability of hot, low-density plasmas.
+In a rarified, impulsively heated plasma, the electron mean free path may become large relative to the temperature length scale of the plasma such that the electron distribution becomes non-Maxwellian \citep{bradshaw_collisional_2013}. In this case, non-local contributions to the heat flux may become important such that determining the heat flux at any one point along the loop requires integrating over the entire loop. This ``non-localization'' of the heat flux has been addressed by a number of authors \citep{ljepojevic_heat_1989,karpen_nonlocal_1987,luciani_nonlocal_1983,west_lifetime_2008} and is likely to have important consequences for the observability of hot, low-density plasmas.
 
 \subsubsection{Radiative Loss Term}\label{sec:rad-loss}
 
@@ -144,11 +151,7 @@ where $p_0$ is the pressure at $s=0$. At the apex of the loop, $s=L$, the pressu
 
 % spell-checker: disable %
 \begin{pycode}[chapter2]
-fig = plt.figure(figsize=texfigure.figsize(
-    pytex,
-    scale=0.85,
-    height_ratio=3/4,
-))
+fig = plt.figure(figsize=texfigure.figsize(pytex, scale=1,))
 ax = fig.gca()
 
 temps = u.Quantity([1e5, 5e5, 1e6, 2e6, 5e6],'K')
@@ -171,15 +174,14 @@ ax.legend(frameon=False, loc='lower center',ncol=2)
 
 tfig = ch2.save_figure('isothermal-loop', fext='.pgf')
 tfig.caption = r'Density as a function of field-aligned coordinate, $s$, for an isothermal flux tube assuming a vertical (dashed) and semi-circular (solid) geometry for a half length of $L=\SI{500}{\mega\m}$ and a footpoint density of $n_0=\SI{e10}{\per\cubic\cm}$. The different colors correspond to different temperatures, $T$, as denoted in the legend.'
-tfig.figure_width = r'0.85\textwidth'
 \end{pycode}
 \py[chapter2]|tfig|
 % spell-checker: enable %
 
 In the limit of a vertical flux tube such that the loop has no curvature, \autoref{eq:isothermal_pressure} becomes,
-\begin{equation*}
+\begin{equation}\label{eq:isothermal_pressure_vertical}
     p(s) = p_0\exp{\left[-\frac{s}{\lambda_h(1 + s/R_\solar)}\right]} = p_0\exp{\left[-\frac{h}{\lambda_p}\right]},
-\end{equation*}
+\end{equation}
 where $\lambda_p=\lambda_h(1 + h/R_\solar)$ is the pressure scale height. Similarly, from \autoref{eq:ideal_gas_law}, the density can be expressed as,
 \begin{equation*}
     n(s) = n_0\exp{\left[-\frac{h}{\lambda_p}\right]},
@@ -196,9 +198,277 @@ Note that the heating falls off twice as fast as the pressure such that in long 
 
 %RTV, Serio, Martens (2 paragraphs)
 
+In the non-isothermal case, an analytic solution of \autoref{eq:hydrostatic_energy} and \autoref{eq:hydrostatic_pressure} is not possible due to the $dF_c/ds$ term being nonlinear in $T$. As a result, a number of so-called scaling laws have been developed to provide analytic and interpretable approximations for the thermal structure of coronal loops. In order to interpret early space-based coronal observations made with the S-054 \textit{SkyLab} X-ray telescope, \citet{rosner_dynamics_1978} derived two scaling laws relating the heating and maximum temperature to the isobaric pressure and loop length. I will now summarize this derivation.
+
+Using \autoref{eq:ideal_gas_law} and \autoref{eq:spitzer-harm}, \autoref{eq:hydrostatic_energy} can be written as,
+\begin{equation*}
+    \frac{F_c}{\kappa_0T^{5/2}}\frac{dFc}{dT} = \frac{p^2}{4k_B^2T^2} - Q.
+\end{equation*}
+Separating variables and integrating from the base of the loop yields,
+\begin{equation*}
+    \int_{F_{c,0}}^{F_c}\dd{F_c^\prime}F_c^\prime = \frac{\kappa_0 p^2}{4k_B^2}\int_{T_0}^T\dd{T^\prime}T^{\prime 1/2}\Lambda(T^\prime) - \kappa_0\int_{T_0}^T\dd{T^\prime}T^{\prime 5/2}Q,
+\end{equation*}
+where the ``0'' subscript denotes a quantity at the base of the loop. If the loop is thermally isolated from the lower atmosphere, $F_{c,0}=0$ such that no thermal energy is conducted across the lower boundary. Using this assumption to simplify the left-hand side gives,
+\begin{equation}\label{eq:rtv:fc2}
+    F_c^2 = f_R(T) - f_H(T),
+\end{equation}
+where,
+\begin{align}
+    f_R(T) &= \frac{\kappa_0p^2}{2k_B^2}\int_{T_0}^T\dd{T^\prime}T^{\prime 1/2}\Lambda(T^\prime), \label{eq:rtv:fr_integral} \\
+    f_H(T) &= 2\kappa_0\int_{T_0}^T\dd{T^\prime}T^{\prime 5/2}Q. \label{eq:rtv:fh_integral}
+\end{align}
+Note that \autoref{eq:rtv:fc2} requires that $f_R(T)\ge f_H(T)$ to guarantee a physical solution for the heat flux. Using the definition of the classical heat flux, \autoref{eq:spitzer-harm}, again and integrating once more from the base of the loop yields,
+\begin{align}
+    \left(\kappa_0T^{5/2}\frac{dT}{ds}\right)^2 &= f_R(T) - f_H(T), \nonumber \\
+    \kappa_0T^{5/2}\frac{dT}{ds} &= (f_R(T) - f_H(T))^{1/2}, \nonumber \\
+    s - s_0 &= \kappa_0\int_{T_0}^T\dd{T^\prime}\frac{T^{\prime 5/2}}{\sqrt{f_R(T^\prime) - f_H(T^\prime)}} \label{eq:rtv:fr_fh_integral},
+\end{align}
+where $s=s(T_0)$ is the coordinate at the base of the loop. Using the appropriate boundary conditions, \autoref{eq:rtv:fr_fh_integral} can then be used to derive both scaling laws.
+
+First, \autoref{eq:rtv:fr_integral} can be simplified by using piecewise power-law approximation in \autoref{eq:rad-loss-power-law}. For $T>\SI{e5}{\kelvin}$, $\alpha=-1/2$ is a suitable approximation \citep[see Appendix A of][]{rosner_dynamics_1978} and assuming $T\gg T_0$, \autoref{eq:rtv:fr_integral} becomes
+\begin{equation}\label{eq:rtv:fr}
+    f_R(T) = \frac{\kappa_0\chi_0 p^2}{2k_B^2}T,
+\end{equation}
+where $\chi_0=\SI{e-18.8}{\erg\cm\cubed\kelvin\tothe{1/2}\per\second}$.
+
+% spell-checker: disable %
+\begin{pycode}[chapter2]
+p0 = np.logspace(-2,3,100) * u.dyne/(u.cm**2)
+loop_lengths = u.Quantity([1e9,1e10,1e11], 'cm')
+
+fig = plt.figure(figsize=texfigure.figsize(pytex, scale=1,))
+ax = fig.gca()
+
+# Plot pressure versus in temperature
+for i,L in enumerate(loop_lengths):
+    rtv = RTVScalingLaws(L, pressure=p0)
+    ax.plot(p0, rtv.max_temperature, color=PALETTE[i],
+            label=r'$L=\SI{{{:.0f}}}{{\mega\m}}$'.format(L.to(u.Mm).value))
+
+# Ticks and labels
+ax.set_xscale('log')
+ax.set_yscale('log')
+ax.set_xlabel(r'$p$ $[\si{\dyne\per\square\cm}]$')
+ax.set_ylabel(r'$T_\textup{max}$ $[\si{\kelvin}]$')
+ax.set_xlim(p0[[0,-1]].value)
+ax.set_ylim(1e6, 1e8)
+ax.legend(frameon=False, loc=2)
+
+# Save
+tfig = ch2.save_figure('rtv-tmax', fext='.pgf')
+tfig.caption = r'Loop apex temperature, $T_\textup{max}$, as a function of pressure, $p$, calculated from \autoref{eq:rtv:scaling-law-tmax} for several different values of the loop half-length, $L$. Adapted from Figure 9 of \citet{rosner_dynamics_1978}.'
+\end{pycode}
+\py[chapter2]|tfig|
+% spell-checker: enable %
+
+At the base of the loop, losses due to radiation dominate over energy supplied by the heating term such that $f_R(T) \gg f_H(T)$. Using this condition and \autoref{eq:rtv:fr} and integrating the right-hand side of \autoref{eq:rtv:fr_fh_integral} from the base of the loop ($T_0$) to the apex ($T_\textup{max}$), \autoref{eq:rtv:fr_fh_integral} becomes,
+\begin{align}
+    s_\textup{max} - s_0 = \frac{k_B}{p}\sqrt{\frac{2\kappa_0}{\chi_0}}\int_{T_0}^{T_\textup{max}}\dd{T^\prime}T^{\prime 2}, \nonumber \\
+    s_\textup{max} - s_0 = \frac{k_B}{3p}\sqrt{\frac{2\kappa_0}{\chi_0}}(T_\textup{max}^3 - T_0^3), \nonumber
+\end{align}
+where $s_\textup{max}=s(T_\textup{max})$ is the coordinate at the apex of the loop where the temeperature is maximized. Defining the loop half-length, the distance between the apex and the base, as $L=s(T_\textup{max}) - s(T_0)$, assuming $T_\textup{max}\gg T_0$ since $T$ monotonically increases from the base to the apex, and solving for $T_\textup{max}$ yields the first scaling law,
+\begin{equation}\label{eq:rtv:scaling-law-tmax}
+    T_\textup{max} = c_1(pL)^{1/3},
+\end{equation}
+where $c_1=\left(\frac{3}{k_B}\sqrt{\frac{\chi_0\kappa_0}{2}}\right)^{1/3}\approx\py[chapter2]|f'{rtv.c1.to(u.K*(u.cm/u.dyne)**(1/3)).value:.0f}'|\,\si{\kelvin\cm\tothe{1/3}\per\dyne\tothe{1/3}}$. \autoref{fig:rtv-tmax} shows the apex temperature, $T_\textup{max}$, as a function of $p$ for several different loop half-lengths. Note that longer loops have higher apex temperatures.
+
+If the loop is heated uniformly, the maximum temperature will occur at the apex such that $dT/ds=0$ at $s=s_\textup{max}$ and by \autoref{eq:spitzer-harm}, the heat flux at the apex also vanishes. In this case, plugging \autoref{eq:rtv:fh_integral} and \autoref{eq:rtv:fr} into \autoref{eq:rtv:fc2} gives,
+\begin{align}
+    f_R(T_\textup{max}) &= f_H(T_\textup{max}), \nonumber \\
+    \frac{\kappa_0\chi_0}{2k_B^2}p^2T_\textup{max} &= 2\kappa_0Q\int_{T_0}^{T_\textup{max}}\dd{T} T^{5/2}, \nonumber \\
+    \frac{\chi_0}{2k_B^2}p^2T_\textup{max} &= \frac{4}{7}Q(T_\textup{max}^{7/2} - T_0^{7/2}).
+\end{align}
+Using the approximation $T_\textup{max}\gg T_0$, the second term on the right-hand side can be dropped. Finally, using the first scaling law (\autoref{eq:rtv:scaling-law-tmax}) and solving for $Q$ gives the second scaling law of \citet{rosner_dynamics_1978},
+\begin{equation}\label{eq:rtv:scaling-law-heat}
+    Q = c_2 p^{7/6}L^{-5/6},
+\end{equation}
+where $c_2=\frac{7\chi_0}{8k_B^2}c_1^{-5/2}\approx\py[chapter2]|f'{rtv.c2.to(u.erg**(-1/6)*u.cm**(4/3)/u.s).value:.0f}'|\,\si{\cm\tothe{4/3}\per\erg\tothe{1/6}\per\second}$. Note that this scaling law implies that less heat is needed to sustain a long loop compared to a short loop at the same pressure.
+
+\citet{serio_dynamics_1991} extend the work of \citet{rosner_dynamics_1978} by considering two additional cases: (1) loops with $L$ greater than th pressure scale height such that the isobaric approximation does not hold; and (2) loops with a local temperature minimum at the top. They considered a more general form of the heating function, $Q(s)=Q_0\exp{(-s/\lambda_H)}$, where the heating is now stratified and falls off exponentially over a heating scale height $\lambda_H$. The modified scaling laws of \citet{serio_dynamics_1991} are,
+\begin{align}
+    T_\textup{max} &= c_1(p_0L)^{1/3}\exp{\left[-0.04L\left(\frac{2}{\lambda_H} + \frac{1}{\lambda_p}\right)\right]}, \label{eq:serio:scaling-law-tmax} \\
+    Q_0 &= c_2p_0^{7/6}L^{-5/6}\exp{\left[0.5L\left(\frac{1}{\lambda_H} - \frac{1}{\lambda_p}\right)\right]}, \label{eq:serio:scaling-law-heat}
+\end{align}
+where $p_0$ is the pressure at the base of the loop, $Q_0$ is the heating rate at the base of the loop, $\lambda_p$ is the pressure scale height as defined in \autoref{sec:isothermal}. The derivation is largely the same as that of \citet{rosner_dynamics_1978} except that $p$ is allowed to vary with $s$ according to \autoref{eq:isothermal_pressure_vertical} in the limit of no gravitational stratification. Note that the scaling laws of \citet{rosner_dynamics_1978} (\autoref{eq:rtv:scaling-law-tmax} and \autoref{eq:rtv:scaling-law-heat}) are recovered in the limits of constant pressure ($\lambda_p\to\infty$) and uniform heating ($\lambda_H\to\infty$). If the heating is sufficiently stratified such that $\lambda_H<L/2$, there will be local temperature minimum at the apex. In cases where the heating is very localized near the footpoints such that $\lambda_H<\lambda_p/3$, a cool condensation may form at the apex, causing the loop to be Rayleigh-Taylor unstable. See \autoref{sec:tne} for additional discussion of non-equilibrium in steadily-heated loops.
+
+More recently, \citet{martens_scaling_2010} derived an analytic expression for the temperature profile along the loop under the assumption of constant pressure $p_0$ and using a heating function of the form,
+\begin{equation}\label{eq:martens:heating}
+    Q = C_Qp_0^{\beta^\star}T^{\alpha^\star}, 
+\end{equation}
+where $C_Q$ is a constant of proportionality and $\beta^\star$ and $\alpha^\star$ determine the dependence of $Q$ on $p_0$ and $T$, respectively. Assuming a radiative loss function of the form of \autoref{eq:rad-loss-power-law}, \citeauthor{martens_scaling_2010} solve a dimensionless form of \autoref{eq:hydrostatic_energy} and find a closed-form expression for the temperature as a function of the field-aligned coordinate, $s$,
+\begin{equation}\label{eq:martens:temperature}
+    T(s) = T_\textup{max}\left[\beta_r^{-1}(s/L;\lambda+1,1/2)\right],
+\end{equation}
+where $\beta_r^{-1}$ is the inverse of the regularized incomplete $\beta$-function \citep[see Section 6.6 of][]{abramowitz_handbook_1972}, $\lambda=\frac{11/2+\gamma}{2(2 + \gamma + \alpha^\star)} - 1$, and $\gamma = -\alpha$ from \autoref{eq:rad-loss-power-law}.
+
+\citet{martens_scaling_2010} points out that the solution in \autoref{eq:martens:temperature} is overconstrained by the boundary conditions on his dimensionless energy equation such that \autoref{eq:martens:temperature} is only valid for specific sets of parameters. These additional constraints produce two scaling laws of similar form to those of \citet{rosner_dynamics_1978,serio_dynamics_1991}. The scaling laws of \citet{martens_scaling_2010} are,
+\begin{align}
+    p_0L &= T_\textup{max}^{\frac{11+2\gamma}{4}} \left(\frac{\kappa_0}{\chi_0^\prime}\right)^{1/2}\frac{(3-2\gamma)^{1/2}}{4 + 2\gamma + 2\alpha^\star} B(\lambda + 1, 1/2), \label{eq:martens:scaling_law_tmax} \\
+    Q_\textup{apex} &= \frac{p_0^2\chi_0(7/2 + \alpha^\star)}{T_\textup{max}^{(2+\gamma)}(3/2 - \gamma)}, \label{eq:martens:scaling_law_heating}
+\end{align}
+where $B$ is the complete $\beta$-function \citep[see Equation 6.2.1 of][]{abramowitz_handbook_1972}, $\chi_0^\prime=\chi_0/4k_B^2$, and $Q_\textup{apex}$ is the heating rate at the apex of the loop (i.e. where $T=T_\textup{max}$). \autoref{eq:martens:scaling_law_tmax} and \autoref{eq:martens:scaling_law_heating} provide a generalization of the scaling laws of \citet{rosner_dynamics_1978} for non-uniform heating along the loop. Notice that in the case of uniform heating ($\alpha^\star=0$) and $\gamma=-\alpha=1/2$, \autoref{eq:martens:scaling_law_tmax} and \autoref{eq:martens:scaling_law_heating} reduce to \autoref{eq:rtv:scaling-law-tmax} and \autoref{eq:rtv:scaling-law-heat}, respectively. In \autoref{ch:synthesizar}, I use the scaling laws of \citet{martens_scaling_2010} to efficiently model time-independent emission from an \AR{} composed of many hundreds of loops.  
+
 \subsection{Numerical Solutions}\label{sec:hydrostatic_numerical}
 
 %Show basic hydrostatic solutions via shooting method (1 paragraph)
+
+While the analytical expressions outlined in \autoref{sec:scaling_laws} provide useful approximations of the thermal structure of a coronal loop, it is often necessary to solve the full hydrostatic energy (\autoref{eq:hydrostatic_energy}) and pressure (\autoref{eq:hydrostatic_pressure}) balance subject to the closure by the equation of state, \autoref{eq:ideal_gas_law}. Because of the non-linear dependence on $T$ in the thermal conduction term of the energy equation, \autoref{eq:hydrostatic_energy} and \autoref{eq:hydrostatic_pressure} must be integrated numerically \citep[e.g. with an Euler or Runge-Kutta scheme, see][Chapter 16]{press_numerical_1992}. Numerical solutions of these hydrostatic solutions have been used by many authors \citep[e.g.][]{aschwanden_modeling_2001} to constrain the properties of the heating in the corona by comparing with loop profiles derived from observations.
+
+Taken together, \autoref{eq:hydrostatic_energy}, \autoref{eq:hydrostatic_pressure}, and \autoref{eq:spitzer-harm} represent a system of three coupled linear differential equations subject to the boundary conditions,
+\begin{align}
+    F_c(s=0) = 0, \label{eq:hydrostatic:bc1}\\
+    F_c(s=L) = 0, \label{eq:hydrostatic:bc2}\\
+    p(s=0) = p_0, \\
+    T(s=0) = T_0,
+\end{align}
+where $p_0$ and $T_0$ are free parameters. The additional boundary condition on the heat flux is because $Q$, the energy supplied by coronal heating, is not known such that there four unknowns: $Q,F_c,p,T$. Setting the heat flux equal to zero at the boundaries thermally isolates the loop such that no energy leaves the system by thermal conduction.
+
+% spell-checker: disable %
+\begin{pycode}[chapter2]
+# Configure hydrostatic run
+base_config = {
+    'general': {
+        'total_time': 1 * u.s,
+        'loop_length': 90 * u.Mm,
+        'footpoint_height': 5e8 * u.cm,
+        'output_interval': 5*u.s,
+        'loop_inclination': 0*u.deg,
+        'logging_frequency': 1000,
+        'write_file_physical': True,
+        'write_file_ion_populations': False,
+        'write_file_hydrogen_level_populations': False,
+        'write_file_timescales': False,
+        'write_file_equation_terms': False,
+        'heat_flux_limiting_coefficient': 1./6.,
+        'heat_flux_timestep_limit': 1e-10*u.s,
+        'use_kinetic_model': False,
+        'minimum_collisional_coupling_timescale': 0.01*u.s,
+        'force_single_fluid': False,
+    },
+    'initial_conditions': {
+        'footpoint_temperature': 2e4 * u.K,
+        'footpoint_density': 1e11 * u.cm**(-3),
+        'isothermal': False,
+        'heating_location': 45*u.Mm,
+        'heating_scale_height': 1e300*u.cm,
+        'heating_range_lower_bound': 1e-8*u.erg/u.s/(u.cm**3),
+        'heating_range_upper_bound': 1e2*u.erg/u.s/(u.cm**3),
+        'heating_range_step_size': 0.01,
+        'heating_range_fine_tuning': 10000.0,
+        'use_poly_fit_gravity': False,
+    },
+    'heating': {
+        'background_heating': True,
+    },
+    'radiation': {
+        'use_power_law_radiative_losses': True,
+        'decouple_ionization_state_solver': False,
+        'density_dependent_rates': False,
+        'optically_thick_radiation': False,
+        'nlte_chromosphere': False,
+        'ranges_dataset': 'ranges',
+        'emissivity_dataset': 'chianti_v7',
+        'abundance_dataset': 'asplund',
+        'rates_dataset': 'chianti_v7',
+        'elements_equilibrium': [],
+        'elements_nonequilibrium': [],
+    },
+    'solver': {
+        'epsilon': 0.01,
+        'safety_radiation': 0.1,
+        'safety_conduction': 1.0,
+        'safety_advection': 1.0,
+        'safety_atomic': 1.0,
+        'safety_viscosity': 1.0,
+        'cutoff_ion_fraction':1e-6,
+        'epsilon_d':0.1,
+        'epsilon_r':1.8649415311920072,
+        'timestep_increase_limit': 0.05,
+        'relative_viscous_timescale': None,
+        'minimum_radiation_temperature': 2e4*u.K,
+        'zero_over_temperature_interval': 5.0e2*u.K,
+        'minimum_temperature': 1e4*u.K,
+        'maximum_optically_thin_density': 1e12*u.cm**(-3),
+    },
+    'grid': {
+        'adapt': True,
+        'adapt_every_n_time_steps': 10,
+        'minimum_cells': 150,
+        'maximum_cells': 30000,
+        'maximum_refinement_level': 12,
+        'minimum_delta_s': 1.0*u.cm,
+        'maximum_variation': 0.1,
+        'refine_on_density': True,
+        'refine_on_electron_energy': True,
+        'refine_on_hydrogen_energy': False,
+        'minimum_fractional_difference': 0.1,
+        'maximum_fractional_difference': 0.2,
+        'linear_restriction': True,
+        'enforce_conservation': False,
+    }
+}
+
+def run_ic(location, scale_height):
+    c = Configure(base_config)
+    c.config['initial_conditions']['heating_location'] = location
+    c.config['initial_conditions']['heating_scale_height'] = scale_height
+    # Run initial conditions code to get hydrostatic solution
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmpdir_hydrad = os.path.join(tmpdir, 'hydrad')
+        shutil.copytree(HYDRAD_DIR, tmpdir_hydrad)
+        c.setup_initial_conditions(tmpdir_hydrad, execute=True, verbose=False)
+        shutil.copyfile(
+            os.path.join(tmpdir_hydrad,'Initial_Conditions','profiles','initial.amr'),
+            os.path.join(tmpdir_hydrad,'Results','profile0.amr'))
+        shutil.copyfile(
+            os.path.join(tmpdir_hydrad,'Initial_Conditions','profiles','initial.amr.phy'),
+            os.path.join(tmpdir_hydrad,'Results','profile0.phy'))
+        return Profile(tmpdir_hydrad, index=0)
+        
+p_uni = run_ic(45*u.Mm, 1e300*u.cm)
+p_apex = run_ic(45*u.Mm, 10*u.Mm)
+
+# Plot
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=1,
+    height_ratio=1/2,
+))
+# Temperature
+ax = fig.add_subplot(121)
+ax.plot(p_uni.coordinate.to(u.Mm), p_uni.electron_temperature.to(u.MK),
+        color=PALETTE[0], label='uniform')
+ax.plot(p_apex.coordinate.to(u.Mm), p_apex.electron_temperature.to(u.MK),
+        color=PALETTE[1], label='apex')
+ax.set_xlabel(r'$s$ $[\si{\mega\m}]$')
+ax.set_ylabel(r'$T$ $[\si{\mega\kelvin}]$')
+ax.set_xlim(p_uni.coordinate[[0,-1]].to(u.Mm).value)
+ax.set_ylim(0,2.5)
+ax.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(nbins=5, prune='lower'))
+ax.legend(frameon=False,loc='bottom center')
+# Density
+ax = fig.add_subplot(122)
+ax.plot(p_uni.coordinate.to(u.Mm), p_uni.electron_density, color=PALETTE[0],)
+ax.plot(p_apex.coordinate.to(u.Mm), p_apex.electron_density, color=PALETTE[1],)
+ax.set_xlabel(r'$s$ $[\si{\mega\m}]$')
+ax.set_ylabel(r'$n$ $[\si{\per\cubic\cm}]$')
+ax.set_yscale('log')
+ax.set_xlim(p_uni.coordinate[[0,-1]].to(u.Mm).value)
+ax.set_ylim(2e8,1e11)
+plt.subplots_adjust(wspace=0.35)
+
+# Save
+tfig = ch2.save_figure('hydrostatic', fext='.pgf')
+tfig.caption = r'Temperature (left) and density (right) as a function of $s$ for a full semi-circular loop of length $2L=\SI{80}{\mega\m}$ heated unformly (blue) and at the apex with $\lambda_H=\SI{10}{\mega\m}$ (orange). An isothermal chromosphere of depth \SI{5}{\mega\m} is attached to each footpoint. The footpoint temperature is $T_0=\SI{2e4}{\kelvin}$ and the footpoint density is $n_0=\SI{e11}{\per\cubic\cm}$ though the chromospheric density is much higher.'
+\end{pycode}
+\py[chapter2]|tfig|
+% spell-checker: enable %
+
+If the heating function is assumed to have the form,
+\begin{equation*}
+    Q(s) = Q_0\exp{\left[-\frac{s}{\lambda_H}\right]},
+\end{equation*}
+the problem is to determine which value of $Q_0$ satisifies \autoref{eq:hydrostatic:bc1} and \autoref{eq:hydrostatic:bc2} for some choice of $p_0,T_0,\lambda_H,L$ using a ``shooting'' method \citep[see Section 17.1 of][]{press_numerical_1992}. Uniform heating corresponds to $\lambda_H\to\infty$. Typically, \autoref{eq:hydrostatic_energy}, \autoref{eq:hydrostatic_pressure}, and \autoref{eq:spitzer-harm} are solved on a numerical grid spanning half a semi-circular loop from the top of the chromosphere to the loop apex and symmetry is assumed about the apex. If grid spans the entire loop of length $2L$, the second boundary condition is modified to $F_c(s=2L)=0$ such that heat can be conducted across the apex. \autoref{fig:hydrostatic} shows an example hydrostatic solution for a uniformly (blue) and apex (orange) heated loop computed by numerically solving the hydrostatic energy and pressure balance equations for a full loop using the method described above.
 
 \section{Hydrodynamics}\label{sec:hydrodynamics}
 

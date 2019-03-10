@@ -60,11 +60,11 @@
             "pdflatex",
             "pythontex",
             "bibtex",
-            "makeindex-aux",
-            "makeindex-idx",
-            "makeindex-nomencl",
+            //"makeindex-aux",
+            //"makeindex-idx",
+            //"makeindex-nomencl",
             "pdflatex",
-            "makeindex-nomencl",
+            //"makeindex-nomencl",
             "pdflatex"
         ]
     }

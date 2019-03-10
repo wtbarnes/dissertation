@@ -1,2 +1,456 @@
 % Text for chapter 6
 \chapter{Predicting Diagnostics for Nanoflares of Varying Frequency}\label{ch:modeling_observables}
+
+% spell-checker: disable %
+\begin{pycode}[chapter6]
+name = 'chapter6'
+ch6 = texfigure.Manager(
+    pytex,
+    os.path.join('.', name),
+    number=6,
+    **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
+)
+\end{pycode}
+% spell-checker: enable %
+
+% brief intro to the chapter
+
+\section{Introduction}\label{sec:modeling_observables:introduction}
+
+Nanoflares have long been used to explain the observed million-degree temperatures in the non-flaring solar corona. Though originally pertaining to energetic bursts of order $10^{24}$ erg resulting from small-scale reconnection \citep{parker_nanoflares_1988}, the term \textit{nanoflare} is now synonymous with any impulsive energy release and is not specific to any particular physical mechanism \citep{klimchuk_key_2015}. Due to their faint, transient nature, direct observations of nanoflares are made difficult by several factors, including inadequate spectral coverage of instruments, the efficiency of thermal conduction, and non-equilibrium ionization \citep{cargill_implications_1994,winebarger_defining_2012,barnes_inference_2016}. However, recent observations of ``very hot'' 8-10 MK plasma, the so-called ``smoking gun'' of nanoflares, have provided compelling evidence for their existence \citep[e.g.][]{brosius_pervasive_2014,caspi_new_2015,parenti_spectroscopy_2017,ishikawa_detection_2017}.
+
+Critical to understanding the underlying heating mechanism is knowing whether the corona in non-flaring active regions is heated \textit{steadily} or \textit{impulsively}, or, more precisely, at what frequency do nanflares repeat on a given magnetic strand. In the case of low-frequency nanoflares, the time between consecutive events on a strand is long relative to its characteristic cooling time, giving the strand time to fully cool and drain before it is reenergized. In the high-frequency scenario, the time between events is short relative to the cooling time such that the strand is not allowed to fully cool before being heated again. Steady heating may be regarded as nanoflare heating in the very high-frequency limit. 
+
+Before proceeding, we note that a magnetic \textit{strand}, the fundamental unit of the low-$\beta$ corona, is a flux tube oriented parallel to the magnetic field that is isothermal in the direction perpendicular to magnetic field. We make the distinction that a \textit{coronal loop} is an observationally-defined feature representing a magnetic field-aligned intensity enhancement relative to the surrounding diffuse emission such that a single coronal loop may be composed of many thermally-isolated strands. Furthermore, we define the \AR{} \textit{core} as the area near the center of the \AR{} whose X-ray and EUV emission is dominated by closed loops with both footpoints rooted in the photosphere.
+
+In lieu of a direct observable signature of nanoflare heating, two parameters in particular have been used to diagnose the heating frequency in \AR{} cores: the emission measure slope and the timelag. These diagnostics provide \textit{indirect} signatures of the energy deposition via observations of the plasma cooling by thermal conduction, enthalpy, and radiation. We will now discuss each of these observables in detail.
+
+The emission measure distribution, $\mathrm{EM}(T)=\int\mathrm{d}h\,n_e^2$, where $n_e$ is the electron density and the integration is taken along the line of sight, is a useful diagnostic for parameterizing the frequency of energy deposition. Many observational and theoretical studies have suggested that the ``cool'' portion of the $\dem{}$ (i.e. leftward of the peak, $10^{5.5}\lesssim T\lesssim10^{6.5}$ K), can be described by $\mathrm{EM}(T)\sim T^a$ \citep{jordan_structure_1976,cargill_implications_1994,cargill_nanoflare_2004}. The so-called \textit{emission measure slope}, $a$, is an important diagnostic for assessing how often a single strand may be reheated and has been used by several researchers to interpret \AR{} core observations in terms of both high- and low-frequency heating \citep[see Table 3 of][and references therein]{bradshaw_diagnosing_2012}. The ``cool'' emission measure slope typically falls in the range $2<a<5$, with shallower slopes indicative of low-frequency heating and steeper slopes associated with high-frequency heating. Many observational studies of active region cores have used the emission measure slope to make conclusions about the heating frequency \citep[e.g.][]{tripathi_emission_2011,warren_constraints_2011,winebarger_using_2011,schmelz_cold_2012,warren_systematic_2012,del_zanna_evolution_2015}.
+
+To better understand observable properties of nanoflare heating, several researchers have used hydrodynamic models of coronal loops to examine how the emission measure slope varies with heating frequency \citep{mulu-moore_can_2011,bradshaw_diagnosing_2012,reep_diagnosing_2013}. Most recently, \citet{cargill_active_2014} found that varying the time between consecutive heating events from 250 s (high-frequency heating) to 5000 s (low-frequency heating) could account for the wide observed distribution of emission measure slopes, with higher values of $a$ corresponding to higher heating frequency due to the $\dem$ distribution becoming increasingly isothermal \citep[see also][]{barnes_inference_2016-1}.
+
+In addition to the emission measure slope, the timelag analysis of \citet{viall_evidence_2012} has also been used by several workers to understand the frequency of energy release in \AR{} cores. The \textit{timelag} is the temporal delay which maximizes the cross-correlation between two timeseries, and, qualitatively, can be thought of as the amount of time which one signal must be shifted relative to another in order to achieve the best ``match'' between the two signals. As the plasma cools through the six EUV channels of the Atmospheric Imaging Assembly \citep[AIA,][]{lemen_atmospheric_2012} onboard the Solar Dynamics Observatory spacecraft \citep[SDO,][]{pesnell_solar_2012}, we expect to see the intensity peak in successively cooler passbands of AIA according to the sensitivity of each channel in temperature space \citep{viall_patterns_2011}. Computing the timelag between lightcurves in different channels provides a proxy for the cooling time between channels and insight into the thermal evolution of the plasma. Calculating the timelag in each pixel of an AIA image can reveal large scale cooling patterns in coronal loops as well as the diffuse emission between loops across an entire \AR{}.
+
+\citet{viall_evidence_2012} computed timelags for all possible AIA EUV channel pairs in every pixel of \AR{} NOAA 11082 and found positive timelags across the entire \AR{} core, indicative of cooling plasma. They interpreted these observations as being inconsistent with a steady heating model. \citet{viall_survey_2017} extended this analysis to the 15 active regions catalogued by \citet{warren_systematic_2012} and found overwhelmingly positive timelags, or cooling plasma, in all cases, with only a few isolated instances of negative timelags, or heating plasma. These observations are consistent with an impulsive heating scenario in which little emission is produced during the heating phase because of the time needed to fill the corona by chromospheric evaporation and the efficiency of thermal conduction. \citet{bradshaw_patterns_2016} predicted AIA intensities for a range of nanoflare heating frequencies in a model \AR{} and applied the timelag analysis to their simulated images. They found that aspects of both high and intermediate frequency nanoflares reproduced the observed timelag patterns, but neither model could fully account for the observational constraints, suggestive of a range of heating frequencies across the \AR{}. However, \citet{lionello_can_2016} used a field-aligned hydrodynamic model to compute timelags for several loops in NOAA 11082 and concluded that an impulsive heating model could not account for the long ($>5000$ s) timelags calculated from observations by \citet{viall_evidence_2012}.
+
+Any successful heating model must be able to reproduce the observed distribution of emission measure slopes and timelags. In order to carry out such a test, both advanced forward modeling and sophisticated comparisons to data are required. In this paper, we carry out a series of nanoflare heating simulations in order to better understand how the frequency of impulsive heating events on a given strand is related to observable properties of the plasma, notably the emission measure slope and the timelag as derived from AIA observations. To do this, we use a combination of magnetic field extrapolations, hydrodynamic models, and atomic data to produce simulated AIA emission which can be treated in the same manner as real observations. We then apply the emission meaure and timelag analysis to this simulated data. \autoref{sec:modeling_observables:modeling} provides detailed descriptions of our forward modeling pipeline and the nanoflare heating model. In \autoref{sec:modeling_observables:results}, we show the predicted intensities for each heating model and AIA channel (\autoref{sec:modeling_observables:intensities}), the resulting emission measure slopes (\autoref{sec:modeling_observables:em_slopes}) and the timelags (\autoref{sec:modeling_observables:timelags}). \autoref{sec:modeling_observables:discussion} provides some discussion of our results and \autoref{sec:modeling_observables:conclusions} includes a summary and concluding remarks.
+
+This paper is the first in a series concerned with constraining nanoflare heating properties through forward modeled observables and serves to describe our forward modeling pipeline and lay out the results of our nanoflare simulations. In \autoref{ch:classifying_observables}, we use machine learning to make detailed comparisons to AIA observations of \AR{} NOAA 1158. We train a random forest classifier using the predicted emission measure slopes and timelags presented here over the entire heating frequency parameter space in order to classify the heating frequency in each pixel of the observed \AR{}. In contrast to past studies which have relied on a single diagnostic, this approach allows us to simultaneously account for an arbitrarily large number of observables in deciding which model fits the data ``best.'' The ability to compare models with large quantities of data statistically is crucial for progress in the current era where the amount of solar coronal data is orders of magnitude larger than in the past.  Combined, these two papers demonstrate a novel method for using real and simulated observations to systematically predict heating properties in \AR{} cores.
+
+\section{Modeling}\label{sec:modeling_observables:modeling}
+
+% spell-checker: disable %
+\begin{pycode}[chapter6_modeling]
+name = 'chapter6'
+ch6_modeling = texfigure.Manager(
+    pytex,
+    os.path.join('.', name),
+    number=6,
+    **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
+)
+import io
+
+from sunpy.instr.aia import aiaprep
+from sunpy.physics.differential_rotation import diffrot_map
+import pandas as pd
+import plasmapy.atomic
+import astropy.io
+from astropy.table import Table
+\end{pycode}
+% spell-checker: enable %
+
+In order to understand how signatures of the heating frequency are manifested in the emission measure slope and timelag, we predict the emission over the entire \AR{} as observed by SDO/AIA for a range of nanoflare heating frequencies. To do this, we have constructed an advanced forward modeling pipeline through a combination of magnetic field extrapolations, field-aligned hydrodynamic simulations, and atomic data. In the following section, we discuss each step of our pipeline in detail.
+
+\subsection{Magnetic Field Extrapolation}\label{sec:modeling_observables:field}
+
+% spell-checker: disable %
+\begin{pycode}[chapter6_modeling]
+# Data prep
+aia_map = Map(ch6_modeling.data_file('aia_171_observed.fits'))
+hmi_map = Map(ch6_modeling.data_file('hmi_magnetogram.fits'))
+# AIA
+aia_map = diffrot_map(aiaprep(aia_map), time=hmi_map.date, rot_type='snodgrass')
+aia_map = aia_map.submap(
+    SkyCoord(-440, -375, unit=u.arcsec, frame=aia_map.coordinate_frame),
+    SkyCoord(-140, -75, unit=u.arcsec, frame=aia_map.coordinate_frame),
+)
+# HMI
+hmi_map = hmi_map.rotate(order=3)
+hmi_map = aiaprep(hmi_map).submap(aia_map.bottom_left_coord, aia_map.top_right_coord)
+
+# Create figure
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=1,
+    height_ratio=0.5,       
+))
+plt.subplots_adjust(wspace=0.03)
+
+# Plot HMI Map
+ax = fig.add_subplot(121, projection=hmi_map)
+hmi_map.plot(
+    title=False, annotate=False, axes=ax,
+    norm=matplotlib.colors.SymLogNorm(50, vmin=-7.5e2, vmax=7.5e2),
+    cmap='better_RdBu_r'
+)
+ax.grid(alpha=0)
+# HPC Axes
+lon,lat = ax.coords[0],ax.coords[1]
+lat.set_ticklabel(rotation='vertical')
+lon.set_axislabel(r'Helioprojective Longitude',)
+lat.set_axislabel(r'Helioprojective Latitude',)
+# HGS Axes
+hgs_lon,hgs_lat = aia_map.draw_grid(axes=ax, grid_spacing=10*u.deg, alpha=0.5, color='k')
+hgs_lat.set_axislabel_visibility_rule('labels')
+hgs_lon.set_axislabel_visibility_rule('labels')
+hgs_lat.set_ticklabel_visible(False)
+hgs_lon.set_ticklabel_visible(False)
+hgs_lat.set_ticks_visible(False)
+hgs_lon.set_ticks_visible(False)
+
+# Plot AIA Map
+ax = fig.add_subplot(122, projection=aia_map,)
+aia_map.plot(
+    title=False,annotate=False, axes=ax,
+    norm=ImageNormalize(vmin=0, vmax=5e3, stretch=AsinhStretch(0.1)))
+# Plot fieldlines
+ar = synthesizAR.Field.restore(os.path.join(ch6_modeling.data_dir, 'base_noaa1158'), lazy=False)
+for l in ar.loops[::10]:
+    c = l.coordinates.transform_to(aia_map.coordinate_frame)
+    ax.plot_coord(c, '-', color='w', lw=0.5, alpha=0.25)
+ax.grid(alpha=0)
+# HMI Contours
+hmi_map.draw_contours(u.Quantity([-5,5], '%'), axes=ax,
+                      colors=[DEEP_PALETTE[0], DEEP_PALETTE[3]], linewidths=0.75)
+# HPC Axes
+lon,lat = ax.coords[0],ax.coords[1]
+lon.set_ticks(color='w')
+lat.set_ticks(color='w')
+lat.set_ticklabel_visible(False)
+lon.set_axislabel('')
+lat.set_axislabel_visibility_rule('labels')
+# HGS Axes
+hgs_lon,hgs_lat = aia_map.draw_grid(axes=ax,grid_spacing=10*u.deg,alpha=0.5,color='w')
+hgs_lat.set_axislabel_visibility_rule('labels')
+hgs_lon.set_axislabel_visibility_rule('labels')
+hgs_lat.set_ticklabel_visible(False)
+hgs_lon.set_ticklabel_visible(False)
+hgs_lat.set_ticks_visible(False)
+hgs_lon.set_ticks_visible(False)
+
+# Save
+tfig = ch6_modeling.save_figure('modeling-observables:magnetogram', fext='.pdf')
+tfig.caption = r'Active region NOAA 1158 on 12 February 2011 15:32:42 UTC as observed by HMI (left) and the \SI{171}{\angstrom} channel of AIA (right). The gridlines show the heliographic longitude and latitude. The left panel shows the LOS magnetogram and the colorbar range is $\pm\SI{750}{\gauss}$ on a symmetrical log scale. In the right panel, 500 out of the total 5000 fieldlines are overlaid in white and the red and blue contours show the HMI LOS magnetogram at the $+5\%$ (red) and $-5\%$ (blue) levels.'
+\end{pycode}
+\py[chapter6_modeling]|tfig|
+% spell-checker: enable %
+
+We choose \AR{} NOAA 1158, as observed by the Helioseismic Magnetic Imager \citep[HMI,][]{hoeksema_helioseismic_2014} on 12 February 2011 15:32:42 UTC, from the list of active regions studied by \citet{warren_systematic_2012}. The line-of-sight (LOS) magnetogram is shown in the left panel of \autoref{fig:modeling-observables:magnetogram}. We model the geometry of \AR{} NOAA 1158 by computing the three-dimensional magnetic field using the oblique potential field extrapolation method of \citet{schmidt_observable_1964} as outlined in \citet[section 3]{sakurai_greens_1982}. The extrapolation technique of \citeauthor{schmidt_observable_1964} is well-suited for our purposes due to its simplicity and efficiency though we note it is only applicable on the scale of an \AR{}. We include the oblique correction to account for the fact that the \AR{} is off of disk center. 
+
+The HMI LOS magnetogram provides the lower boundary condition of the vector magnetic field (i.e. $B_z(x,y,z=0)$) for our field extrapolation. We crop the magnetogram to an area of \SI{300}{\arcsecond}-by-\SI{300}{\arcsecond} centered on $(\py[chapter6_modeling]|f'{ar.magnetogram.center.Tx.value:.2f}'|\si{\arcsecond},\py[chapter6_modeling]|f'{ar.magnetogram.center.Ty.value:.2f}'|\si{\arcsecond})$ and resample the image to 100-by-100 pixels to reduce the computational cost of the field extrapolation. Additionally, we define our extrapolated field to have a dimension of 100 pixels and spatial extent of $0.3R_{\solar}$ in the $z-$direction such that each component of our extrapolated vector magnetic field $\vec{B}$ has dimensions $(100,100,100)$.
+
+\begin{pycode}[chapter6_modeling]
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=0.65,
+    height_ratio=1.0,
+))
+ax = fig.gca()
+vals,bins,_ = ax.hist(
+    [l.full_length.to(u.Mm).value for l in ar.loops[:]],
+    bins='scott', color='k', histtype='step', lw=plt.rcParams['lines.linewidth'])
+ax.set_xlabel(r'$L$ $[\si{\mega\m}]$');
+ax.set_ylabel(r'Number of Loops');
+ax.set_ylim(-100,1300)
+ax.set_xlim(-1,260)
+# Spines
+tfig = ch6_modeling.save_figure('modeling-observables:loops', fext='.pgf')
+tfig.caption = r'Distribution of footpoint-to-footpoint lengths (in Mm) of the 5000 fieldlines traced from the field extrapolation computed from the magnetogram of NOAA 1158.'
+tfig.figure_width = r'0.65\textwidth'
+\end{pycode}
+\py[chapter6_modeling]|tfig|
+
+After computing the three-dimensional vector field from the observed magnetogram, we trace $5\times10^3$ fieldlines through the extrapolated volume using the streamline tracing functionality in the yt software package \citep{turk_yt_2011}. We choose only closed fieldlines in the range $\SI{20}{\mega\m}<L<\SI{300}{\mega\m}$, where $L$ is the full length of the fieldline. The right panel of \autoref{fig:modeling-observables:magnetogram} shows a subset of the traced fieldlines overlaid on the observed AIA \SI{171}{\angstrom} image of NOAA 1158. Contours from the observed HMI LOS magnetogram are shown in red (positive) and blue (negative). A qualitative comparison between the extrapolated fieldlines and the loops visible in the AIA \SI{171}{\angstrom} image reveals that our field extrapolation and line tracing adequately capture the three-dimensional geometry of the \AR{}. \autoref{fig:modeling-observables:loops} shows the distribution of footpoint-to-footpoint lengths for all of the traced fieldlines.
+
+\subsection{Hydrodynamic Modeling}\label{sec:modeling-observables:loops}
+
+Due to the low-$\beta$ nature of the corona, we can treat each fieldline traced from the field extrapolation as a thermally-isolated strand. We use the Enthalpy-based Thermal Evolution of Loops model \citep[EBTEL,][]{klimchuk_highly_2008,cargill_enthalpy-based_2012,cargill_enthalpy-based_2012-1}, specifically the two-fluid version of EBTEL \citep{barnes_inference_2016}, to model the thermodynamic response of each strand. The two-fluid EBTEL code solves the time-dependent, two-fluid hydrodynamic equations spatially-integrated over the corona for the electron pressure and temperature, ion pressure and temperature, and density. The two-fluid EBTEL model accounts for radiative losses in both the transition region and corona, thermal conduction (including flux limiting), and binary Coulomb collisions between electrons and ions. The time-dependent heating input is configurable and can be deposited in the electrons and/or ions. A detailed description of the model and a complete derivation of the two-fluid EBTEL equations can be found in \autoref{sec:ebtel-two-fluid}.
+
+For each of the $5\times10^3$ strands, we run a separate instance of the two-fluid EBTEL code for $3\times10^4$ s of simulation time to model the time-dependent, spatially-averaged coronal temperature and density. For each simulation, the loop length is determined from the field extrapolation. We include flux limiting in the heat flux calculation and use a flux limiter constant of 1 \citep[see Eqs. 21 and 22 of][]{klimchuk_highly_2008}. Additionally, we choose to deposit all of the energy into the electrons. To map the results back to the extrapolated fieldlines, we assign a single temperature and density to every point along the strand at each timestep. Though EBTEL only computes spatially-averaged quantities in the corona, its efficiency allows us to calculate time-dependent solutions for many thousands of strands in a few minutes.
+
+\subsection{Heating Model}\label{sec:modeling-observables:heating}
+
+We parameterize the heating input in terms of discrete heating pulses on a single strand with triangular profiles of duration $\tau_{\textup{event}}=200$ s. For each event $i$, there are two parameters: the peak heating rate $q_i$ and the waiting time prior to the event $\twait[,i]$. We define the waiting time such that $\twait[,i]$ is the amount of time between when event $i-1$ ends and event $i$ begins. Following the approach of \citet{cargill_active_2014}, we relate the waiting time and the event energy such that $\twait[,i]\propto q_i$. The physical motivation for this scaling is as follows. In the nanoflare model of \citet{parker_nanoflares_1988}, random convective motions continually stress the magnetic field rooted in the photosphere, leading to the buildup and eventual release of energy. If the field is stressed for a long amount of time without relaxation, large discontinuities will have time to develop in the field, leading to a dramatic release of energy. Conversely, if the field relaxes quickly, there is not enough time for the field to become sufficiently stressed and the resulting energy release will be relatively small. 
+
+In this work we explore three different heating scenarios: low-, intermediate-, and high-frequency nanoflares. We define the heating frequency in terms of the ratio between the fundamental cooling timescale due to thermal conduction and radiation, $\tau_{\textup{cool}}$, and the average waiting time of all events on a given strand, $\langle \twait\rangle$,
+
+\begin{equation}\label{eq:modeling-observables:heating_types}
+    \varepsilon = \frac{\langle \twait\rangle}{\tau_{\textup{cool}}}
+    \begin{cases} 
+        < 1, &  \text{high frequency},\\
+        \sim1, & \text{intermediate frequency}, \\
+        > 1, & \text{low frequency}.
+     \end{cases}
+\end{equation}
+
+We choose to parameterize the heating in terms of the cooling time rather than an absolute waiting time as $\tau_{\textup{cool}}\sim L$ \citep[see appendix of][]{cargill_active_2014}. While a waiting time of 2000 s might correspond to low-frequency heating for a 20 Mm strand, it would correspond to high-frequency heating in the case of a 150 Mm strand. By parameterizing the heating in this way, we ensure that all strands in the \AR{} are heated at the same frequency relative to their cooling time. \autoref{fig:modeling-observables:hydro-profiles} shows the heating rate, electron temperature, and density as a function of time, for a single strand, for the three heating scenarios listed above.
+
+\begin{pycode}[chapter6_modeling]
+fig,axes = plt.subplots(
+    3, 1, sharex=True,
+    figsize=texfigure.figsize(
+        pytex,
+        height_ratio=0.75,
+    )
+)
+plt.subplots_adjust(hspace=0.)
+
+i_loop=680
+heating = ['high_frequency', 'intermediate_frequency','low_frequency']
+loop = ar.loops[i_loop]
+for i,h in enumerate(heating):
+    loop.parameters_savefile = os.path.join(ch6_modeling.data_dir, f'{h}', 'loop_parameters.h5')
+    with h5py.File(loop.parameters_savefile, 'r') as hf:
+        q = np.array(hf[f'loop{i_loop:06d}']['heating_rate'])
+    axes[0].plot(loop.time, 1e3*q, color=PALETTE[i], label=h.split('_')[0].capitalize(),)
+    axes[1].plot(loop.time, loop.electron_temperature[:,0].to(u.MK), color=PALETTE[i],)
+    axes[2].plot(loop.time, loop.density[:,0]/1e9, color=PALETTE[i],)
+
+# Legend
+axes[0].legend(ncol=3, loc="lower center", bbox_to_anchor=(0.5,1.02), frameon=False,)
+
+# Labels and limits
+axes[0].set_xlim(0,3e4)
+axes[0].set_yticks([5,15,25])
+axes[1].set_ylim(0.1,8)
+axes[1].set_yticks([2,4,6,8])
+axes[2].set_ylim(0,2)
+#axes[2].set_yticks([0.5,1,1.5])
+axes[0].set_ylabel(r'$Q$ $[\SI{e-3}{\erg\per\cubic\cm\per\second}]$')
+axes[1].set_ylabel(r'$T$ $[\si{\mega\kelvin}]$')
+axes[2].set_ylabel(r'$n$ $[\SI{e9}{\per\cubic\cm}]$')
+axes[2].set_xlabel(r'$t$ $[\si{\second}]$')
+
+# Save
+tfig = ch6_modeling.save_figure('modeling-observables:hydro-profiles')
+tfig.caption = r'Heating rate (top), electron temperature (middle), and density (bottom) as a function of time for the three heating scenarios for a single strand. The colors denote the heating frequency as defined in the legend. The strand has a half length of $L/2\approx\SI{40}{\mega\m}$ and a mean field strength of $\bar{B}\approx\SI{30}{\gauss}$.'
+\end{pycode}
+\py[chapter6_modeling]|tfig|
+
+For a single impulsive event $i$ with a triangular temporal profile of duration $\tau_{\textup{event}}$, the energy density is $E_i=\tau_{\textup{event}}q_i/2$. Summing over all events on all strands that comprise the \AR{} gives the total energy flux injected into the \AR{},
+\begin{equation}
+    F_{AR} = \frac{\tau_{\textup{event}}}{2}\frac{\sum_l^{N_{\textup{strands}}}\sum_i^{N_l} q_iL_l}{t_\textup{total}}
+\end{equation}
+where $t_\textup{total}$ is the total simulation time, $N_\textup{strands}$ is the total number of strands comprising the \AR{}, and $N_l=(t_\textup{total} + \langle\twait\rangle)/(\tau + \langle\twait\rangle)$ is the total number of events occurring on each strand over the whole simulation. Note that the number of events per strand is a function of both $\varepsilon$ and $\tau_{\textup{cool}}$.
+
+For each heating frequency, we constrain the total flux into the \AR{} to be $F_{\ast}=\SI{e7}{\erg\per\square\cm\per\second}$ \citep{withbroe_mass_1977} such that $F_{AR}$ must satisfy the condition,
+\begin{equation}\label{eq:modeling-observables:energy_constraint}
+    \frac{| F_{AR}/N_\textup{strands} - F_{\ast} |}{F_{\ast}} < \delta,
+\end{equation}
+where $\delta\ll1$. For each strand, we choose $N_l$ events each with energy $E_i$ from a power-law distribution with slope $-2.5$ and fix the upper bound of the distribution to be $\bar{B}_l^2/8\pi$, where $\bar{B}_l$ is the spatially-averaged field strength along the strand $l$ as derived from the field extrapolation. This is the maximum amount of energy made available by the field to heat the strand. We then iteratively adjust the lower bound on the power-law distribution for $E_i$ until we have satisfied \autoref{eq:modeling-observables:energy_constraint} within some numerical tolerance. We note that the set of $E_i$ we choose for each strand may not uniquely satisfy \autoref{eq:modeling-observables:energy_constraint}.
+
+We use the field strength derived from the potential field extrapolation to constrain the energy input to our hydrodynamic model for each strand. While the derived potential field is already in its lowest energy state and thus has no energy to give up, our goal here is only to understand how the distribution of field strength may be related to the properties of the heating. In this way, we use the potential field as a proxy for the non-potential component of the coronal field, with the understanding that we cannot make any quantitative conclusions regarding the amount of available energy or the stability of the field itself.
+
+\begin{table}
+    \centering
+    \caption{All three heating models plus the two single-event control models. In the single-event models, the energy flux is not constrained by \autoref{eq:modeling-observables:energy_constraint}.\label{tab:modeling-observables:heating}}
+    \begin{tabularx}{\columnwidth}{CCC}
+        \toprule
+        Name & $\varepsilon$ (see \autoref{eq:modeling-observables:heating_types}) & Energy Constrained? \\
+        \midrule
+        high & 0.1 & yes \\
+        intermediate & 1 & yes \\
+        low & 5 & yes \\
+        cooling & 1 event per strand & no \\
+        random & 1 event per strand & no \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
+
+In addition to these three multi-event heating models, we also run two single-event control models. In both control models every strand in the \AR{} is heated exactly once by an event with energy $\bar{B}_l^2/8\pi$. In our first control model, the start time of every event is $t=0$ s such that all strands are allowed to cool uninterrupted for $t_\textup{total}=10^4$ s. In the second control model, the start time of the event on each strand is chosen from a uniform distribution over the interval $[0, 3\times10^4]$ s, such that the heating is likely to be out of phase across all strands. In these two models, the energy has not been constrained according to \autoref{eq:modeling-observables:energy_constraint} and the total flux into the \AR{} is $(\sum_{l}\bar{B}_l^2L_l)/8\pi t_\textup{total}$. From here on, we will refer to these two models as the ``cooling'' and ``random'' models, respectively. All five heating scenarios are summarized in \autoref{tab:modeling-observables:heating}.
+
+\subsection{Forward Modeling}\label{sec:modeling-observables:forward}
+
+\subsubsection{Atomic Physics}\label{sec:modeling-observables:atomic}
+
+For an optically thin, high-temperature, low-density plasma, the radiated power per unit volume, or \textit{emissivity}, of a transition $\lambda_{ij}$ of an electron in ion $k$ of element $X$ is given by,
+\begin{equation}\label{eq:modeling-observables:ppuv}
+    P(\lambda_{ij}) = \frac{n_H}{n_e}\mathrm{Ab}(X)N_j(X,k)f_{X,k}A_{ji}\Delta E_{ji}n_e,
+\end{equation}
+where $N_j$ is the fractional energy level population of excited state $j$, $f_{X,k}$ is the fractional population of ion $k$, $\mathrm{Ab}(X)$ is the abundance of element $X$ relative to hydrogen, $n_H/n_e\approx0.83$ is the ratio of hydrogen and electron number densities, $A_{ji}$ is the Einstein coefficient, and $\Delta E_{ji}=hc/\lambda_{ij}$ is the energy of the emitted photon \citep[see][]{mason_spectroscopic_1994,del_zanna_solar_2018}. To compute \autoref{eq:modeling-observables:ppuv}, we use version 8.0.6 of the CHIANTI atomic database \citep{dere_chianti_1997,young_chianti_2016}. We use the abundances of \citet{feldman_potential_1992} as provided by CHIANTI. For each atomic transition, $A_{ji}$ and $\lambda_{ji}$ can be looked up in the database. To find $N_j$, we solve the level-balance equations for ion $k$, including the relevant excitation and de-excitation processes as provided by CHIANTI \citep[see section 3.3 of][]{del_zanna_solar_2018}. See \autoref{sec:line_formation} for a detailed explanation of the emissivity calculation.
+
+The ion population fractions, $f_{X,k}$, provided by CHIANTI assume ionization equilibrium (i.e. the ionization and recombination rates are always in balance). However, in the rarefied solar corona, where the plasma is likely heated impulsively, it is not gauranteed that the ionization timescale is less than the heating timescale such that the ionization state may not be representative of the electron temperature \citep{bradshaw_explosive_2006,reale_nonequilibrium_2008,bradshaw_numerical_2009}. To properly account for this effect, we compute $f_{X,k}$ by solving the time-dependent ion population equations for each element using the ionization and recombination rates provided by CHIANTI. The details of this calculation are provided in \autoref{ap:nonequilibrium_implicit}.
+
+\subsubsection{Instrument Effects}\label{sec:modeling-observables:instrument}
+
+\begin{pycode}[chapter6_modeling]
+em = synthesizAR.atomic.EmissionModel.restore(
+    os.path.join(ch6_modeling.data_dir, 'base_emission_model.json'))
+data = {'Element': [], 'Number of Ions': [], 'Number of Transitions': [],}
+for i in em:
+    if not hasattr(i.transitions, 'wavelength'):
+        continue
+    data['Element'].append(i.atomic_symbol)
+    data['Number of Ions'].append(1)
+    data['Number of Transitions'].append(i.transitions.wavelength.shape[0])
+df = pd.DataFrame(data=data).groupby('Element').sum().reset_index()
+z = df['Element'].map(plasmapy.atomic.atomic_number)
+df = df.assign(z = z).sort_values(by='z', axis=0).drop(columns='z')
+caption = r"Elements included in the calculation of \autoref{eq:modeling-observables:intensity}. For each element, we include all ions for which CHIANTI provides sufficient data for computing the emissivity.\label{tab:modeling-observables:elements}"
+with io.StringIO() as f:
+    astropy.io.ascii.write(
+        Table.from_pandas(df),
+        format='latex',
+        latexdict = {'data_start':r'\midrule', 'data_end': r'\bottomrule',
+                     'header_start': r'\toprule', 'col_align': 'ccc',
+                     'preamble':r'\begin{center}', 'tablefoot':r'\end{center}'},
+        caption=caption,
+        output=f)
+    tab = f.getvalue()
+\end{pycode}
+\py[chapter6_modeling]|tab|
+
+We combine \autoref{eq:modeling-observables:ppuv} with the wavelength response function of the instrument to model the intensity as it would be observed by AIA,
+\begin{equation}\label{eq:modeling-observables:intensity}
+    I_c = \frac{1}{4\pi}\sum_{\{ij\}}\int_{\text{LOS}}\mathrm{d}hP(\lambda_{ij})R_c(\lambda_{ij})
+\end{equation}
+where $I_c$ is the intensity for a given pixel in channel $c$, $P(\lambda_{ij})$ is the emissivity as given by \autoref{eq:modeling-observables:ppuv}, $R_c$ is the wavelength response function of the instrument for channel $c$ \citep[see][]{boerner_initial_2012}, $\{ij\}$ is the set of all atomic transitions listed in \autoref{tab:modeling-observables:elements}, and the integration is along the LOS. 
+
+\begin{pycode}[chapter6_modeling]
+fig,axes = plt.subplots(
+    2, 3, sharex=True, sharey=True,
+    figsize=texfigure.figsize(
+        pytex, 
+        scale=1,
+        height_ratio=2/3,       
+    )
+)
+
+# Setup parameters
+aia = InstrumentSDOAIA([0,1]*u.s, observer_coordinate=None)
+T = np.logspace(5,8,100)
+p = 10**(15)*u.K/(u.cm**3)
+const_p_indices = np.array([(i,np.argmin(np.fabs(em.density.value-d.value))) 
+                            for i,d in enumerate(p/em.temperature)])
+
+# Read and plot data
+with h5py.File(os.path.join(ch6_modeling.data_dir, 'effective_aia_response.h5'), 'r') as hf:
+    for i, (ax, channel) in enumerate(zip(axes.flatten(), aia.channels)):
+        grp = hf[channel['name']]
+        real_response = splev(T, channel['temperature_response_spline'])
+        ax.plot(T, real_response, ls='-',color='k',)
+        ax.plot(em.temperature, 
+                np.array(grp['response'])[const_p_indices[:,0],const_p_indices[:,1]],
+                color='k',ls='--',)
+        elements = sorted([e for e in grp if e != 'response'],
+                            key=lambda x: plasmapy.atomic.atomic_number(x))
+        for j,element in enumerate(elements):
+            ax.plot(em.temperature, 
+                    np.array(grp[element])[const_p_indices[:,0],const_p_indices[:,1]],
+                    color=PALETTE[j], ls='--', label=plasmapy.atomic.atomic_symbol(element),)
+        if i==1:
+            ax.legend(ncol=len(elements), loc="lower center", bbox_to_anchor=(0.5,1.02),
+                      frameon=False)
+        ax.text(6e7,1e-24, r'{} $\si{{\angstrom}}$'.format(channel['name']),
+                fontsize=plt.rcParams['legend.fontsize'],
+                horizontalalignment='right', verticalalignment='top')
+ax.plot(T, p/T, color='k')
+
+# Labels, limits
+ax.set_xscale('log')
+ax.set_yscale('log')
+ax.set_ylim([2e-30,2e-24])
+ax.set_xlim([1e5,8e7])
+ax.set_yticks([1e-29, 1e-27, 1e-25])
+axes[1,0].set_ylabel(r'$K_c$ $[\si{\dn\cm\tothe{5}\per\second\per\pixel}]$')
+axes[1,0].set_xlabel(r'$T$ $[\si{\kelvin}]$')
+plt.subplots_adjust(wspace=0.,hspace=0.)
+
+# Save
+tfig = ch6_modeling.save_figure('modeling-observables:aia-response', fext='.pgf')
+tfig.caption = r'SSW temperature response functions (solid black) and effective temperature response functions for the elements in \autoref{tab:modeling-observables:elements} (dashed black) for all six EUV AIA channels. The colored, dashed curves, as indicated in the legend, denote the contributions of the individual elements to the total response. For this calculation, we have assumed equilibrium ionization and a constant pressure of \SI{e15}{\kelvin\per\cubic\cm}. We do not account for the time-varying degradation of the instrument.'
+\end{pycode}
+\py[chapter6_modeling]|tfig|
+
+When computing the intensity in each channel of AIA, we do not rely on the temperature response functions computed by SolarSoft \citep[SSW,][]{freeland_data_1998} and instead use the wavelength response functions directly. As discussed in \autoref{sec:modeling-observables:atomic}, the assumption of ionization equilibrium is likely to be violated in the impulsive heating cases considered here. Thus, we must recompute the contributions of each ion to the total channel response, using the result of \autoref{eq:population_fraction_solution} in place of the equilibrium ion population fractions. \autoref{fig:modeling-observables:aia-response} shows the effective temperature response functions for the six EUV channels on AIA compared to those calculated from \texttt{aia\_get\_response.pro} in SSW. Even though we include a limited number of transitions from the CHIANTI database (see \autoref{tab:modeling-observables:elements}), we recover nearly all of the response from each channel. The high-temperature contributions in the SSW functions are due to continuum emission which we do not include in our model. In all cases, the continuum contribution is several orders of magnitude below peak of the channel response. Additionally, we do not account for the time variation in the wavelength response functions due to the degradation of the detector \citep[see Section 2.1.6 of ][]{boerner_initial_2012}.
+
+\begin{pycode}[chapter6_modeling]
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=0.65,
+    height_ratio=1.0, 
+))
+ax = fig.gca()
+
+min_T = 1e300*u.K
+max_T = 0*u.K
+p = 1e15*u.K/(u.cm**3)
+
+i_loop=680
+loop = ar.loops[i_loop]
+for i,h in enumerate(heating):
+    loop.parameters_savefile = os.path.join(ch6_modeling.data_dir, f'{h}', 'loop_parameters.h5')
+    ax.plot(loop.electron_temperature[:,0], loop.density[:,0], color=PALETTE[i], alpha=0.75,
+            label=h.split('_')[0].capitalize())
+    min_T = min(min_T, loop.electron_temperature.min())
+    max_T = max(max_T, loop.electron_temperature.max())
+T = np.linspace(min_T,max_T,1000)
+ax.plot(T, p/T, color='k')
+
+ax.set_xscale('log')
+ax.set_yscale('log')
+ax.set_xlim(1.75e5,1e7)
+ax.set_ylim(1.1e7,6e9)
+ax.legend(ncol=3, loc="lower center", bbox_to_anchor=(0.5,1.02), frameon=False,)
+ax.set_ylabel(r'$n$ $[\si{\per\cubic\cm}]$')
+ax.set_xlabel(r'$T$ $[\si{\kelvin}]$')
+
+tfig = ch6_modeling.save_figure('modeling-observables:hydro-phase-space', fext='.pgf')
+tfig.caption = r'$n-T$ phase-space orbits for a single strand for the three heating scenarios as defined by the legend. The black line indicates a constant pressure of $\SI{e15}{\kelvin\per\cubic\cm}$.'
+tfig.figure_width = r'0.65\textwidth'
+\end{pycode}
+\py[chapter6_modeling]|tfig|
+
+Furthermore, during the evolution of a strand, the pressure is not constant for any of our heating scenarios as evidenced by \autoref{fig:modeling-observables:hydro-phase-space}. The black line of constant pressure $p=\SI{e15}{\kelvin\per\cubic\cm}$ shows the default pressure at which the SSW AIA response functions are evaluated. The other lines show the temperature-density phase space evolution for the high-, intermediate-, and low-frequency cases for a single strand, none of which is well described by the assumption of constant pressure. By recomputing and interpolating the emissivity to the temperatures and densities as defined by our hydrodynamic simulation, we ensure that we are evaluating all quantities in \autoref{eq:modeling-observables:ppuv} at the correct temperature and density.
+
+\subsubsection{Mapping Back to the Magnetic Field}\label{sec:modeling-observables:mapping}
+
+We compute the emissivity according to \autoref{eq:modeling-observables:ppuv} for all of the transitions in \autoref{tab:modeling-observables:elements} using the temperatures and densities from from our hydrodynamic models for all $5\times10^3$ strands. We then compute the LOS integral in \autoref{eq:modeling-observables:intensity} by first converting the coordinates of each strand to a helioprojective (HPC) coordinate frame \citep[see][]{thompson_coordinate_2006} using the coordinate transformation functionality in Astropy \citep{the_astropy_collaboration_astropy_2018} combined with the solar coordinate frames provided by SunPy \citep{sunpy_community_sunpypython_2015}. This enables us to easily project our simulated \AR{} along any arbitrary LOS simply by changing the location of the observer that defines the HPC frame. Here, our HPC frame is defined by an observer at the position of the SDO spacecraft on 12 February 2011 15:32:42 UTC (i.e. the time of the HMI observation of NOAA 1158 shown in \autoref{fig:modeling-observables:magnetogram}).
+
+Next, we use these transformed coordinates to compute a weighted two-dimensional histogram, using the integrand of \autoref{eq:modeling-observables:intensity} at each coordinate as the weights. We construct the histogram such that the bin widths are consistent with the spatial resolution of the instrument. For AIA, a single bin, representing a single pixel, has a width of \SI{0.6}{\arcsecond\per\pixel}. Finally, we  apply a gaussian filter to the resulting histogram to emulate the point spread function of the instrument. We do this for each timestep, using a cadence of \SI{10}{\second}, and for each channel. For every heating scenario, this produces approximately $6(3\times10^4)/10\approx2\times10^4$ separate images. A detailed discussion of this forward modeling pipeline is provided in \autoref{ch:synthesizar}.
+
+
+\section{Results}\label{sec:modeling-observables:results}
+
+% spell-checker: disable %
+\begin{pycode}[chapter6_results]
+name = 'chapter6'
+ch6_results = texfigure.Manager(
+    pytex,
+    os.path.join('.', name),
+    number=6,
+    **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
+)
+correlation_threshold = 0.1
+rsquared_threshold = 0.75
+\end{pycode}
+% spell-checker: enable %
+
+We forward model time-dependent AIA intensities using the method outlined in \autoref{sec:modeling-observables:forward} for the heating scenarios discussed in \autoref{sec:modeling-observables:heating}. We discuss the predicted intensities in \autoref{sec:modeling-observables:intensities} for all six EUV channels of AIA and all five heating models. In \autoref{sec:modeling-observables:em_slopes} and \autoref{sec:modeling-observables:timelags}, we show the results of the emission measure and timelag analysis, respectively, applied to our simulated data. In \autoref{ch:classifying_observables}, we use these simulated observables to train a machine learning classification model to understand with which heating scenario the real data are most consistent.
+
+\subsection{Intensities}\label{sec:modeling-observables:intensities}
+
+We compute the intensities for the \SIlist{94;131;171;193;211;335}{\angstrom} channels of SDO/AIA using the procedure described in \autoref{sec:modeling-observables:forward}. We compute the intensity in each pixel of the model \AR{} over a total simulation period of $\SI{3e4}{\second}\approx\SI{8.3}{\hour}$ with the exception of the cooling case which is only run for \SI{e4}{\second}. For the high-, intermediate-, and low-frequency and ``random'' models, we discard the first and last \SI{5e3}{\second} of evolution to avoid any transient effects in the strand evolution associated with the initial conditions and the constraints placed on the energy, respectively. We complete this procedure for each of the five heating scenarios in \autoref{tab:modeling-observables:heating}.
+
+% INTENSITY MAPS
+
+\autoref{fig:modeling-observables:intensity-map} shows a snapshot of the intensity map at $t=15\times10^3$ s for each channel and for the high-, intermediate-, and low-frequency nanoflare heating cases. The rows correspond to the different heating scenarios while the columns show the six channels. In each column, the intensities are normalized to the maximum intensity in the low-frequency case and are on a square root scale. In general, we find that in the high-frequency intensity maps, individual loops are difficult to distinguish while in the low-frequency case individual loops appear bright relative to the surrounding emission. This distinguishability or ``fuzziness'' can be measured quantitatively as $\sigma_{I}/\bar{I}$, where $\sigma_{I}$ is the standard deviation taken over all pixels and $\bar{I}$ is the mean intensity \citep[Equation 11]{guarrasi_coronal_2010}. A larger value of $\sigma_{I}/\bar{I}$ indicates a greater degree of contrast and vice versa. $\sigma_{I}/\bar{I}$ for each channel and heating frequency is shown in \autoref{tab:modeling-observables:fuzzy}. With the exception of 131 \AA{}, for every channel, the high-frequency case is the most ``fuzzy''. The low-frequency case shows the most contrast in each channel except 94 \AA{} though the margin between the low and intermediate cases is quite small in some cases.
+
+% FUZZY TABLE
+
+Looking at the first two columns of \autoref{fig:modeling-observables:intensity-map}, we see that the intensity in the \SIlist{94;131}{\angstrom} channels increases as the heating frequency decreases. Both channels are double peaked and have ``hot'' ($\approx\SI{7}{\mega\kelvin}$ for \SI{94}{\angstrom}, $\approx\SI{12}{\mega\kelvin}$ for \SI{131}{\angstrom}) and ``warm'' ($\approx\SI{1}{\mega\kelvin}$ for \SI{94}{\angstrom}, $\approx\SI{0.5}{\mega\kelvin}$ for \SI{131}{\angstrom}) components. In the case of high frequency heating, less energy is available per event such that few strands are heated to $>\SI{4}{\mega\kelvin}$. There is little emission in the \SI{131}{\angstrom} channel as strands are not often permitted to cool to $\leq\SI{0.5}{\mega\kelvin}$ either. However, in the low- and intermediate-frequency cases, we see several individual bright loops in both the \SIlist{94;131}{\angstrom} channels as the heating rate is sufficient to produce ``hot'' (i.e. \SIrange{8}{10}{\mega\kelvin}) loops. We see only a few of these loops as the lifetime of this hot plasma is short due to the efficiency of thermal conduction. In contrast, the faint, diffuse component of the \SI{94}{\angstrom} emission that is present in all three cases is due to the contribution of the ``warm'' component. 
+
+Additionally, we find that the \SI{171}{\angstrom} channel is dimmer for high frequency heating as the peak sensitivity of this channel is $<\SI{1}{\mega\kelvin}$ and in the case of high frequency heating, strands are rarely allowed to cool below \SI{1}{\mega\kelvin}. In contrast, we note that the overall intensity in the \SIlist{193;211;335}{\angstrom} channels is relatively constant over heating frequency as compared to the three previous channels though individual loops do become more visible with decreasing heating frequency. This relative insensitivity is because the temperature response functions of these three channels all peak in between \SI{1.5}{\mega\kelvin} and \SI{2.5}{\mega\kelvin}. In the case of high-frequency heating, strands are being sustained near these temperatures while in the low-frequency case, strands are cooling through this temperature range. This is illustrated for a single strand in \autoref{fig:modeling-observables:hydro-profiles}.
+
+While there are clear differences in the AIA intensities between all three heating frequencies, quantifying these differences is difficult due in part to the multidimensional nature of the intensity data. To better understand how observational signatures differ as a function of heating frequency, we need to find a reduced representation of our dataset that retains signatures of the underlying energy deposition. To this end, we compute two common observables: the emission measure slope (\autoref{sec:modeling-observables:em_slopes}) and the timelag (\autoref{sec:modeling-observables:timelags}).
+

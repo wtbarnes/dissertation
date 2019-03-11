@@ -1,5 +1,5 @@
 % Text for chapter 6
-\chapter{Predicting Diagnostics for Nanoflares of Varying Frequency}\label{ch:modeling_observables}
+\chapter{Predicting Diagnostics for Nanoflares of Varying Frequency}\label{ch:modeling-observables}
 
 % spell-checker: disable %
 \begin{pycode}[chapter6]
@@ -13,31 +13,31 @@ ch6 = texfigure.Manager(
 \end{pycode}
 % spell-checker: enable %
 
-% brief intro to the chapter
+In this chapter, I use the forward modeling pipeline outlined in \autoref{ch:synthesizar} to predict observable signatures of an \AR{} heated by nanoflares of varying frequency. In particular, I predict both the emission measure slope (see \autoref{sec:em_slope}) and timelag (see \autoref{sec:timelag}). In \autoref{ch:classifying_observables}, these simulated diagnostics are used to train a random forest classifier to predict heating frequency in every pixel of \AR{} NOAA 1158. This chapter is adapted directly from \citet{barnes_understanding_2019} which is currently in preparation to be submitted for publication. 
 
-\section{Introduction}\label{sec:modeling_observables:introduction}
+\section{Introduction}\label{sec:modeling-observables:introduction}
 
 Nanoflares have long been used to explain the observed million-degree temperatures in the non-flaring solar corona. Though originally pertaining to energetic bursts of order $10^{24}$ erg resulting from small-scale reconnection \citep{parker_nanoflares_1988}, the term \textit{nanoflare} is now synonymous with any impulsive energy release and is not specific to any particular physical mechanism \citep{klimchuk_key_2015}. Due to their faint, transient nature, direct observations of nanoflares are made difficult by several factors, including inadequate spectral coverage of instruments, the efficiency of thermal conduction, and non-equilibrium ionization \citep{cargill_implications_1994,winebarger_defining_2012,barnes_inference_2016}. However, recent observations of ``very hot'' 8-10 MK plasma, the so-called ``smoking gun'' of nanoflares, have provided compelling evidence for their existence \citep[e.g.][]{brosius_pervasive_2014,caspi_new_2015,parenti_spectroscopy_2017,ishikawa_detection_2017}.
 
-Critical to understanding the underlying heating mechanism is knowing whether the corona in non-flaring active regions is heated \textit{steadily} or \textit{impulsively}, or, more precisely, at what frequency do nanflares repeat on a given magnetic strand. In the case of low-frequency nanoflares, the time between consecutive events on a strand is long relative to its characteristic cooling time, giving the strand time to fully cool and drain before it is reenergized. In the high-frequency scenario, the time between events is short relative to the cooling time such that the strand is not allowed to fully cool before being heated again. Steady heating may be regarded as nanoflare heating in the very high-frequency limit. 
+Critical to understanding the underlying heating mechanism is knowing whether the corona in non-flaring active regions is heated \textit{steadily} or \textit{impulsively}, or, more precisely, at what frequency do nanflares repeat on a given magnetic strand. In the case of low-frequency nanoflares, the time between consecutive events on a strand is long relative to its characteristic cooling time, giving the strand time to fully cool and drain before it is reenergized. In the high-frequency scenario, the time between events is short relative to the cooling time such that the strand is not allowed to fully cool before being heated again. Steady heating may be regarded as nanoflare heating in the very high-frequency limit.
 
 Before proceeding, we note that a magnetic \textit{strand}, the fundamental unit of the low-$\beta$ corona, is a flux tube oriented parallel to the magnetic field that is isothermal in the direction perpendicular to magnetic field. We make the distinction that a \textit{coronal loop} is an observationally-defined feature representing a magnetic field-aligned intensity enhancement relative to the surrounding diffuse emission such that a single coronal loop may be composed of many thermally-isolated strands. Furthermore, we define the \AR{} \textit{core} as the area near the center of the \AR{} whose X-ray and EUV emission is dominated by closed loops with both footpoints rooted in the photosphere.
 
 In lieu of a direct observable signature of nanoflare heating, two parameters in particular have been used to diagnose the heating frequency in \AR{} cores: the emission measure slope and the timelag. These diagnostics provide \textit{indirect} signatures of the energy deposition via observations of the plasma cooling by thermal conduction, enthalpy, and radiation. We will now discuss each of these observables in detail.
 
-The emission measure distribution, $\mathrm{EM}(T)=\int\mathrm{d}h\,n_e^2$, where $n_e$ is the electron density and the integration is taken along the line of sight, is a useful diagnostic for parameterizing the frequency of energy deposition. Many observational and theoretical studies have suggested that the ``cool'' portion of the $\dem{}$ (i.e. leftward of the peak, $10^{5.5}\lesssim T\lesssim10^{6.5}$ K), can be described by $\mathrm{EM}(T)\sim T^a$ \citep{jordan_structure_1976,cargill_implications_1994,cargill_nanoflare_2004}. The so-called \textit{emission measure slope}, $a$, is an important diagnostic for assessing how often a single strand may be reheated and has been used by several researchers to interpret \AR{} core observations in terms of both high- and low-frequency heating \citep[see Table 3 of][and references therein]{bradshaw_diagnosing_2012}. The ``cool'' emission measure slope typically falls in the range $2<a<5$, with shallower slopes indicative of low-frequency heating and steeper slopes associated with high-frequency heating. Many observational studies of active region cores have used the emission measure slope to make conclusions about the heating frequency \citep[e.g.][]{tripathi_emission_2011,warren_constraints_2011,winebarger_using_2011,schmelz_cold_2012,warren_systematic_2012,del_zanna_evolution_2015}.
+The emission measure distribution, $\mathrm{EM}(T)=\int\mathrm{d}h\,n_e^2$, where $n_e$ is the electron density and the integration is taken along the line of sight, is a useful diagnostic for parameterizing the frequency of energy deposition. Many observational and theoretical studies have suggested that the ``cool'' portion of the $\emd$ (i.e. leftward of the peak, $10^{5.5}\lesssim T\lesssim10^{6.5}$ K), can be described by $\mathrm{EM}(T)\sim T^a$ \citep{jordan_structure_1976,cargill_implications_1994,cargill_nanoflare_2004}. The so-called \textit{emission measure slope}, $a$, is an important diagnostic for assessing how often a single strand may be reheated and has been used by several researchers to interpret \AR{} core observations in terms of both high- and low-frequency heating \citep[see Table 3 of][and references therein]{bradshaw_diagnosing_2012}. The ``cool'' emission measure slope typically falls in the range $2<a<5$, with shallower slopes indicative of low-frequency heating and steeper slopes associated with high-frequency heating. Many observational studies of active region cores have used the emission measure slope to make conclusions about the heating frequency \citep[e.g.][]{tripathi_emission_2011,warren_constraints_2011,winebarger_using_2011,schmelz_cold_2012,warren_systematic_2012,del_zanna_evolution_2015}.
 
-To better understand observable properties of nanoflare heating, several researchers have used hydrodynamic models of coronal loops to examine how the emission measure slope varies with heating frequency \citep{mulu-moore_can_2011,bradshaw_diagnosing_2012,reep_diagnosing_2013}. Most recently, \citet{cargill_active_2014} found that varying the time between consecutive heating events from 250 s (high-frequency heating) to 5000 s (low-frequency heating) could account for the wide observed distribution of emission measure slopes, with higher values of $a$ corresponding to higher heating frequency due to the $\dem$ distribution becoming increasingly isothermal \citep[see also][]{barnes_inference_2016-1}.
+To better understand observable properties of nanoflare heating, several researchers have used hydrodynamic models of coronal loops to examine how the emission measure slope varies with heating frequency \citep{mulu-moore_can_2011,bradshaw_diagnosing_2012,reep_diagnosing_2013}. Most recently, \citet{cargill_active_2014} found that varying the time between consecutive heating events from 250 s (high-frequency heating) to 5000 s (low-frequency heating) could account for the wide observed distribution of emission measure slopes, with higher values of $a$ corresponding to higher heating frequency due to the $\emd$ distribution becoming increasingly isothermal \citep[see also][]{barnes_inference_2016-1}.
 
 In addition to the emission measure slope, the timelag analysis of \citet{viall_evidence_2012} has also been used by several workers to understand the frequency of energy release in \AR{} cores. The \textit{timelag} is the temporal delay which maximizes the cross-correlation between two timeseries, and, qualitatively, can be thought of as the amount of time which one signal must be shifted relative to another in order to achieve the best ``match'' between the two signals. As the plasma cools through the six EUV channels of the Atmospheric Imaging Assembly \citep[AIA,][]{lemen_atmospheric_2012} onboard the Solar Dynamics Observatory spacecraft \citep[SDO,][]{pesnell_solar_2012}, we expect to see the intensity peak in successively cooler passbands of AIA according to the sensitivity of each channel in temperature space \citep{viall_patterns_2011}. Computing the timelag between lightcurves in different channels provides a proxy for the cooling time between channels and insight into the thermal evolution of the plasma. Calculating the timelag in each pixel of an AIA image can reveal large scale cooling patterns in coronal loops as well as the diffuse emission between loops across an entire \AR{}.
 
 \citet{viall_evidence_2012} computed timelags for all possible AIA EUV channel pairs in every pixel of \AR{} NOAA 11082 and found positive timelags across the entire \AR{} core, indicative of cooling plasma. They interpreted these observations as being inconsistent with a steady heating model. \citet{viall_survey_2017} extended this analysis to the 15 active regions catalogued by \citet{warren_systematic_2012} and found overwhelmingly positive timelags, or cooling plasma, in all cases, with only a few isolated instances of negative timelags, or heating plasma. These observations are consistent with an impulsive heating scenario in which little emission is produced during the heating phase because of the time needed to fill the corona by chromospheric evaporation and the efficiency of thermal conduction. \citet{bradshaw_patterns_2016} predicted AIA intensities for a range of nanoflare heating frequencies in a model \AR{} and applied the timelag analysis to their simulated images. They found that aspects of both high and intermediate frequency nanoflares reproduced the observed timelag patterns, but neither model could fully account for the observational constraints, suggestive of a range of heating frequencies across the \AR{}. However, \citet{lionello_can_2016} used a field-aligned hydrodynamic model to compute timelags for several loops in NOAA 11082 and concluded that an impulsive heating model could not account for the long ($>5000$ s) timelags calculated from observations by \citet{viall_evidence_2012}.
 
-Any successful heating model must be able to reproduce the observed distribution of emission measure slopes and timelags. In order to carry out such a test, both advanced forward modeling and sophisticated comparisons to data are required. In this paper, we carry out a series of nanoflare heating simulations in order to better understand how the frequency of impulsive heating events on a given strand is related to observable properties of the plasma, notably the emission measure slope and the timelag as derived from AIA observations. To do this, we use a combination of magnetic field extrapolations, hydrodynamic models, and atomic data to produce simulated AIA emission which can be treated in the same manner as real observations. We then apply the emission meaure and timelag analysis to this simulated data. \autoref{sec:modeling_observables:modeling} provides detailed descriptions of our forward modeling pipeline and the nanoflare heating model. In \autoref{sec:modeling_observables:results}, we show the predicted intensities for each heating model and AIA channel (\autoref{sec:modeling_observables:intensities}), the resulting emission measure slopes (\autoref{sec:modeling_observables:em_slopes}) and the timelags (\autoref{sec:modeling_observables:timelags}). \autoref{sec:modeling_observables:discussion} provides some discussion of our results and \autoref{sec:modeling_observables:conclusions} includes a summary and concluding remarks.
+Any successful heating model must be able to reproduce the observed distribution of emission measure slopes and timelags. In order to carry out such a test, both advanced forward modeling and sophisticated comparisons to data are required. In this paper, we carry out a series of nanoflare heating simulations in order to better understand how the frequency of impulsive heating events on a given strand is related to observable properties of the plasma, notably the emission measure slope and the timelag as derived from AIA observations. To do this, we use a combination of magnetic field extrapolations, hydrodynamic models, and atomic data to produce simulated AIA emission which can be treated in the same manner as real observations. We then apply the emission meaure and timelag analysis to this simulated data. \autoref{sec:modeling-observables:modeling} provides detailed descriptions of our forward modeling pipeline and the nanoflare heating model. In \autoref{sec:modeling-observables:results}, we show the predicted intensities for each heating model and AIA channel (\autoref{sec:modeling-observables:intensities}), the resulting emission measure slopes (\autoref{sec:modeling-observables:em_slopes}) and the timelags (\autoref{sec:modeling-observables:timelags}). \autoref{sec:modeling-observables:discussion} provides some discussion of our results and \autoref{sec:modeling-observables:conclusions} includes a summary and concluding remarks.
 
 This paper is the first in a series concerned with constraining nanoflare heating properties through forward modeled observables and serves to describe our forward modeling pipeline and lay out the results of our nanoflare simulations. In \autoref{ch:classifying_observables}, we use machine learning to make detailed comparisons to AIA observations of \AR{} NOAA 1158. We train a random forest classifier using the predicted emission measure slopes and timelags presented here over the entire heating frequency parameter space in order to classify the heating frequency in each pixel of the observed \AR{}. In contrast to past studies which have relied on a single diagnostic, this approach allows us to simultaneously account for an arbitrarily large number of observables in deciding which model fits the data ``best.'' The ability to compare models with large quantities of data statistically is crucial for progress in the current era where the amount of solar coronal data is orders of magnitude larger than in the past.  Combined, these two papers demonstrate a novel method for using real and simulated observations to systematically predict heating properties in \AR{} cores.
 
-\section{Modeling}\label{sec:modeling_observables:modeling}
+\section{Modeling}\label{sec:modeling-observables:modeling}
 
 % spell-checker: disable %
 \begin{pycode}[chapter6_modeling]
@@ -50,18 +50,18 @@ ch6_modeling = texfigure.Manager(
 )
 import io
 
-from sunpy.instr.aia import aiaprep
-from sunpy.physics.differential_rotation import diffrot_map
 import pandas as pd
 import plasmapy.atomic
 import astropy.io
 from astropy.table import Table
+from sunpy.instr.aia import aiaprep
+from sunpy.physics.differential_rotation import diffrot_map
 \end{pycode}
 % spell-checker: enable %
 
 In order to understand how signatures of the heating frequency are manifested in the emission measure slope and timelag, we predict the emission over the entire \AR{} as observed by SDO/AIA for a range of nanoflare heating frequencies. To do this, we have constructed an advanced forward modeling pipeline through a combination of magnetic field extrapolations, field-aligned hydrodynamic simulations, and atomic data. In the following section, we discuss each step of our pipeline in detail.
 
-\subsection{Magnetic Field Extrapolation}\label{sec:modeling_observables:field}
+\subsection{Magnetic Field Extrapolation}\label{sec:modeling-observables:field}
 
 % spell-checker: disable %
 \begin{pycode}[chapter6_modeling]
@@ -152,8 +152,8 @@ The HMI LOS magnetogram provides the lower boundary condition of the vector magn
 \begin{pycode}[chapter6_modeling]
 fig = plt.figure(figsize=texfigure.figsize(
     pytex,
-    scale=0.65,
-    height_ratio=1.0,
+    scale=0.85,
+    height_ratio=0.75,
 ))
 ax = fig.gca()
 vals,bins,_ = ax.hist(
@@ -161,12 +161,12 @@ vals,bins,_ = ax.hist(
     bins='scott', color='k', histtype='step', lw=plt.rcParams['lines.linewidth'])
 ax.set_xlabel(r'$L$ $[\si{\mega\m}]$');
 ax.set_ylabel(r'Number of Loops');
-ax.set_ylim(-100,1300)
-ax.set_xlim(-1,260)
+ax.set_ylim(1,1300)
+ax.set_xlim(1,260)
 # Spines
 tfig = ch6_modeling.save_figure('modeling-observables:loops', fext='.pgf')
 tfig.caption = r'Distribution of footpoint-to-footpoint lengths (in Mm) of the 5000 fieldlines traced from the field extrapolation computed from the magnetogram of NOAA 1158.'
-tfig.figure_width = r'0.65\textwidth'
+tfig.figure_width = r'0.85\textwidth'
 \end{pycode}
 \py[chapter6_modeling]|tfig|
 
@@ -222,10 +222,10 @@ axes[0].legend(ncol=3, loc="lower center", bbox_to_anchor=(0.5,1.02), frameon=Fa
 # Labels and limits
 axes[0].set_xlim(0,3e4)
 axes[0].set_yticks([5,15,25])
+axes[0].set_ylim(0,27)
 axes[1].set_ylim(0.1,8)
 axes[1].set_yticks([2,4,6,8])
 axes[2].set_ylim(0,2)
-#axes[2].set_yticks([0.5,1,1.5])
 axes[0].set_ylabel(r'$Q$ $[\SI{e-3}{\erg\per\cubic\cm\per\second}]$')
 axes[1].set_ylabel(r'$T$ $[\si{\mega\kelvin}]$')
 axes[2].set_ylabel(r'$n$ $[\SI{e9}{\per\cubic\cm}]$')
@@ -431,8 +431,21 @@ ch6_results = texfigure.Manager(
     number=6,
     **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
 )
+
+import io
+import pandas as pd
+import plasmapy.atomic
+import astropy.io
+from astropy.table import Table
+
 correlation_threshold = 0.1
 rsquared_threshold = 0.75
+channels = [94,131,171,193,211,335]
+heating = [ 'high_frequency', 'intermediate_frequency', 'low_frequency' ]
+channel_pairs = [(94,335), (94,171), (94,193),(94,131),(94,211),(335,131),(335,193),
+				 (335,211),(335,171),(211,131),(211,171),(211,193),(193,171),(193,131),
+				 (171,131),]
+selected_channel_pairs = [channel_pairs[i] for i in (0, 9, 12)]
 \end{pycode}
 % spell-checker: enable %
 
@@ -442,11 +455,106 @@ We forward model time-dependent AIA intensities using the method outlined in \au
 
 We compute the intensities for the \SIlist{94;131;171;193;211;335}{\angstrom} channels of SDO/AIA using the procedure described in \autoref{sec:modeling-observables:forward}. We compute the intensity in each pixel of the model \AR{} over a total simulation period of $\SI{3e4}{\second}\approx\SI{8.3}{\hour}$ with the exception of the cooling case which is only run for \SI{e4}{\second}. For the high-, intermediate-, and low-frequency and ``random'' models, we discard the first and last \SI{5e3}{\second} of evolution to avoid any transient effects in the strand evolution associated with the initial conditions and the constraints placed on the energy, respectively. We complete this procedure for each of the five heating scenarios in \autoref{tab:modeling-observables:heating}.
 
-% INTENSITY MAPS
+% spell-checker: disable %
+\begin{pycode}[chapter6_results]
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=1,
+    height_ratio=0.5, 
+    figure_width_context='figurewidth'
+))
+plt.subplots_adjust(hspace=0.03, wspace=0.03)
+t = 1500
+path_format = os.path.join(ch6_results.data_dir, '{}', 'map_t{:06d}_{}.fits')
+for i,f in enumerate(heating):
+    for j,c in enumerate(channels):
+        m = Map(path_format.format(f,t,c))
+        m = m.submap(SkyCoord(Tx=-390*u.arcsec,Ty=-325*u.arcsec,frame=m.coordinate_frame),
+                     SkyCoord(Tx=-215*u.arcsec,Ty=-150*u.arcsec,frame=m.coordinate_frame))
+        #ax = fig.add_subplot(6, 3, 3*j+i+1, projection=m)
+        ax = fig.add_subplot(3, 6, 6*i+j+1, projection=m)
+        norm = ImageNormalize(
+            vmin=0,vmax=Map(path_format.format('low_frequency',t,c)).data.max(),
+            stretch=SqrtStretch())
+        im = m.plot(axes=ax, title=False, annotate=False, norm=norm)
+        ax.grid(alpha=0)
+        lon,lat = ax.coords
+        lon.set_ticks(color='w', number=2)
+        lat.set_ticks(color='w', number=2)
+        lon.frame.set_linewidth(0)
+        lat.frame.set_linewidth(0)
+        if i==len(heating)-1 and j==1:
+            lon.set_axislabel(r'Helioprojective Longitude',)
+        else:
+            lon.set_ticklabel_visible(False)
+        if i==len(heating)-2 and j==0:
+            lat.set_ticklabel(rotation='vertical')
+            lat.set_axislabel(r'Helioprojective Latitude',)
+        else:
+            lat.set_ticklabel_visible(False)
+        if j == 0:
+            xtext,ytext = m.world_to_pixel(
+                SkyCoord(-385*u.arcsec, -155*u.arcsec, frame=m.coordinate_frame))
+            ax.text(xtext.value,ytext.value,f'{f.split("_")[0].capitalize()}',
+                    color='w',fontsize=0.75*plt.rcParams['legend.fontsize'],
+                    horizontalalignment='left', verticalalignment='top')
+        if i == 0:
+            xtext,ytext = m.world_to_pixel(
+                SkyCoord(-220*u.arcsec, -320*u.arcsec, frame=m.coordinate_frame))
+            ax.text(xtext.value, ytext.value, f'{c}' + r'\si{\angstrom}',
+                    color='w', fontsize=0.75*plt.rcParams['legend.fontsize'],
+                    horizontalalignment='right', verticalalignment='bottom')
+            pos = ax.get_position().get_points()
+            cax = fig.add_axes([pos[0,0], 0.89, pos[1,0]-pos[0,0], 0.025])
+            cbar = fig.colorbar(im, cax=cax,orientation='horizontal')
+            cbar.locator = matplotlib.ticker.MaxNLocator(nbins=3, prune='lower')
+            cbar.ax.tick_params(labelsize=0.5*plt.rcParams['legend.fontsize'],width=0.5)
+            cbar.update_ticks()
+            cbar.ax.xaxis.set_ticks_position('top')
+            cbar.outline.set_linewidth(0.5)
+tfig = ch6_results.save_figure('modeling-observables:intensity-map', fext='.pdf')
+tfig.caption = r'Snapshots of intensity, in \si{\dn\per\pixel\per\second}, across the whole \AR{} at $t=\SI{15e3}{\second}$. The rows correspond to the three different heating frequencies and the columns are the six EUV channels of AIA. In each column, the colorbar is on a square root scale and is normalized between zero and the maximum intensity in the low-frequency case. The color tables are the standard AIA color tables as implemented in SunPy \citep{sunpy_community_sunpypython_2015}.'
+tfig.figure_width = r'\textwidth'
+\end{pycode}
+\py[chapter6_results]|tfig|
+% spell-checker: enable %
 
 \autoref{fig:modeling-observables:intensity-map} shows a snapshot of the intensity map at $t=15\times10^3$ s for each channel and for the high-, intermediate-, and low-frequency nanoflare heating cases. The rows correspond to the different heating scenarios while the columns show the six channels. In each column, the intensities are normalized to the maximum intensity in the low-frequency case and are on a square root scale. In general, we find that in the high-frequency intensity maps, individual loops are difficult to distinguish while in the low-frequency case individual loops appear bright relative to the surrounding emission. This distinguishability or ``fuzziness'' can be measured quantitatively as $\sigma_{I}/\bar{I}$, where $\sigma_{I}$ is the standard deviation taken over all pixels and $\bar{I}$ is the mean intensity \citep[Equation 11]{guarrasi_coronal_2010}. A larger value of $\sigma_{I}/\bar{I}$ indicates a greater degree of contrast and vice versa. $\sigma_{I}/\bar{I}$ for each channel and heating frequency is shown in \autoref{tab:modeling-observables:fuzzy}. With the exception of 131 \AA{}, for every channel, the high-frequency case is the most ``fuzzy''. The low-frequency case shows the most contrast in each channel except 94 \AA{} though the margin between the low and intermediate cases is quite small in some cases.
 
-% FUZZY TABLE
+% spell-checker: disable %
+\begin{pycode}[chapter6_results]
+# Define fuzziness function
+def fuzzy(m):
+    return np.sqrt(((
+        m.data[np.where(m.data > 0)] - m.data[np.where(m.data > 0)].mean())**2)
+        .sum()/m.data[np.where(m.data > 0)].size
+    )/m.data[np.where(m.data > 0)].mean()
+
+# Generate table
+tab = Table({
+    r'Channel $[\si{\angstrom}]$': channels,
+    **{f.split('_')[0].capitalize(): [fuzzy(Map(path_format.format(f,t,c))) for c in channels]
+        for f in heating}
+})
+
+# Write table to string
+caption = r'$\sigma_I/\bar{I}$ as defined by Equation 11 of \citep{guarrasi_coronal_2010} computed on a single image at $t=\SI{15e3}{\second}$ for each channel and heating frequency. A larger value denotes a greater degree of contrast.\label{tab:modeling-observables:fuzzy}'
+formats = {r'Channel $[\si{\angstrom}]$': '%.0f', **{f.split('_')[0].capitalize(): '%.2f' for f in heating}}
+with io.StringIO() as f:
+    astropy.io.ascii.write(
+        tab,
+        caption=caption,
+        output=f,
+        formats=formats,
+        format='latex',
+        latexdict = { 'data_start':r'\midrule', 'data_end': r'\bottomrule',
+                      'header_start': r'\toprule', 'col_align': 'cccc',
+                      'preamble':r'\begin{center}', 'tablefoot':r'\end{center}'},
+    )
+    table = f.getvalue()
+\end{pycode}
+\py[chapter6_results]|table|
+% spell-checker: enable %
 
 Looking at the first two columns of \autoref{fig:modeling-observables:intensity-map}, we see that the intensity in the \SIlist{94;131}{\angstrom} channels increases as the heating frequency decreases. Both channels are double peaked and have ``hot'' ($\approx\SI{7}{\mega\kelvin}$ for \SI{94}{\angstrom}, $\approx\SI{12}{\mega\kelvin}$ for \SI{131}{\angstrom}) and ``warm'' ($\approx\SI{1}{\mega\kelvin}$ for \SI{94}{\angstrom}, $\approx\SI{0.5}{\mega\kelvin}$ for \SI{131}{\angstrom}) components. In the case of high frequency heating, less energy is available per event such that few strands are heated to $>\SI{4}{\mega\kelvin}$. There is little emission in the \SI{131}{\angstrom} channel as strands are not often permitted to cool to $\leq\SI{0.5}{\mega\kelvin}$ either. However, in the low- and intermediate-frequency cases, we see several individual bright loops in both the \SIlist{94;131}{\angstrom} channels as the heating rate is sufficient to produce ``hot'' (i.e. \SIrange{8}{10}{\mega\kelvin}) loops. We see only a few of these loops as the lifetime of this hot plasma is short due to the efficiency of thermal conduction. In contrast, the faint, diffuse component of the \SI{94}{\angstrom} emission that is present in all three cases is due to the contribution of the ``warm'' component. 
 
@@ -454,3 +562,345 @@ Additionally, we find that the \SI{171}{\angstrom} channel is dimmer for high fr
 
 While there are clear differences in the AIA intensities between all three heating frequencies, quantifying these differences is difficult due in part to the multidimensional nature of the intensity data. To better understand how observational signatures differ as a function of heating frequency, we need to find a reduced representation of our dataset that retains signatures of the underlying energy deposition. To this end, we compute two common observables: the emission measure slope (\autoref{sec:modeling-observables:em_slopes}) and the timelag (\autoref{sec:modeling-observables:timelags}).
 
+\subsection{Emission Measure Slopes}\label{sec:modeling-observables:em_slopes}
+
+As discussed in \autoref{sec:modeling-observables:introduction}, the emission measure slope is a useful quantity for understanding how frequently strands are reenergized. We compute emission measure distributions from our forward-modeled intensities using the regularized inversion method of \citet{hannah_differential_2012}. This method was designed to work with the narrowband coverage provided by AIA and so is well-suited to our needs. We choose our temperature bins such that the leftmost edge is at \SI{e5.5}{\kelvin} and the rightmost edge at \SI{e7.2}{\kelvin} with bin widths of $\Delta\log T=0.1$. Rather than computing $\emd$ at each timestep, we compute the time-averaged intensity in each pixel of each channel and compute $\emd$ only once. We compute the uncertainties on the intensities in each channel using the \texttt{aia\_bp\_estimate\_error.pro} procedure in SSW which incorporates uncertainties due to shot noise, read noise, dark subtraction, quantization, photometric calibration, and onboard compression. After computing $\emd$ in each pixel using the regularized inversion procedure, we fit a first-order polynomial to the log-transformed emission measure and temperature bin centers, $\log_{10}\mathrm{EM}\sim a\log_{10}T$, to calculate the emission measure slope, $a$. In \autoref{ch:classifying_observables}, we compare our modeled emission measure slopes to those derived from real AIA observations of NOAA 1158 using this same method.
+
+% spell-checker: disable %
+\begin{pycode}[chapter6_results]
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=1,
+    height_ratio=1/3,
+))
+params = {'cmap': 'viridis', 'vmin': 1.5, 'vmax': 7.5, 'title': False, 'annotate': False}
+axes = []
+for i,h in enumerate(heating):
+    m = Map(os.path.join(ch6_results.data_dir, f'{h}', 'em_slope.fits'))
+    m_r2 = Map(os.path.join(ch6_results.data_dir, f'{h}', 'em_slope_rsquared.fits'))
+    m = Map(m.data, m.meta, mask=m_r2.data < rsquared_threshold)
+    m = m.submap(SkyCoord(Tx=-405*u.arcsec,Ty=-335*u.arcsec,frame=m.coordinate_frame),
+                 SkyCoord(Tx=-210*u.arcsec,Ty=-140*u.arcsec,frame=m.coordinate_frame))
+    ax = fig.add_subplot(1, len(heating), i+1, projection=m)
+    axes.append(ax)
+    im = m.plot(axes=ax, **params)
+    ax.grid(alpha=0)
+    lon,lat = ax.coords
+    lat.set_ticks(number=2)
+    lon.set_ticks(number=3)
+    if i > 0:
+        lon.set_ticklabel_visible(False)
+        lat.set_ticklabel_visible(False)
+    else:
+        lon.set_axislabel('Helioprojective Longitude',)
+        lat.set_axislabel('Helioprojective Latitude',)
+        lat.set_ticklabel(rotation='vertical')
+    xtext,ytext = m.world_to_pixel(SkyCoord(-400*u.arcsec, -143*u.arcsec, frame=m.coordinate_frame))
+    ax.text(xtext.value, ytext.value, h.split('_')[0].capitalize(),
+            color='k', fontsize=plt.rcParams['legend.fontsize'],
+            horizontalalignment='left', verticalalignment='top')
+plt.subplots_adjust(hspace=0.03,wspace=0.03)
+cax = fig.add_axes([
+    axes[0].get_position().get_points()[0,0],
+    axes[-1].get_position().get_points()[1,1]+0.02,
+    axes[-1].get_position().get_points()[1,0] - axes[0].get_position().get_points()[0,0],
+    0.04
+])
+cbar = fig.colorbar(im, cax=cax, orientation='horizontal');
+cbar.ax.xaxis.set_ticks_position('top')
+cbar.set_ticks([2,3,4,5,6,7])
+cbar.ax.tick_params(width=0.5)
+cbar.outline.set_linewidth(0.5)
+tfig = ch6_results.save_figure('modeling-observables:em-slope-maps', fext='.pdf')
+tfig.caption = r'Maps of the emission measure slope, $a$, in each pixel of the \AR{} for the high- (left), intermediate- (center), and low-frequency (right) cases. The $\emd$ is computed using time-averaged intensities from the six AIA EUV channels using the method of \citet{hannah_differential_2012}. The $\emd$ in each pixel is then fit to $T^a$ over the temperature range $\SI{8e5}{\kelvin}\le T< T_{peak}$. Any pixels with $r^2<0.75$ are masked and colored white.'
+\end{pycode}
+\py[chapter6_results]|tfig|
+% spell-checker: enable %
+
+\autoref{fig:modeling-observables:em-slope-maps} shows the resulting emission measure slope, $a$, in each pixel of our forward-modeled \AR{} for the high-, intermediate-, and low-frequency cases. We fit $\emd$ over bins in the temperature range $\SI{8e5}{\kelvin}\le T< T_{peak}$, where $T_{peak}=\argmax_T\,\mathrm{EM}(T)$ is the temperature at which the emission measure distribution peaks. To assess the ``goodness-of-fit'' we use $r^2$, the correlation coefficient for the first-order polynomial fit, and mask pixels with $r^2<\py[chapter6_results]|rsquared_threshold|$. Looking at the three panels in \autoref{fig:modeling-observables:em-slope-maps}, we find that overall, $a$ tends to decrease with decreasing frequency, consistent with previous modeling work (see \autoref{sec:modeling-observables:introduction}). The low frequency map (right panel) shows many values close to 2.
+
+As the heating frequency increases, the slopes become larger, indicating an increasingly isothermal emission measure distribution. The intermediate-frequency map (center panel) shows predominantly higher slopes, with most pixels in the range $2\lesssim a \lesssim 3.5$ while the high-frequency map (left panel) shows much steeper slopes, most $a\ge3.5$, and a much broader range of slopes, $3\lesssim a \lesssim 8$. Note that in the high frequency case, the slope varies considerably across the \AR{} while the distribution of $a$ appears more spatially uniform in the intermediate- and low-frequency cases.
+
+Below $T(\mathrm{EM}_{max})$, \citet{cargill_implications_1994} noted that the $\emd$ could be described by $\mathrm{EM}(T)\sim n^2\tau_{rad}$, where $\tau_{rad}\sim T^{1-\alpha}n^{-1}$ is the radiative cooling time. Additionally, \citet{bradshaw_cooling_2010} found that $T\sim n^{\ell}$, with $\ell\approx1$ for long loops and $\ell\approx2$ for short loops. Combining these expressions and assuming $\alpha=-1/2$ \citep[i.e. using the radiative losses of][]{rosner_dynamics_1978} gives $a\approx2$ for short loops and $a\approx2.5$ for long loops in the case of single nanoflares. We find that emission measure slopes produced by low-frequency nanoflares as shown in the right panel of \autoref{fig:modeling-observables:em-slope-maps} are consistent with analytical results for single nanoflares.
+
+% spell-checker: disable %
+\begin{pycode}[chapter6_results]
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=0.85,
+    height_ratio=0.75,
+))
+ax = fig.gca()
+params = {'bins': 'fd', 'histtype': 'step','density': True, 'lw': plt.rcParams['lines.linewidth']}
+peaks = {}
+for i,h in enumerate(heating):
+    m = Map(os.path.join(ch6_results.data_dir, f'{h}', 'em_slope.fits'))
+    m_rsquared = Map(os.path.join(ch6_results.data_dir, f'{h}', 'em_slope_rsquared.fits'))
+    m = Map(m.data, m.meta, mask=m_rsquared.data < rsquared_threshold)
+    hist, bins, _ = ax.hist(m.data[~m.mask], **params, color=PALETTE[i],
+                            label=h.split('_')[0].capitalize())
+    bin_centers = (bins[:-1] + bins[1:])/2
+    peaks[h] = f'{bin_centers[np.argmax(hist)]:.1f}'
+
+# Limits, labels
+ax.set_xlim(1, 8);
+ax.xaxis.set_major_locator(matplotlib.ticker.FixedLocator([2, 3, 4, 5, 6, 7]))
+ax.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(nbins=7, prune='both'))
+ax.legend(frameon=False, loc=1)
+ax.set_xlabel(r'$a$')
+ax.set_ylabel(r'Number of Pixels (Normalized)')
+
+# Save
+tfig = ch6_results.save_figure('modeling-observables:em-slope-histograms', fext='.pgf')
+tfig.caption = r'Distribution of $\dem$ slopes, $a$, for every pixel in the simulated \AR{} for the high-, intermediate-, and low-frequency heating scenarios as shown in \autoref{fig:modeling-observables:em-slope-maps}. The histogram bins are determined using the Freedman Diaconis estimator \citep{freedman_histogram_1981} as implemented in the Numpy package for array computation in Python \citep{oliphant_guide_2006} and each histogram is normalized such that the area under the histogram is equal to 1.'
+tfig.figure_width = r'0.85\textwidth'  
+\end{pycode}
+\py[chapter6_results]|tfig|
+% spell-checker: enable %
+
+\autoref{fig:modeling-observables:em-slope-histograms} shows histograms of the emission measure slopes for the high-, intermediate-, and low-frequency cases. We find that the low-frequency distribution peaks at $a\approx\py[chapter6_results]|peaks['low_frequency']|$, inside the range expected from analytical results (see above). The intermediate- and high-frequency distributions peak at successively higher values, $\approx\py[chapter6_results]|peaks['intermediate_frequency']|$ and $\approx\py[chapter6_results]|peaks['high_frequency']|$, respectively. While the low- and intermediate-frequency distributions are more narrowly distributed around their peak values, the distribution of slopes in the high-frequency case is relatively broad and has a positive skew towards steeper slopes. 
+
+Looking at the distribution of slopes across the entire \AR{} in \autoref{fig:modeling-observables:em-slope-histograms}, we find that when the strands are heated infrequently (low frequency) such that each strand is allowed to cool fully prior to the next event, the distribution of slopes ``saturates'' in the range expected for single nanoflares. However, when the strands are reheated often (high frequency), the value of the slope becomes unsaturated and is subject to a range of infrequent cooling times due to the dependence of each waiting time on the power-law heating rate (see \autoref{sec:modeling-observables:heating}). These results are consistent with \citet{cargill_active_2014} who computed $\emd[T]=n^2L$ for a single strand for a range of heating frequencies and found $a$ converged to $\approx2$ for low frequency nanoflares and increased slowly with increasing heating frequency.
+
+Our modeled emission measure slopes show that, even when accounting for the LOS integration, atomic physics, and information lost in the $\emd$ inversion, signatures of the heating frequency still persist in the emission measure slope. However, while this quantity retains information about the frequency of energy deposition, drawing conclusions about the heating based solely on the observed emission measure slope, particularly for a small number of pixels may be misleading. As shown here and in \citet{del_zanna_evolution_2015}, the slope may vary significantly across a given \AR{}. Additionally, calculating $\emd$ from observations is non-trivial due to several factors, including the mathematical difficulties of the ill-posed inversion \citep{craig_fundamental_1976,judge_failure_1995,judge_fundamental_1997}, uncertainties in the atomic data \citep{guennou_can_2013}, and insufficient constraints from spectroscopic observations \citep[e.g.][]{landi_isothermality_2010,winebarger_defining_2012}, among others.
+
+\subsection{Timelags}\label{sec:modeling-observables:timelags}
+
+Next, we apply the timelag method of \citet{viall_evidence_2012} to our synthetic intensities for all of the heating scenarios discussed in \autoref{sec:modeling-observables:heating}. For each pixel in the active region, we compute the cross-correlation (\autoref{eq:cross_correlation_final}) for all pairs of the EUV channels of AIA (15 in total) and find the temporal offset which maximizes the cross-correlation according to \autoref{eq:timelag}. The details of the cross-correlation and timelag calculation are given in \autoref{subsec:cross_correlation}. We consider all possible offsets over the interval $\pm\SI{6}{\hour}$. Using the convention of \citet{viall_evidence_2012}, we order the channel pairs such that the ``hot'' channel is listed first, meaning that a positive timelag corresponds to variability in the hotter channel followed by variability in the cooler channel. In other words, \textit{a positive timelag indicates cooling plasma.} For the \SI{94}{\angstrom} and \SI{131}{\angstrom} channels, both of which have a bimodal temperature response function (see \autoref{fig:modeling-observables:aia-response}), the order is determined by the component which is most dominant such that \SI{94}{\angstrom} is ordered first while \SI{131}{\angstrom} is ordered second. Thus, it is possible for cooling plasma to produce negative timelags in these channel pairs and the ambiguity can be resolved in the context of the timelags in other channel pairs.
+
+\subsubsection{Timelag Maps}\label{sec:modeling-observables:timelag_maps}
+
+% spell-checker: disable %
+\begin{pycode}[chapter6_results]
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=1,
+    height_ratio=3/5,
+))
+
+heating += ['random', 'cooling']
+file_format = os.path.join(ch6_results.data_dir, '{}', '{}_{}_{}.fits')
+norm = matplotlib.colors.Normalize(vmin=-(5e3*u.s).to(u.s).value,
+                                   vmax=(5e3*u.s).to(u.s).value)
+plot_params = { 'title': False, 'annotate': False, 'norm': norm, 'cmap': 'idl_bgry_004',}
+selected_channel_pairs = [(94,335), (211,131), (193,171)]
+
+for j,h in enumerate(heating):
+    for i,cp in enumerate(selected_channel_pairs):
+        m = Map(file_format.format(h, 'timelag', *cp))
+        mc = Map(file_format.format(h, 'correlation', *cp))
+        m = Map(m.data, m.meta, mask=np.where(mc.data<=correlation_threshold, True, False))
+        m = m.submap(SkyCoord(Tx=-440*u.arcsec,Ty=-380*u.arcsec,frame=m.coordinate_frame),
+                     SkyCoord(Tx=-185*u.arcsec,Ty=-125*u.arcsec,frame=m.coordinate_frame))
+        ax = fig.add_subplot(len(selected_channel_pairs), len(heating), j+len(heating)*i+1,
+                             projection=m)
+        im = m.plot(axes=ax, **plot_params)
+        ax.grid(alpha=0)
+        lon = ax.coords[0]
+        lat = ax.coords[1]
+        lon.set_ticks(number=4)
+        lat.set_ticks(number=4,) 
+        if j == 0 and i == 1:
+            lat.set_axislabel(r'Helioprojective Latitude',)
+            lat.set_ticklabel(rotation='vertical',exclude_overlapping=True)
+        else:
+            lat.set_ticklabel_visible(False)
+        if j == 1 and i == 2:
+            lon.set_axislabel(r'Helioprojective Longitude',)
+            lon.set_ticklabel(exclude_overlapping=True)
+        else:
+            lon.set_ticklabel_visible(False)
+        if j == 0:
+            xtext,ytext = m.world_to_pixel(SkyCoord(-435*u.arcsec, -130*u.arcsec, frame=m.coordinate_frame))
+            ax.text(xtext.value, ytext.value, r'{}-{} $\si{{\angstrom}}$'.format(*cp),
+                    color='k', fontsize=0.75*plt.rcParams['legend.fontsize'],
+                    verticalalignment='top', horizontalalignment='left')
+        if i == 0:
+            xtext,ytext = m.world_to_pixel(SkyCoord(-435*u.arcsec, -375*u.arcsec, frame=m.coordinate_frame))
+            ax.text(xtext.value, ytext.value, h.split('_')[0].capitalize(),
+                    color='k', fontsize=0.75*plt.rcParams['legend.fontsize'],
+                    verticalalignment='bottom', horizontalalignment='left')
+        if i==0 and j==0:
+            pos = ax.get_position().get_points()
+            cax = fig.add_axes([pos[0,0], pos[1,1]+0.01, len(heating)*(pos[1,0]-pos[0,0] + 0.0215), 0.02])
+            cbar = fig.colorbar(im, cax=cax, orientation='horizontal')
+            cbar.ax.xaxis.set_ticks_position('top')
+            cbar.ax.tick_params(width=0.5)
+            cbar.outline.set_linewidth(0.5)
+plt.subplots_adjust(wspace=0.03,hspace=0.03)
+
+# Save
+tfig = ch6_results.save_figure('modeling-observables:timelag-maps', fext='.pdf')
+tfig.caption = r'Timelag maps for three different channel pairs for all five of the heating models described in \autoref{tab:modeling-observables:heating}. The value of each pixel indicates the temporal offset, in seconds, which maximizes the cross-correlation (see \autoref{eq:timelag}). The rows indicate the different channel pairs and the columns indicate the varying heating scenarios. The range of the colorbar is $\pm\SI{5000}{\second}$. If $\max{\mathcal{C}_{AB}}<0.1$, the pixel is masked and colored white.'
+tfig.figure_width = r'\textwidth'
+\end{pycode}
+\py[chapter6_results]|tfig|
+% spell-checker: enable %
+
+\autoref{fig:modeling-observables:timelag-maps} shows $\tau_{AB}$ (\autoref{eq:timelag}) in each pixel of our simulated \AR{} for all heating scenarios listed in \autoref{tab:modeling-observables:heating} and three selected channel pairs: 94-335, 211-131, and 193-171 \si{\angstrom}. Blacks, blues, and greens correspond to negative timelags; reds, oranges, and yellows correspond to positive timelags; and olive green indicates zero timelag. The range of the colorbar is $\pm\SI{5000}{\second}$. Note that the heating frequency decreases from left to right across each row. If the correlation in a given pixel is too low ($\max{\mathcal{C}_{AB}}<0.1$), the pixel is masked and colored white.
+
+Looking at the first two rows of \autoref{fig:modeling-observables:timelag-maps}, we find that the positive timelags in the 211-131 \si{\angstrom} channel pair are significantly longer than those in the 94-335 \AA{} pair. In the temperature range $2.5<T<7.3\si{\mega\kelvin}$ (94-335 \si{\angstrom}), the dominant cooling mechanism is field-aligned thermal conduction while radiative cooling dominates in the range $0.6<T<2.5\si{\mega\kelvin}$ (211-131 \si{\angstrom}). Because thermal conduction is far more efficient at high temperatures, the plasma spends less time in the $[T_{335},T_{94}]$ temperature range than in $[T_{131},T_{211}]$. The 193-171 \si{\angstrom} timelags for the cooling case fall in the middle as radiative cooling also tends to dominate in this temperature interval ($0.9<T<1.5\si{\mega\kelvin}$), but the separation in temperature space is smaller than the 211-131 \si{\angstrom} pair. In all cases, these differences in the magnitude of the positive timelags become more apparent at lower heating frequencies.
+
+In the 94-335 \si{\angstrom} pair, we find negative timelags in the longest loops near the edge of the \AR{}, inconsistent with our previous assertion that longer loops lead to longer, positive timelags. These loops are rooted in areas of weaker magnetic field (compared to the center) and thus do not have sufficient energy to evolve significantly into the temperature range of the ``hot'' component of the 94 \si{\angstrom} channel (see \autoref{sec:modeling-observables:heating}). Thus, cooling from 335 \si{\angstrom} to the cooler part of 94 \si{\angstrom} dominates the cross-correlation. These negative timelags become more prominent as the heating frequency decreases. Our results in the cooling case are consistent with the negative 94-335 \si{\angstrom} timelags of similar magnitude observed by \citet{viall_survey_2017} in this same \AR{} and the tendency for longer field lines to exhibit cooler plasma, though \citeauthor{viall_survey_2017} found far fewer positive 94-335 \si{\angstrom} timelags.
+
+We also find negative 211-131 \si{\angstrom} timelags in the center of the \AR{} for the high-, intermediate-, and low-frequency cases, indicative of plasma cooling from the hot part of the 131 \si{\angstrom} channel through the 211 \si{\angstrom} channel. Though we have not shown them here, similar negative timelag signatures are present in nearly all of the other 131 \si{\angstrom} channel pairs as well. These results are consistent with that of \citet{cadavid_heating_2014} who found that in inter-moss regions of \AR{} NOAA 11250, intensity variations in the 131 \si{\angstrom} channel preceded brightenings in all other EUV channels. In the two control cases, we do not find any negative timelags as the cross-correlations in the core are dominated by uninterrupted cooling from \SI{211}{\angstrom} to the cool part of \SI{131}{\angstrom}.
+
+For the 193-171 \si{\angstrom} channel pair, we find very few negative timelags because, unlike the \SIlist{94;131}{\angstrom} channels, the \SIlist{193;171}{\angstrom} channels are strongly peaked about a single temperature. Along with 211 \si{\angstrom}, these channels which are strongly-peaked about a single temperature are important for disambiguating the signals in channels with a bimodal temperature response function (see \autoref{fig:modeling-observables:aia-response}).
+
+Our simulated timelags show far fewer zero timelags than the observations of \citet{viall_evidence_2012,viall_survey_2017} and the modeling work of \citet{bradshaw_patterns_2016} due to the lack of transition region emission in our model. As shown by \citet{viall_transition_2015}, transition region emission shows near-zero timelags because every layer (or temperature) of the transition region responds in unison. However, for the 193-171 \si{\angstrom} channel pair, we find that zero timelags still dominate the inner core of the \AR{} for all five heating scenarios, suggesting that the plasma is cooling into, but not through the \SI{171}{\angstrom} temperature bandpass \citep{viall_survey_2017}. This underscores the point that zero timelags do not imply steady heating \citep{viall_transition_2015,viall_signatures_2016}.
+
+\subsubsection{Cross-correlation Maps}\label{sec:modeling-observables:cross_correlation_maps}
+
+% spell-checker: disable %
+\begin{pycode}[chapter6_results]
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=1,
+    height_ratio=3/5,
+))
+
+plot_params = {'title': False, 'annotate': False, 'vmin': 0, 'vmax': 1, 'cmap': 'magma',}
+for j,h in enumerate(heating):
+    for i,cp in enumerate(selected_channel_pairs):
+        m = Map(file_format.format(h, 'correlation', *cp))
+        m = m.submap(SkyCoord(Tx=-440*u.arcsec,Ty=-380*u.arcsec,frame=m.coordinate_frame),
+                     SkyCoord(Tx=-185*u.arcsec,Ty=-125*u.arcsec,frame=m.coordinate_frame))
+        ax = fig.add_subplot(len(selected_channel_pairs), len(heating), j+len(heating)*i+1,
+                             projection=m)
+        im = m.plot(axes=ax, **plot_params)
+        ax.grid(alpha=0)
+        lon = ax.coords[0]
+        lat = ax.coords[1]
+        lon.set_ticks(number=4,color='w')
+        lat.set_ticks(number=4,color='w')
+        lon.frame.set_linewidth(0)
+        lat.frame.set_linewidth(0)
+        if j == 0 and i == 1:
+            lat.set_axislabel(r'Helioprojective Latitude',)
+            lat.set_ticklabel(rotation='vertical',exclude_overlapping=True)
+        else:
+            lat.set_ticklabel_visible(False)
+        if j == 1 and i == 2:
+            lon.set_axislabel(r'Helioprojective Longitude',)
+            lon.set_ticklabel(exclude_overlapping=True)
+        else:
+            lon.set_ticklabel_visible(False)
+        if j == 0:
+            xtext,ytext = m.world_to_pixel(SkyCoord(-435*u.arcsec, -130*u.arcsec, frame=m.coordinate_frame))
+            ax.text(xtext.value, ytext.value, r'{}-{} $\si{{\angstrom}}$'.format(*cp),
+                    color='w', fontsize=0.75*plt.rcParams['legend.fontsize'],
+                    verticalalignment='top', horizontalalignment='left')
+        if i == 0:
+            xtext,ytext = m.world_to_pixel(SkyCoord(-435*u.arcsec, -375*u.arcsec, frame=m.coordinate_frame))
+            ax.text(xtext.value, ytext.value, h.split('_')[0].capitalize(),
+                    color='w', fontsize=0.75*plt.rcParams['legend.fontsize'],
+                    verticalalignment='bottom', horizontalalignment='left')
+        if i==0 and j==0:
+            pos = ax.get_position().get_points()
+            cax = fig.add_axes([pos[0,0], pos[1,1]+0.01, len(heating)*(pos[1,0]-pos[0,0] + 0.0215), 0.02])
+            cbar = fig.colorbar(im, cax=cax, orientation='horizontal')
+            cbar.ax.xaxis.set_ticks_position('top')
+            cbar.ax.tick_params(width=0.5)
+            cbar.outline.set_linewidth(0.5)
+plt.subplots_adjust(wspace=0.03, hspace=0.03)
+
+# Save
+tfig = ch6_results.save_figure('modeling-observables:correlation-maps', fext='.pdf')
+tfig.caption = r'Same as \autoref{fig:modeling-observables:timelag-maps} except each pixel shows the maximum cross-correlation, $\max\mathcal{C}_{AB}$.'
+\end{pycode}
+\py[chapter6_results]|tfig|
+% spell-checker: enable %
+
+\autoref{fig:modeling-observables:correlation-maps} shows the peak cross-correlation value, $\max\mathcal{C}_{AB}$, for each selected channel pair. Looking first at all three channel pairs, we see that, on average, the cross-correlation increases as the heating frequency decreases. Additionally, we find that the highest cross-correlations tend to be in the center of the \AR{} while the lowest tend to be on the outer edge. Comparing \autoref{fig:modeling-observables:correlation-maps} with the timelags in \autoref{fig:modeling-observables:timelag-maps} also reveals that negative timelags are correlated with lower peak cross-correlation values. Furthermore, other than the ``cooling'' scenario, we find that there are large variations from one loop to the next for all heating frequencies such that the spatial coherence of these peak cross-correlation values is low. In \autoref{ch:classifying_observables}, we will use the peak cross-correlation value, in addition to the timelag, to classify the heating frequency in each observed pixel.
+
+\subsubsection{Histograms}\label{sec:modeling-observables:histograms}
+
+\autoref{fig:modeling-observables:timelag-histograms} shows histograms of timelags for every channel pair and all five heating scenarios. The timelags are binned between \SI{-e4}{\second} and \SI{e4}{\second} in \SI{60}{\second} bins. Each histogram is colored according the corresponding heating function, consistent with \autoref{fig:modeling-observables:hydro-profiles} and \autoref{fig:modeling-observables:em-slope-histograms}. The columns are arranged such that heating frequency decreases from left to right. We show each channel pair for all heating models to demonstrate how the distribution of timelags evolves as the heating frequency varies.
+
+Note that as the frequency decreases (from left to right), the number of negative timelags decreases. In the ``cooling'' case, there are very few negative timelags except for channel pairs which include one or both of the double-peaked channels (\SIlist{94;131}{\angstrom}). For those channel pairs which include \SI{94}{\angstrom} and/or \SI{131}{\angstrom}, we expect to find negative timelags, even in the single-nanoflare cooling case as our convention of ordering the ``hot'' channel first has been violated such that cooling plasma can lead to negative timelags. For the remaining channel pairs, negative timelags are associated with the heating and cooling cycle being interrupted by repeated events on a given strand.
+
+% spell-checker: disable %
+\begin{pycode}[chapter6_results]
+fig,axes = plt.subplots(
+    len(channel_pairs), len(heating),
+    figsize=texfigure.figsize(
+        pytex,
+        scale=1,
+        height_ratio=1.0,
+))
+bins = np.arange((-10e3*u.s).value, (10e3*u.s).value, (60*u.s).value)
+plot_params = { 'histtype':'step', 'bins':bins, 'log':True, 'lw': 1}
+
+for i,cp in enumerate(channel_pairs):
+    for j,h in enumerate(heating):
+        ax = axes[i,j]
+        # Select Map and Mask
+        m = Map(file_format.format(h, 'timelag', *cp))
+        mc = Map(file_format.format(h, 'correlation', *cp))
+        m = Map(m.data, m.meta, mask=np.where(mc.data<=correlation_threshold, True, False))
+        hist, bins, _ = ax.hist(m.data[~m.mask].flatten(), **plot_params, color=PALETTE[j])
+        ax.axvline(x=0, ls=':', alpha=0.75, color='k', lw=1)
+        # Channel and Heating Labels
+        if j==0 and (i+1)%2 != 0:
+            ax.set_ylabel('{}-{}'.format(*cp), fontsize=plt.rcParams['ytick.labelsize'])
+        if j==len(heating)-1 and (i+1)%2 == 0:
+            ax.set_ylabel('{}-{}'.format(*cp), fontsize=plt.rcParams['ytick.labelsize'])
+            ax.yaxis.set_label_position('right')
+        if i==0:
+            ax.set_title(h.split('_')[0].capitalize())
+        # Limits
+        ax.set_ylim(2, 1e5)
+        ax.set_xlim(1.1*bins[0], 1.1*bins[-1])
+        # Spines and limits
+        if j > 0:
+            ax.spines['left'].set_visible(False)
+            ax.tick_params(axis='y', which='both', length=0, labelleft=False)
+        else:
+            if i < len(channel_pairs) - 1:
+                ax.tick_params(axis='y', which='both', labelleft=False)
+        if j < len(heating)-1:
+            ax.spines['right'].set_visible(False)
+        if i > 0:
+            ax.spines['top'].set_visible(False)
+        if i < len(channel_pairs)-1:
+            ax.spines['bottom'].set_visible(False)
+            ax.tick_params(axis='x',which='both',length=0,labelbottom=False)
+        else:
+            if j > 0:
+                ax.tick_params(axis='x', which='both', labelbottom=False)
+axes[len(channel_pairs)-1,0].set_xlabel(r'$\tau_{AB}$ $[\si{\second}]$')
+plt.subplots_adjust(hspace=0,wspace=0)
+
+# Save
+tfig = ch6_results.save_figure('modeling-observables:timelag-histograms', fext='.pgf')
+tfig.caption = r'Histograms of timelag values across the whole \AR{}. The rows indicate the different channel pairs and the columns indicate the different heating models. Colors are used to denote the various heating models. The black dashed line denotes zero timelag. The bin range is $\pm\SI{e4}{\second}$ and the bin width is \SI{60}{\second}. As with the timelag maps, we do not include timelags corresponding to $\max{\mathcal{C}_{AB}}<0.1$.'
+tfig.placement = '!h'
+\end{pycode}
+\py[chapter6_results]|tfig|
+% spell-checker: enable %
+
+\section{Discussion}\label{sec:modeling-observables:discussion}
+
+For all of our heating models, we find negative timelags in at least one of the three channel pairs as shown in \autoref{fig:modeling-observables:timelag-maps}. Negative timelags can be used to disambiguate the temperature sensitivity of the AIA passbands and can be produced in one of two ways: high-frequency heating in which the timelag is dominated by many frequent reheatings or a channel pair in which one channel is bimodal. While intensity in the 131 \AA{} channel can correspond to either $\SI{0.4}{\mega\kelvin}$ or $>\SI{10}{\mega\kelvin}$ plasma (see \autoref{fig:modeling-observables:aia-response}), negative timelags in the 211-131 \si{\angstrom} channel pair provide a possible signature of $\ge\SI{10}{\mega\kelvin}$ plasma because a negative timelag implies the plasma is cooling from \SI{131}{\angstrom} to \SI{211}{\angstrom}. This also holds for the 171-131 and 193-131 \si{\angstrom} channel pairs as well while the 94-131 and 335-131 \si{\angstrom} channels are more ambiguous due to the first channel in the pair being bimodal as well. As noted in \autoref{sec:modeling-observables:timelag_maps}, the high-, intermediate-, and low-frequency maps for the 211-131 \si{\angstrom} channel pair all show coherent negative time lags in the core. Because these strands are rooted in areas of strong field, enough energy is made available by the field (see \autoref{sec:modeling-observables:heating}) to heat them well into (and likely above) the hot component of the \SI{131}{\angstrom} passband. Since these strands are relatively short, the density increases rapidly enough for this hot plasma to be visible before it is washed out by thermal conduction.
+
+Plasma undergoing pure cooling by radiation and thermal conduction produces a predictable and well-understood timelag signature. However, complicated heating scenarios and LOS geometries are likely to make it more difficult to interpret observed timelag signatures. Consider the case of a single cooling strand such that the maximum allowed timelag for given channel pair $AB$ is the amount of time it takes to cool from $T_A$ to $T_B$ by thermal conduction and radiation. We may regard the ``cooling'' case in \autoref{fig:modeling-observables:timelag-histograms} as the baseline timelag distribution given that all strands were heated only once at $t=\SI{0}{\second}$. Because the timelag is primarily determined by the cooling phase of the strand, the timelag becomes primarily a function of the loop length $L$ since $\tau_{cool}\propto L$. Two effects are likely to increase the decoherence of the baseline timelag distribution: multiple structures evolving out-of-phase along a given LOS (the ``random'' heating scenario) and multiple reheatings before the end of the cooling and draining cycle on a given strand. We note that multiple polluting structures along the LOS seem to primarily add negative timelags to the distribution (the ``random'' case) while increasing the frequency of events on a given strand extends the distribution in the positive direction. The latter effect also produces more negative timelags. Since steady heating can be thought of as nanoflare heating in the high-frequency limit, we expect the distribution of timelags to approach a uniform distribution as the heating frequency increases. This is again consistent with the results of \citet{viall_signatures_2016} who found that steadily-heated loops have no preferred timelag.
+
+While our model for the energy deposition (see \autoref{sec:modeling-observables:heating}) does not assume any specific physical heating mechanism, the parameterization of the heating frequency in \autoref{eq:modeling-observables:heating_types} has an interesting implication in the context of the \citet{parker_nanoflares_1988} nanoflare model. Rearranging \autoref{eq:modeling-observables:heating_types} and recalling that $\tau_\textup{cool}\propto L$ gives $\langle\twait\rangle\propto L$, i.e. longer strands have longer absolute waiting times between heating events. Given that longer fieldlines tend to be rooted in regions of weaker magnetic field, this further implies that, where the field is stronger, energy is more quickly dissipated. According to \citet{parker_nanoflares_1988}, this dissipation is due to small-scale reconnection of flux tubes that are continually stressed by the convective motion of the underlying photosphere. Thus, in this context, our heating model implies that the reconnection and the underlying driver are more efficient in areas where the field is strongest.
+
+Though we have not addressed it here, another possible mechanism for producing time-varying intensity in \AR s is thermal non-equilibrium (TNE) wherein condensation cycles driven by highly-stratified, but steady footpoint heating lead to long-period intensity pulsations \citep{kuin_thermal_1982}. Though originally used to explain coronal rain \citep{antolin_coronal_2010,antolin_multithermal_2015,auchere_coronal_2018} and prominences \citep{antiochos_model_1991}, several workers \citep{mok_three-dimensional_2016,winebarger_investigation_2016,froment_long-period_2017,winebarger_identifying_2018,froment_occurrence_2018} have recently claimed that TNE can produce timelag signatures similar to those of impulsive heating models, suggesting that observed timelags may be consistent with both impulsive and steady heating. However, it is not yet clear whether TNE is consistent with observed signatures of very hot (8-10 MK) plasma. Detailed comparisons between TNE and nanoflare simulations and observations are desparately needed.
+
+\section{Summary}\label{sec:modeling-observables:conclusions}
+
+We have carried out a series of numerical simulations in an effort to understand how signatures of the nanoflare heating frequency are manifested in two observables: the emission measure slope and the timelag. Additionally, we described each component of our pipeline for forward modeling \AR{} emission. For a given magnetogram observation of the relevant \AR{} (in this case, NOAA 1158), we compute a potential field extrapolation and trace a large number of fieldlines through the extrapolated vector field. For each traced fieldline, we run an EBTEL hydrodynamic simulation and use the resulting temperatures and densities, combined with data from CHIANTI and the instrument response function, to compute the time-dependent intensity. These intensities are then mapped back to the magnetic skeleton and integrated along the LOS in each pixel to create time-dependent images of the \AR{}.
+
+Using our novel and efficient forward modeling pipeline, we produced AIA images for all six EUV channels for $\approx\SI{8}{\hour}$ of simulation time. From these results, we computed both the emission measure slope and the timelag for all possible channel pairs. We carried out these steps for three different nanoflare heating frequencies, high, intermediate, and low, (see \autoref{eq:modeling-observables:heating_types}) in addition to two control models, for a total of five different heating scenarios (see \autoref{tab:modeling-observables:heating}).
+
+Our results can be summarized in the following points:
+\begin{enumerate}
+    \item As the heating frequency decreases, the emission measure slope, $a$, becomes increasingly shallow, saturating at $a\approx2$. As the heating frequency increases, the distribution of slopes over the \AR{} is shifted to higher values and broadens.
+    \item The timelag becomes increasingly spatially coherent with decreasing heating frequency. When strands are allowed to cool without being reenergized, the spatial distribution of timelags is largely determined by the distribution of loop lengths over the \AR{}.
+    \item The distribution of timelags becomes increasingly broad and approaches a uniform distribution as the heating frequency increases, consistent with the results of \citet{viall_signatures_2016}.
+    \item Negative timelags in channel pairs where the second (``cool'') channel is \SI{131}{\angstrom} provide a possible diagnostic for $\ge\SI{10}{\mega\kelvin}$ plasma
+\end{enumerate}
+
+In this paper, we have used our advanced forward modeling pipeline to systematically examine how the emission measure slope and timelag are affected by the nanoflare heating frequency. In \autoref{ch:classifying_observables} we use the model results presented here to train a random forest classification model and apply it to emission measure slopes and timelags derived from real AIA observations of NOAA 1158. The 15 channel pairs for the timelag and cross-correlation combined with the emission measure slope represent a 31-dimensional feature space and a single 500-by-500 pixel \AR{} amounts to $2.5\times10^5$ sample points. Performing an accurate assessment over this amount of data manually or ``by eye'' is at least impractical and likely impossible. Thus, the application of machine learning to the problem of assessing models in the context of real data is a critical step in understanding the underlying energy deposition in \AR{} cores and, to our knowledge, has not yet been applied in this context. 

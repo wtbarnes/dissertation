@@ -110,7 +110,7 @@ where $F_c$ is the Spitzer-H{\"a}rm heat flux. Smaller values of $f$ limit the h
 \subsection{Two-fluid Modeling}\label{hot-plasma:subsec:two_fluid_theory}
     
 In some parameter regimes nanoflare heating can also induce electron-ion non-equilibrium if the heating timescale is shorter than the electron-ion equilibration timescale. Interactions between electrons and ions in a fully-ionized hydrogen plasma like the solar corona are governed by binary Coulomb collisions. Thus, the equilbration timescale is $\tau_{ei}=1/\nu_{ei}$, where $\nu_{ei}$ is the collision frequency and is given by,
-\begin{equation}\label{eq:col_freq}
+\begin{equation}\tag{\ref{eq:col_freq}}
     \nu_{ei} = \frac{16\sqrt{\pi}}{3}\frac{e^4}{m_em_i}\left(\frac{2k_BT_e}{m_e}\right)^{-3/2}n\ln{\Lambda},
 \end{equation}
 where $T_e$ is the electron temperature, $m_e,m_i$ are the electron and ion masses respectively, and $\ln{\Lambda}$ is the Coulomb logarithm \citep[see both Eq. 2.5e and Section 3 of][]{braginskii_transport_1965}. For $n\sim\SI{e9}{\per\cubic\cm}$ and $T_e\sim\SI{e7}{\kelvin}$, parameters typical of nanoflare heating, $\tau_{ei}\approx\SI{800}{\second}$. Thus, any heating that occurs on a timescale less than \SI{800}{\second}, such as a nanoflare with a duration of $\tau\le\SI{100}{\second}$, will result in electron-ion non-equilibrium. While chromospheric evaporation during and after the nanoflare will increase $n$ and thus decrease $\nu_{ei}$, we argue that during the early heating phase, $\tau_{ei}\gg\tau$, with \SI{800}{\second} being an upper bound on $\tau_{ei}$.

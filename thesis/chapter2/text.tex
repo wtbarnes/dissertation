@@ -82,9 +82,9 @@ tfig.caption = r'\textit{Left:} A simple empirical model of $\beta$ as a functio
 \py[chapter2]|tfig|
 % spell-checker: enable %
 
-\section{Hydrostatic Equilibrium}\label{sec:hydrostatic}
+\section{Hydrostatics}\label{sec:hydrostatic}
 
-\subsection{Energy Balanace Equations}\label{sec:hydrostatic_equations}
+\subsection{Equations of Hydrostatic Equilibrium}\label{sec:hydrostatic_equations}
 
 For a single strand in hydrostatic equilibrium with uniform cross-sectional area, the equations of pressure and energy balance as a function of $s$, the coordinate parallel to the magnetic field, are given by,
 \begin{align}
@@ -503,22 +503,73 @@ the problem is to determine which value of $Q_0$ satisifies \autoref{eq:hydrosta
 
 % need to expand on these expressions, detail the terms
 
-The two-fluid field-aligned hydrodynamic mass and energy equations, as given by \citet{bradshaw_influence_2013}, are:
+Thus far, I have only discussed cases where the loop is in hydrostatic equilibrium such that the downward gravitational pressure is exactly balanced by the thermal pressure and the energy input by coronal heating is conducted to the lower atmosphere and radiated away to space. In this case, it was alwas assumed that $Q$, the energy supplied by coronal heating, was time-independent. However, as discussed in \autoref{sec:nanoflares}, heating in the corona is likely  very impulsive such that $Q=Q(t)$. If $Q$ changes sufficiently fast such that thermal conduction and radiation do not have time to balance the energy supplied by coronal heating, the loop is no longer in hydrostatic equilibrium and evolves according to the equations of field-aligned \textit{hydrodynamics}.
+
+\subsection{Equations of Field-aligned Hydrodynamics}\label{sec:hydrodynamic-equations}
+
+The two-fluid field-aligned hydrodynamic mass, momentum, and energy equations in conservative form, as described by \citet[Appendix A]{bradshaw_influence_2013}, are,
 \begin{align}
-    \frac{\partial\rho}{\partial t} &= -\frac{\partial(\rho v)}{\partial s}, \label{eq:1dmass} \\
-    \frac{\partial E_e}{\partial t} + \frac{\partial}{\partial s} \lbrack(E_e+p_e)v\rbrack &= v\frac{\partial p_e}{\partial s} - \frac{\partial F_{ce}}{\partial s} + \frac{1}{\gamma - 1}k_Bn\nu_{ei}(T_i-T_e) -n^2\Lambda(T_e)+Q_{e} , \label{eq:1denergy_e} \\
-    \frac{\partial E_i}{\partial t} + \frac{\partial }{\partial s}\lbrack(E_i+p_i)v\rbrack &= -v\frac{\partial p_e}{\partial s} - \frac{\partial F_{ci}}{\partial s} + \frac{1}{\gamma - 1}k_Bn\nu_{ei}(T_e-T_i) + \frac{\partial}{\partial s}\left(\frac{4}{3}\mu_iv\frac{\partial v}{\partial s}\right) +\rho v g_{\parallel} + Q_{i},\label{eq:1denergy_i}
+    \frac{\partial\rho}{\partial t} + \frac{\partial(\rho v)}{\partial s} =& 0, \label{eq:hydrodynamic_mass} \\
+    \frac{\partial}{\partial t}(\rho v) + \frac{\partial}{\partial s}(\rho v^2) =& -\frac{\partial}{\partial s}(p_e + p_i) + \frac{\partial}{\partial s}\left(\frac{4}{3}\mu_i\frac{\partial v}{\partial s}\right) + \rho g, \label{eq:hydrodynamic_momentum} \\
+    \frac{\partial E_e}{\partial t} + \frac{\partial}{\partial s} \lbrack(E_e+p_e)v\rbrack =& v\frac{\partial p_e}{\partial s} - \frac{\partial F_{ce}}{\partial s} + \frac{1}{\gamma - 1}k_Bn\nu_{ei}(T_i-T_e) \label{eq:hydrodynamic_energy_e} \\ 
+    & - n^2\Lambda(T_e) + Q_{e} , \nonumber \\
+    \frac{\partial E_i}{\partial t} + \frac{\partial }{\partial s}\lbrack(E_i+p_i)v\rbrack =& -v\frac{\partial p_e}{\partial s} - \frac{\partial F_{ci}}{\partial s} + \frac{1}{\gamma - 1}k_Bn\nu_{ei}(T_e-T_i) \label{eq:hydrodynamic_energy_i} \\
+    & + \frac{\partial}{\partial s}\left(\frac{4}{3}\mu_iv\frac{\partial v}{\partial s}\right) +\rho vg + Q_{i}, \nonumber
 \end{align}
 where,
 \begin{align}
-    E_e =& \frac{p_e}{\gamma - 1} \label{eq:ee_closure}, \\
-    E_i =& \frac{p_i}{\gamma - 1} + \frac{\rho v^2}{2}, \label{eq:ei_closure}
+    E_e =& \frac{p_e}{\gamma - 1} \label{eq:hydrodynamic_energy_e_def}, \\
+    E_i =& \frac{p_i}{\gamma - 1} + \frac{\rho v^2}{2}. \label{eq:hydrodynamic_energy_i_def}
 \end{align}
-and we assume closure through the ideal gas law, $p_e=k_BnT_e,\,p_i=k_BnT_i$. Note that we have assumed quasi-neutrality such that $n_e=n_i=n$ and $v_e=v_i=v$. It then follows that $\rho=m_en_e+m_in_i\approx m_in$.
+and the set of equations is closed by an equation of state for both the electrons and the ions,
+\begin{align}
+    p_e=k_BnT_e, \label{eq:ideal_gas_law_e}\\
+    p_i=k_BnT_i \label{eq:ideal_gas_law_i}.
+\end{align}
+\autoref{eq:hydrodynamic_mass}, \autoref{eq:hydrodynamic_momentum}, \autoref{eq:hydrodynamic_energy_e}, and \autoref{eq:hydrodynamic_energy_i} describe the energy, momentum, and mass transport of the plasma in the field-aligned direction in response to the injection of energy via coronal heating. Note that the subscripts $e$ and $i$ denote quantities pertaining to either the electron or ion fluids, respectively. Under the current-free and quasi-neutrality assumptions, $v_e=v_i=v$ and $n_e=n_i=n$, respectively such that there is only one mass equation and one momentum equation. It then follows that $\rho = m_en_e+m_in_i = n(m_e + m_i)\approx m_in$ since $m_e \ll m_i$. The kinetic energy term in \autoref{eq:hydrodynamic_energy_e} is neglected for this same reason. I will now give a brief a description of each equation and their respective terms.
 
-Note the right-hand side of \autoref{eq:1denergy_e} and \autoref{eq:1denergy_i}: the first term represents the energy loss or gain as the fluids move through the electric field that maintains quasi-neutrality, given by $E=-(1/ne)\partial p_e/\partial s$; the third term models the exhange of energy between the electron and ion populations via binary Coulomb collisions and is attributed to \citet{braginskii_transport_1965}. Though the expression presented here differs by a factor of 2 compared to that of \citeauthor{braginskii_transport_1965}, we maintain that the electron-ion equilibration time is not significantly changed by this relatively small numerical factor.
+\subsubsection{The Mass Equation}\label{sec:hydrodynamic-mass}
+
+By \autoref{eq:hydrodynamic_mass}, the equation of mass conservation, changes in the mass density, $\rho$, are due to variations in the mass flux, $\rho v$, where $v$ is the bulk flow velocity in the field-aligned direction. An increase in $\rho$ at a given point is due to an inflow of mass into the surrounding region ($\frac{\partial}{\partial s}(\rho v) < 0$) and any decrease in $\rho$ is due to an outflow of mass from the region ($\frac{\partial}{\partial s}(\rho v) > 0$) \citep{priest_magnetohydrodynamics_2014}. Note that \autoref{eq:hydrodynamic_mass} is the equivalent to \autoref{eq:mhd_continuity} in one dimension (i.e. $\nabla\to\frac{\partial}{\partial s}$).
+
+\subsubsection{The Momentum Equation}\label{sec:hydrodynamic-momentum}
+
+\autoref{eq:hydrodynamic_momentum} describes the evolution of the momentum of the plasma, $\rho v$. The second term on the right-hand side is the viscous contribution to the ion momentum and $\mu_i$ is the classical coefficient of viscosity as given by \citet{spitzer_physics_1962}. The electron viscosity is negligible since $m_e\ll m_i$. Viscous effects are exepected to become important at high temperatures \citep{bradshaw_what_2011} and, in particular, \citet{peres_importance_1993} found that inclusion of viscosity affected the formation of shocks in a flaring loop and subsequently influenced the predicted X-ray line profiles for Ca XIX and Fe XXV. 
+
+$g$ in the third term on the right-hand side is the field-aligned gravitational acceleration and is given in \autoref{sec:hydrostatic_equations}. Note that in the limit of zero bulk flow ($v=0$) and electron-ion equilibrium ($p_e=p_i$), \autoref{eq:hydrodynamic_momentum} reduces to \autoref{eq:hydrostatic_pressure}, the hydrostatic pressure balance equation.
+
+\subsubsection{The Energy Equations}\label{sec:hydrodynamic-energy}
+
+\autoref{eq:hydrodynamic_energy_e} and \autoref{eq:hydrodynamic_energy_i} describe the evolution of the electron and ion energy. The second term on the left-hand side of both equations represents the enthalpy flux and the second term on the right-hand side denotes the energy transported by the heat flux. The form of each heat flux term is the same as that in \autoref{eq:spitzer-harm} with a modified coefficient of thermal conduction: $\kappa_{0,e}\approx\SI{7.8e-7}{\erg\per\cm\per\second\per\kelvin\tothe{7/2}}$ for the electrons and $\kappa_{0,i}\approx\SI{3.2e-8}{\erg\per\cm\per\second\per\kelvin\tothe{7/2}}$ for the ions. Note that this implies that conductive cooling is less efficient in the ion fluid. 
+
+The fourth term on the right-hand side of \autoref{eq:hydrodynamic_energy_e} denotes energy lost to radiation and is the same as in \autoref{eq:hydrostatic_energy}. Radiation from the ions is considered negligible. The fourth term on the right-hand side of \autoref{eq:hydrodynamic_energy_i} is the viscous contribution to the ion energy (see \autoref{sec:hydrodynamic-momentum}) and the fifth term is work done against gravity. The contributions of both of these terms to the electron energy are negligible because $m_e\ll m_i$.
+
+The electron and ion equations are coupled through the first and third terms on the right-hand side. The first term represents the energy loss or gain as the fluids move through the electric field that maintains quasi-neutrality, given by $E=-(1/ne)\partial p_e/\partial s$. The third term models the exhange of energy between the electron and ion populations via binary Coulomb collisions and is attributed to \citet{braginskii_transport_1965}. $\nu_{ei}$ is the frequency of electron-ion collisions and is given by,
+\begin{equation}\label{eq:col_freq}
+    \nu_{ei} = \frac{16\sqrt{\pi}}{3}\frac{e^4}{m_em_i}\left(\frac{2k_BT_e}{m_e}\right)^{-3/2}n\ln{\Lambda},
+\end{equation}
+where $\ln{\Lambda}$ is the Coulomb logarithm \citep[see both Eq. 2.5e and Section 3 of][]{braginskii_transport_1965}. Though the expression presented here differs by a factor of 2 compared to that of \citeauthor{braginskii_transport_1965}, the electron-ion equilibration time is not significantly changed by this relatively small numerical factor.
+
+Lastly, $Q_e$ and $Q_i$ denote the energy injected into the electrons and ions by a the heating term. In general, this is a free parameter and may be a function of both $s$ and $t$. While it is often assumed, that all of the heating is supplied to the electrons, some heating mechanisms may also preferentially energize the ions. See \autoref{ch:inferring_hot_plasma} for more details. 
+
+Assuming electron-ion equilibrium ($T_e=T_i$) and adding \autoref{eq:hydrodynamic_energy_e} and \autoref{eq:hydrodynamic_energy_e} gives the single-fluid hydrodynamic energy equation,
+\begin{equation}\label{eq:hydrodynamic_energy}
+    \frac{\partial E}{\partial t} + \frac{\partial}{\partial s}\lbrack(E+p)v\rbrack = - \frac{\partial}{\partial s}F_c - n^2\Lambda(T) + \frac{\partial}{\partial s}\left(\frac{4}{3}\mu_iv\frac{\partial v}{\partial s}\right) +\rho vg + Q, 
+\end{equation}
+were $E=E_e + E_i$, $p=p_e+p_i$, and $F_c=F_{c,e} + F_{c,i}$. Under the  assumption of hydrostatic equilibrium ($v=0,\frac{\partial}{\partial t}=0$), this reduces to the hydrostatic energy balance equation, \autoref{eq:hydrostatic_energy}.
 
 \subsection{The Heating and Cooling Cycle of Coronal Loops}\label{sec:heating-cooling-cycle}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.65\textwidth]{chapter2/figures/heating-cooling-cycle-cartoon.pdf}
+    \caption{A cartoon illustration of the heating and cooling cycle of an impulsively heated coronal loop. The red arrows denote energy injected by heating (a) and energy transported by thermal conduction (b). The blue arrows denote energy lost by radiation. The thick green arrows indicate the bulk transport of material in the loop.}
+    \label{fig:heating-cooling-cycle-cartoon}
+\end{figure}
+
+The response of the coronal loop plasma to an impulsive release of energy is reasonably well-understood and has been studied extensively, both in the context of flares and nanoflares \citep[e.g.][]{antiochos_influence_1976,antiochos_evaporative_1978,cargill_implications_1994,cargill_cooling_1995,cargill_nanoflare_2004}. \autoref{fig:heating-cooling-cycle-cartoon} shows a cartoon of the different phases of the heating, filling, cooling, and draining cycle of a coronal loop.
+
+% discuss each phase, derive approximations for cooling times, note importance of enthalpy-driven cooling
 
 \subsection{The HYDRAD Model}\label{sec:hydrad}
 
@@ -634,3 +685,8 @@ as a direct analogy to Eq. 18 of \citet{cargill_enthalpy-based_2012}. In the ear
 % RESULTS TABLE HERE %
 
 \autoref{eq:c1_mod} is motivated by simplicity while including the essential physics. Alternative, more complex determinations of $c_1$ have been considered, but involve limitations on how EBTEL can be used both now and in the future.
+
+\nomenclature[a-ti]{$T_i$}{ion temperature}
+\nomenclature[a-me]{$m_e$}{electron mass}
+\nomenclature[a-mi]{$m_i$}{ion mass}
+\nomenclature[a-gsol]{$g_\solar$}{gravitational acceleration at the solar surface}

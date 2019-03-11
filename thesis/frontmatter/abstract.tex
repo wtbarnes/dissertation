@@ -1,38 +1,7 @@
 \begin{abstract}
-While it is generally agreed that the continually stressed coronal
-magnetic field is responsible for the million-degree temperatures in the
-upper solar atmosphere, the mechanism responsible for transporting this
-stored energy to the coronal plasma is yet unknown. In particular, the
-frequency with which this energy is deposited into active regions, areas
-of intense magnetic activity, remains largely unconstrained. In this
-dissertation, I use a new forward modeling pipeline, combined with
-well-known machine learning classification methods, to better constrain
-the frequency of energy deposition in active region cores. Specifically,
-I simulate time-dependent, multi-wavelength emission over an entire
-active region for a range of nanoflare frequencies. From these synthetic
-intensities, I compute two commonly-used observables, the timelag and
-the emission measure slope, and compare the distributions of these
-parameters in order to better understand how the underlying heating
-frequency is related to observable quantities. I then use these
-synthetic data to train a random forest classifier in order to classify
-real data in terms of the heating frequency. In doing so, I am able to
-map the heating frequency, pixel by pixel, across an entire active
-region. In addition to this parameter survey of heating frequencies, I
-also describe a model for relating the underlying magnetic field
-structure of the active region to the heating frequency and compute the
-resulting emission in multiple narrowband channels. The resulting
-observables from this new model are assessed against the classified
-observations. Altogether, this work represents a critical step in
-constraining heating frequency in active region cores.
+The solar corona, the outermost layer of the Sun's atmosphere, is heated to temperatures in excess of one million Kelvin, nearly three orders of magnitude greater than the surface of the Sun. This so-called ``coronal heating problem'' has occupied the field of solar astrophysics for over seventy years and is one of the most important open questions in astronomy as a whole. While it is generally agreed that the continually stressed coronal magnetic field plays a role in producing these million-degree temperatures, the exact mechanism(s) responsible for transporting this stored energy to the coronal plasma is yet unknown. Nanoflares, small-scale bursts of energy likely resulting from the frequent reconnection of twisted magnetic fieldlines, have long been proposed as a candidate for heating the non-flaring corona, especially in areas of high magnetic activity. However, a direct detection of heating by nanoflares has proved difficult due to their faint, transient nature and as such, properties of this proposed heating mechanism remain largely unconstrained. In this thesis, I use a hydrodynamic model of the coronal plasma combined with a sophisticated forward modeling approach and machine learning classification techniques to predict signatures of nanoflare heating and compare these predictions to real observational data. In particular, the focus of this work is constraining the frequency with which nanoflares occur on a given magnetic fieldline in non-flaring active regions. 
 
-A novel component of this dissertation is the modular and scalable
-fowarding modeling pipeline, written in the Python programming language,
-that builds a ``magnetic skeleton'' from a three-dimensional field
-extrapolation, configures thousands of field-aligned hydrodynamic loop
-models, and computes arbitrary line-of-sight projections of the
-time-dependent, three-dimensional active region emission. Another novel
-component of this dissertation is the use of a random forest
-classification model. By training such a model on our synthetic data, we
-are able to systematically and quantitatively assess agreement between
-modeled nanoflare frequencies and observations.
+First, I give an introduction to the structure of the solar atmosphere and coronal heating, discuss the hydrodynamics of coronal loops, and provide an overview of the important emission mechanisms in a high-temperature, optically-thin plasma. Then, I describe the forward modeling pipeline for predicting time-dependent, multi-wavelength emission over an entire active region. Next, I use a hydrodynamic model of a single coronal loop to predict signatures of ``very hot'' plasma produced by single nanoflares. I find that several effects, including flux limiting, nonequilibrium ionization, and nanoflare duration, are likely to limit the observability of this direct signature of nanoflare heating. Then, I use the forward modeling code described above to simulate time-dependent, multi-wavelength AIA emission from active region NOAA 1158 for a range of nanoflare frequencies and find that signatures of the heating frequency persist in multiple observable quantities. Finally, I use these predicted diagnostics to train a random forest classifier and apply this model to real AIA observations of NOAA 1158. In doing so, I am able to map the heating frequency, pixel by pixel, across the entire active region. Altogether, this thesis represents a critical step in systematically constraining the frequency of energy deposition in active regions.
+
+A novel component of this thesis is the development of a modular forward modeling pipeline, written in the Python programming language, that builds a ``magnetic skeleton'' from a three-dimensional field extrapolation, configures thousands of field-aligned hydrodynamic loop models, and computes arbitrary line-of-sight projections of the time-dependent, three-dimensional active region emission. The code is flexible and scalable and is openly-developed such that it may be used and improved by the larger solar physics community. Another novel component of this thesis is the use of machine learning to compare real observations and model results. By training a random forest classifier on predicted diagnostics, I am able to systematically and quantitatively assess observations in the context of multiple diagnostics in order to make an accurate prediction of the properties of the heating.
 \end{abstract}

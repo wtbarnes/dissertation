@@ -1,18 +1,6 @@
 % Text for chapter 6
 \chapter{Predicting Diagnostics for Nanoflares of Varying Frequency}\label{ch:modeling-observables}
 
-% spell-checker: disable %
-\begin{pycode}[chapter6]
-name = 'chapter6'
-ch6 = texfigure.Manager(
-    pytex,
-    os.path.join('.', name),
-    number=6,
-    **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
-)
-\end{pycode}
-% spell-checker: enable %
-
 In this chapter, I use the forward modeling pipeline outlined in \autoref{ch:synthesizar} to predict observable signatures of an \AR{} heated by nanoflares of varying frequency. In particular, I predict both the emission measure slope (see \autoref{sec:em_slope}) and timelag (see \autoref{sec:timelag}). In \autoref{ch:classifying_observables}, these simulated diagnostics are used to train a random forest classifier to predict heating frequency in every pixel of \AR{} NOAA 1158. This chapter is adapted directly from \citet{barnes_understanding_2019} which is currently in preparation to be submitted for publication. 
 
 \section{Introduction}\label{sec:modeling-observables:introduction}
@@ -48,12 +36,7 @@ ch6_modeling = texfigure.Manager(
     number=6,
     **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
 )
-import io
-
-import pandas as pd
 import plasmapy.atomic
-import astropy.io
-from astropy.table import Table
 from sunpy.instr.aia import aiaprep
 from sunpy.physics.differential_rotation import diffrot_map
 \end{pycode}
@@ -431,12 +414,7 @@ ch6_results = texfigure.Manager(
     number=6,
     **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
 )
-
-import io
-import pandas as pd
 import plasmapy.atomic
-import astropy.io
-from astropy.table import Table
 
 correlation_threshold = 0.1
 rsquared_threshold = 0.75

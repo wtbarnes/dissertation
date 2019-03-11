@@ -39,6 +39,7 @@ import sys
 from collections import OrderedDict
 from fractions import Fraction
 import copy
+import io
 
 # Add global thesis Python directory to the path
 sys.path.append('./python/')
@@ -46,6 +47,7 @@ sys.path.append('./python/')
 import texfigure
 pytex.formatter = texfigure.repr_latex_formatter
 
+import pandas as pd
 import h5py
 import numpy as np
 from scipy.interpolate import interp1d, splev
@@ -54,12 +56,15 @@ import matplotlib.pyplot as plt
 import matplotlib.colors
 import matplotlib.ticker
 import seaborn
+import plasmapy.atomic
 from sunpy.map import Map, GenericMap
 from sunpy.coordinates import Helioprojective, HeliographicStonyhurst
 import astropy.time
 import astropy.units as u
 import astropy.constants as const
 from astropy.coordinates import SkyCoord
+import astropy.io
+from astropy.table import Table
 from astropy.visualization import ImageNormalize, AsinhStretch, SqrtStretch, LogStretch
 import fiasco
 import synthesizAR

@@ -106,7 +106,7 @@ It is commonly assumed that the field-aligned thermal conduction, $F_c$, is well
 \begin{equation}\label{eq:spitzer-harm}
     F_c = -\kappa_0 T^{5/2} \frac{dT}{ds},
 \end{equation}
-where $\kappa_0\sim\SI{e-6}{\erg\per\cm\per\second\per\kelvin\tothe{7/2}}$ is the coefficient of thermal conduction in the field-aligned direction. Thermal conduction is an energy \textit{sink} in the corona, but in the TR, it is an energy \textit{source} because $F_c>0$ when $\frac{dT}{ds}<0$ and $F_c<0$ when $dT/ds>0$. Thus, the interface between the TR and the corona is defined as that point at which $F_c$ transitions from a source to a sink \citep{vesecky_numerical_1979,klimchuk_highly_2008,cargill_enthalpy-based_2012}. Note that the heat flux is not a loss term, but rather a mechanism for transferring energy between the corona and transition region provided the conductive flux to the cooler, underlying chromosphere is negligible.  
+where $\kappa_0\sim\SI{e-6}{\erg\per\cm\per\second\per\kelvin\tothe{7/2}}$ is the coefficient of thermal conduction in the field-aligned direction. In the corona, thermal conduction is an energy sink needed to balance coronal heating. However, in the TR, where $Q=0$, thermal conduction is an energy source to compensate for losses due to radiation. Thus, $F_c$ be used to define the boundary between the TR and the corona such that the base of the corona is the point at which thermal conduction transitions from an energy source to a sink \citep{vesecky_numerical_1979,bradshaw_new_2010}. Note that no energy is lost from the system due to the heat flux; it is only a mechanism for transferring energy between the corona and transition region provided the conductive flux to the cooler, underlying chromosphere is negligible such that the loop is thermally isolated.  
 
 According to \autoref{eq:spitzer-harm}, $F_c\to\infty$ as $\frac{dT}{ds}\to\infty$. However, at low densities, there may be an insufficient number of particles to support the implied heat flux such that the heat flux saturates at the \textit{free-streaming limit} \citep{patsourakos_coronal_2005,bradshaw_explosive_2006,bradshaw_collisional_2013}. Failure to account for this limiting of the heat flux can result in overestimation of the cooling due to thermal conduction, particularly in cases where the heating is very impulsive. A more detailed discussion of the free-streaming limit is given in \autoref{hot-plasma:subsec:hf_theory}.
 
@@ -498,11 +498,6 @@ the problem is to determine which value of $Q_0$ satisifies \autoref{eq:hydrosta
 
 \section{Hydrodynamics}\label{sec:hydrodynamics}
 
-%show two-fluid hydro equations and how they relate to previously stated MHD equations
-% discuss physics of each term
-
-% need to expand on these expressions, detail the terms
-
 Thus far, I have only discussed cases where the loop is in hydrostatic equilibrium such that the downward gravitational pressure is exactly balanced by the thermal pressure and the energy input by coronal heating is conducted to the lower atmosphere and radiated away to space. In this case, it was alwas assumed that $Q$, the energy supplied by coronal heating, was time-independent. However, as discussed in \autoref{sec:nanoflares}, heating in the corona is likely  very impulsive such that $Q=Q(t)$. If $Q$ changes sufficiently fast such that thermal conduction and radiation do not have time to balance the energy supplied by coronal heating, the loop is no longer in hydrostatic equilibrium and evolves according to the equations of field-aligned \textit{hydrodynamics}.
 
 \subsection{Equations of Field-aligned Hydrodynamics}\label{sec:hydrodynamic-equations}
@@ -516,10 +511,10 @@ The two-fluid field-aligned hydrodynamic mass, momentum, and energy equations in
     \frac{\partial E_i}{\partial t} + \frac{\partial }{\partial s}\lbrack(E_i+p_i)v\rbrack =& -v\frac{\partial p_e}{\partial s} - \frac{\partial F_{ci}}{\partial s} + \frac{1}{\gamma - 1}k_Bn\nu_{ei}(T_e-T_i) \label{eq:hydrodynamic_energy_i} \\
     & + \frac{\partial}{\partial s}\left(\frac{4}{3}\mu_iv\frac{\partial v}{\partial s}\right) +\rho vg + Q_{i}, \nonumber
 \end{align}
-where,
+where $\gamma=5/3$,
 \begin{align}
     E_e =& \frac{p_e}{\gamma - 1} \label{eq:hydrodynamic_energy_e_def}, \\
-    E_i =& \frac{p_i}{\gamma - 1} + \frac{\rho v^2}{2}. \label{eq:hydrodynamic_energy_i_def}
+    E_i =& \frac{p_i}{\gamma - 1} + \frac{\rho v^2}{2}, \label{eq:hydrodynamic_energy_i_def}
 \end{align}
 and the set of equations is closed by an equation of state for both the electrons and the ions,
 \begin{align}
@@ -540,11 +535,11 @@ $g$ in the third term on the right-hand side is the field-aligned gravitational 
 
 \subsubsection{The Energy Equations}\label{sec:hydrodynamic-energy}
 
-\autoref{eq:hydrodynamic_energy_e} and \autoref{eq:hydrodynamic_energy_i} describe the evolution of the electron and ion energy. The second term on the left-hand side of both equations represents the enthalpy flux and the second term on the right-hand side denotes the energy transported by the heat flux. The form of each heat flux term is the same as that in \autoref{eq:spitzer-harm} with a modified coefficient of thermal conduction: $\kappa_{0,e}\approx\SI{7.8e-7}{\erg\per\cm\per\second\per\kelvin\tothe{7/2}}$ for the electrons and $\kappa_{0,i}\approx\SI{3.2e-8}{\erg\per\cm\per\second\per\kelvin\tothe{7/2}}$ for the ions. Note that this implies that conductive cooling is less efficient in the ion fluid. 
+\autoref{eq:hydrodynamic_energy_e} and \autoref{eq:hydrodynamic_energy_i} describe the evolution of the electron and ion energy. The second term on the left-hand side of both equations represents the enthalpy flux and the second term on the right-hand side denotes the energy transported by the heat flux. The form of each heat flux term is the same as that in \autoref{eq:spitzer-harm} with a modified coefficient of thermal conduction: $\kappa_{0,e}\approx\SI{7.8e-7}{\erg\per\cm\per\second\per\kelvin\tothe{7/2}}$ for electrons, $\kappa_{0,i}\approx\SI{3.2e-8}{\erg\per\cm\per\second\per\kelvin\tothe{7/2}}$ for ions. Note that this implies that conductive cooling is less efficient in cooling the ions. 
 
 The fourth term on the right-hand side of \autoref{eq:hydrodynamic_energy_e} denotes energy lost to radiation and is the same as in \autoref{eq:hydrostatic_energy}. Radiation from the ions is considered negligible. The fourth term on the right-hand side of \autoref{eq:hydrodynamic_energy_i} is the viscous contribution to the ion energy (see \autoref{sec:hydrodynamic-momentum}) and the fifth term is work done against gravity. The contributions of both of these terms to the electron energy are negligible because $m_e\ll m_i$.
 
-The electron and ion equations are coupled through the first and third terms on the right-hand side. The first term represents the energy loss or gain as the fluids move through the electric field that maintains quasi-neutrality, given by $E=-(1/ne)\partial p_e/\partial s$. The third term models the exhange of energy between the electron and ion populations via binary Coulomb collisions and is attributed to \citet{braginskii_transport_1965}. $\nu_{ei}$ is the frequency of electron-ion collisions and is given by,
+The electron and ion equations are coupled through the first and third terms on the right-hand side. The first term represents the energy loss or gain as the fluids move through the electric field that maintains quasi-neutrality, given by $E=-\frac{1}{ne}\frac{\partial}{\partial s}p_e$. The third term models the exhange of energy between the electron and ion populations via binary Coulomb collisions and is attributed to \citet{braginskii_transport_1965}. $\nu_{ei}$ is the frequency of electron-ion collisions and is given by,
 \begin{equation}\label{eq:col_freq}
     \nu_{ei} = \frac{16\sqrt{\pi}}{3}\frac{e^4}{m_em_i}\left(\frac{2k_BT_e}{m_e}\right)^{-3/2}n\ln{\Lambda},
 \end{equation}
@@ -552,24 +547,46 @@ where $\ln{\Lambda}$ is the Coulomb logarithm \citep[see both Eq. 2.5e and Secti
 
 Lastly, $Q_e$ and $Q_i$ denote the energy injected into the electrons and ions by a the heating term. In general, this is a free parameter and may be a function of both $s$ and $t$. While it is often assumed, that all of the heating is supplied to the electrons, some heating mechanisms may also preferentially energize the ions. See \autoref{ch:inferring_hot_plasma} for more details. 
 
-Assuming electron-ion equilibrium ($T_e=T_i$) and adding \autoref{eq:hydrodynamic_energy_e} and \autoref{eq:hydrodynamic_energy_e} gives the single-fluid hydrodynamic energy equation,
+Assuming electron-ion equilibrium ($T_e=T_i$) and adding \autoref{eq:hydrodynamic_energy_e} and \autoref{eq:hydrodynamic_energy_i} gives the single-fluid hydrodynamic energy equation,
 \begin{equation}\label{eq:hydrodynamic_energy}
     \frac{\partial E}{\partial t} + \frac{\partial}{\partial s}\lbrack(E+p)v\rbrack = - \frac{\partial}{\partial s}F_c - n^2\Lambda(T) + \frac{\partial}{\partial s}\left(\frac{4}{3}\mu_iv\frac{\partial v}{\partial s}\right) +\rho vg + Q, 
 \end{equation}
-were $E=E_e + E_i$, $p=p_e+p_i$, and $F_c=F_{c,e} + F_{c,i}$. Under the  assumption of hydrostatic equilibrium ($v=0,\frac{\partial}{\partial t}=0$), this reduces to the hydrostatic energy balance equation, \autoref{eq:hydrostatic_energy}.
+were $E=E_e + E_i$, $p=p_e+p_i$, and $F_c=F_{c,e} + F_{c,i}$. Under the  assumption of hydrostatic equilibrium ($v=0,\frac{\partial}{\partial t}=0$), this reduces to the equation of hydrostatic energy balance, \autoref{eq:hydrostatic_energy}.
 
 \subsection{The Heating and Cooling Cycle of Coronal Loops}\label{sec:heating-cooling-cycle}
 
 \begin{figure}
     \centering
     \includegraphics[width=0.65\textwidth]{chapter2/figures/heating-cooling-cycle-cartoon.pdf}
-    \caption{A cartoon illustration of the heating and cooling cycle of an impulsively heated coronal loop. The red arrows denote energy injected by heating (a) and energy transported by thermal conduction (b). The blue arrows denote energy lost by radiation. The thick green arrows indicate the bulk transport of material in the loop.}
+    \caption{A cartoon illustration of the heating and cooling cycle of an impulsively heated coronal loop. The loop has a half-length of $L$ and is assumed to be symmetric about the apex. The red arrows denote energy injected by heating (a) and energy transported by thermal conduction (b). The blue arrows denote energy lost by radiation (d and e). The thick green arrows indicate the bulk transport of material in the loop (c, d, and e). The black arrows denote the order in which the cycle proceeds.}
     \label{fig:heating-cooling-cycle-cartoon}
 \end{figure}
 
-The response of the coronal loop plasma to an impulsive release of energy is reasonably well-understood and has been studied extensively, both in the context of flares and nanoflares \citep[e.g.][]{antiochos_influence_1976,antiochos_evaporative_1978,cargill_implications_1994,cargill_cooling_1995,cargill_nanoflare_2004}. \autoref{fig:heating-cooling-cycle-cartoon} shows a cartoon of the different phases of the heating, filling, cooling, and draining cycle of a coronal loop.
+If energy supplied by coronal heating cannot be balanced by radiation and thermal conduction in order to maintain hydrostatic equilibrium, the loop undergoes a cycle of heating, cooling, and draining according to the physics in \autoref{eq:hydrodynamic_mass}, \autoref{eq:hydrodynamic_momentum}, \autoref{eq:hydrodynamic_energy_e}, and \autoref{eq:hydrodynamic_energy_i}. This response of the coronal loop plasma to an impulsive release of energy is reasonably well-understood and has been studied extensively, both in the context of flares and nanoflares \citep[e.g.][]{antiochos_influence_1976,antiochos_evaporative_1978,cargill_implications_1994,cargill_cooling_1995,cargill_nanoflare_2004,bradshaw_cooling_2005,bradshaw_reinterpretation_2008,bradshaw_new_2010,bradshaw_cooling_2010}. \autoref{fig:heating-cooling-cycle-cartoon} shows a cartoon of the different phases of the heating, filling, cooling, and draining cycle of a coronal loop.
 
-% discuss each phase, derive approximations for cooling times, note importance of enthalpy-driven cooling
+Consider a loop initially in hydrostatic equilibrium that is then (uniformly) heated sufficiently quickly such that radiation and thermal conduction do not have time to balance this energy input. For the sake of simplicity, I will assume the single-fluid approximation as given in \autoref{eq:hydrostatic_energy} and a semi-circular loop with half-length $L$ that is symmetric about the apex as shown in \autoref{fig:heating-cooling-cycle-cartoon}. This is illustrated in phase (a) of \autoref{fig:heating-cooling-cycle-cartoon}. This excess heat raises the temperature of the loop and sets up a strong heat flux toward the lower atmosphere because $F_c \propto -T^{5/2}\frac{\partial T}{\partial s}$ and $T$ monotonically increases with $s$ from the TR up to the apex. This is shown in phase (b). Once conduction is able to match the coronal heating rate, the plasma begins to cool.
+
+Both radiation and conduction remove energy from corona and thus cool the plasma, but during this initial phase, conduction is more efficient. This is easily proved by considering the respective timescales of each of these processes. Following \citet{cargill_cooling_1995}, dropping all but the thermal conduction and radiative loss terms in \autoref{eq:hydrodynamic_energy} gives an apprximation of the conductive cooling time,
+\begin{align}
+    \frac{\partial}{\partial t}E \approx -\frac{\partial}{\partial s}F_c, \nonumber \\
+    \frac{3k_BnT}{\tau_C} \sim \frac{\kappa_0 T^{7/2}}{L^2}, \nonumber \\
+    \tau_C \sim \frac{3k_BL^2n}{\kappa_0T^{5/2}}, \label{eq:conductive_cooling_time}
+\end{align} 
+and the radiative cooling time,
+\begin{align}
+    \frac{\partial}{\partial t}E \approx -n^2\Lambda(T), \nonumber \\
+    \frac{3k_BnT}{\tau_R} \sim n^2\chi T^\alpha, \nonumber \\
+    \tau_R \sim \frac{3k_B}{\chi n T^{\alpha-1}}. \label{eq:radiative_cooling_time}
+\end{align}
+For $\alpha=-1/2$, $\tau_C \ll \tau_R$ for high temperatures and low densities such that conduction is more efficient than radiation at removing the excess energy in the corona. 
+
+Because energy lost by radiation is proportional to $n^2$, the dense underlying chromosphere and TR are efficient at radiating away the energy conducted downward from the corona. However, if radiation cannot keep pace with the coronal conductive flux, this excess energy will heat the chromosphere and effectively destabilize the pressure balance in \autoref{eq:hydrostatic_pressure}. This increase in temperature causes chromospheric and TR \citep{bradshaw_influence_2013} material to expand into the corona and increase the coronal density. This process is illustrated in phase (c) of \autoref{fig:heating-cooling-cycle-cartoon} and is called chromospheric ablation\footnote{Historically, this process is referred to as chromospheric ``evaporation.'' However, this terminology is potentially misleading and ``ablation'' is a more accurate term.}. Note that this upflow of material provides energy to the corona via an enthalpy flux \citep{antiochos_evaporative_1978}.
+
+As material fills the corona, $n$ increases and radiative cooling becomes more efficient. This further lowers the coronal temperature, weakens the downward conductive flux, and thus reduces chromospheric ablation. This is illustrated in panel (d). Once the corona has cooled sufficiently such that the downward conductive flux can be balanced by radiative losses in the TR, chromospheric ablation ceases. At this point, radiation has become just as efficient as thermal conduction such that $\tau_R\sim\tau_C$.
+
+As the corona continues to cool, the ablated material can no longer support the upward pressure gradient and the plasma falls back down the loop due to gravity (see \autoref{eq:hydrostatic_pressure}). This is shown in phase (e) of \autoref{fig:heating-cooling-cycle-cartoon}. At this point, radiative cooling is much more efficient compared to conductive cooling such that $\tau_R\gg\tau_C$. However, \citep{bradshaw_cooling_2010} note that the resulting enthalpy flux out of the corona from the downflow of material also represents a significant and sometimes dominant loss mechanism during this radiative and enthalpy-driven cooling phase\footnote{While this phase of the loop evolution is often referrred to as only the ``radiative cooling phase,'' this nomenclature is incomplete as it neglects an important component of the energy budget.}. Furthermore, \citep{bradshaw_reinterpretation_2008,bradshaw_cooling_2010} show that this enthalpy flux is important in powering the TR against collapse due to runaway radiative cooling.
+
+Provided the time-independent heating that initially supported the loop in hydrostatic equilibrium is still present, the loop will cool and drain until it reaches its equilibrium temperature and density. If the loop again undergoes some time-dependent heating, the cycle will start over. Note that the evolution of plasma is complicated if the loop is re-energized before the cooling and draining cycle is complete \citep[e.g.][or \autoref{sec:modeling-observables:heating}]{cargill_active_2014,barnes_inference_2016-1}.
 
 \subsection{The HYDRAD Model}\label{sec:hydrad}
 

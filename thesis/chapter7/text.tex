@@ -30,7 +30,7 @@ While such predicted diagnostics are useful in understanding how observables res
 
 Because of the ability to learn non-linear relationships from arbitrary data, machine learning  is an excellent tool for systematically comparing observations and simulations for a range of input parameters. Machine learning has a variety of applications in solar physics, from predicting coronal mass ejections \citep[e.g.][]{bobra_predicting_2016} to deconvolving magnetograms \citep{baso_enhancing_2018}. In particular, \citet{tajfirouze_time-resolved_2016} trained a probabilistic neural network (PNN) on  $>10^5$ modeled \SI{94}{\angstrom} and \SI{335}{\angstrom} AIA light curves simulated using EBTEL for a large parameter space of heating properties. They found that a sample of observed light curves were most consistent with many frequent events drawn from a power-law distribution with index $\alpha=-1.5$ though the overall agreement between the best fit and the observation was poor. Combined with predicted observables from sophisticated forward models, systematic comparisions using machine learning methods are well-poised to place strong constraints on heating properties in \AR s.
 
-In this paper, the second in a series concerned with constraining nanoflare heating properties, we train a random forest classification model to classify the heating frequency in each pixel of \AR{} NOAA 1158 using the predicted emission measure slopes, timelags, and maximum cross-correlations from \autoref{ch:modeling-observables}. In \autoref{sec:classifying-observables:observations}, we describe how the full 12 hours of multi-wavelength AIA observations were processed and how we computed the emission measure slope (\autoref{sec:classifying-observables:em_slopes}) and timelag (\autoref{sec:classifying-observables:timelags}). \autoref{sec:classifying-observables:compare} describes the random forest classification model as well as the data preparation procedure (\autoref{sec:classifying-observables:data-prep}) and \autoref{sec:classifying-observables:feature-combos} and \ref{sec:classifying-observables:feature-importance} show the predicted heating frequency in each pixel for several different combinations of features. In \autoref{sec:classifying-observables:discussion} we discuss the results of our classification model and provide some concluding comments in \autoref{sec:classifying-observables:conclusions}. To our knowledge, this paper represents the first attempt to use multiple diagnostics and machine learning to map the heating properties across an observed \AR{}.
+In this chapter, the second in a series concerned with constraining nanoflare heating properties, we train a random forest classification model to classify the heating frequency in each pixel of \AR{} NOAA 1158 using the predicted emission measure slopes, timelags, and maximum cross-correlations from \autoref{ch:modeling-observables}. In \autoref{sec:classifying-observables:observations}, we describe how the full 12 hours of multi-wavelength AIA observations were processed and how we computed the emission measure slope (\autoref{sec:classifying-observables:em_slopes}) and timelag (\autoref{sec:classifying-observables:timelags}). \autoref{sec:classifying-observables:compare} describes the random forest classification model as well as the data preparation procedure (\autoref{sec:classifying-observables:data-prep}) and \autoref{sec:classifying-observables:feature-combos} and \ref{sec:classifying-observables:feature-importance} show the predicted heating frequency in each pixel for several different combinations of features. In \autoref{sec:classifying-observables:discussion} we discuss the results of our classification model and provide some concluding comments in \autoref{sec:classifying-observables:conclusions}. To our knowledge, this represents the first attempt to use multiple diagnostics and machine learning to map the heating properties across an observed \AR{}.
 
 \section{Observations and Analysis}\label{sec:classifying-observables:observations}
 
@@ -428,12 +428,6 @@ ch7_compare = texfigure.Manager(
     fig_dir=os.path.join( '.', f'{name}', 'figures'),
     data_dir=os.path.join('.', 'chapter6', 'data'),
 )
-
-
-# Define cmap function and import needed functions
-def heating_cmap():
-    return matplotlib.colors.ListedColormap(PALETTE[:3], N=3)
-
 from classify import prep_data, classify_ar
 
 # Define needed parameters
@@ -462,7 +456,7 @@ meta = Map(os.path.join(ch7_compare.data_dir, 'observations', 'timelag_171_131.f
 
 # ML classification code here
 rf_options = {
-    'n_estimators': 100,
+    'n_estimators': 500,
     'max_features': 'sqrt',
     'criterion': 'gini',
     'max_depth': 30,
@@ -658,7 +652,14 @@ for i,c in enumerate(('a','b','c','d')):
                  SkyCoord(Tx=-225*u.arcsec,Ty=-150*u.arcsec,frame=m.coordinate_frame))
     ax = fig.add_subplot(2, 2, i+1, projection=m)
     axes.append(ax)
-    im = m.plot(axes=ax, title=False,annotate=False, vmin=-0.5, vmax=2.5, cmap=heating_cmap())
+    im = m.plot(
+        axes=ax,
+        title=False,
+        annotate=False,
+        vmin=-0.5,
+        vmax=2.5,
+        cmap='discrete_heating_frequency'
+    )
     ax.grid(alpha=0)
     # Axes and ticks
     lon, lat = ax.coords
@@ -771,7 +772,7 @@ An important caveat to this method for systematic comparison as we have applied 
 
 \section{Conclusions and Summary}\label{sec:classifying-observables:conclusions}
 
-In this paper, the second in our series on constraining nanoflare heating properties, we have used predicted diagnostics from \autoref{ch:modeling-observables} to systematically classify each pixel of \AR{} NOAA 1158 in terms of frequency of energy deposition. In particular, we first collect \SI{12}{\hour} of full-resolution SDO/AIA observations of NOAA 1158 in six EUV channels: \SIlist{94;131;171;193;211;335}{\angstrom}. We then co-align each image to a single time such that a given pixel in each image corresponds to approximately the same spatial coordinate and then crop the image to an area of \SI{500}{\arcsecond}-by-\SI{500}{\arcsecond} centered on the \AR{}.
+In this chapter, we have used predicted diagnostics from \autoref{ch:modeling-observables} to systematically classify each pixel of \AR{} NOAA 1158 in terms of frequency of energy deposition. In particular, we first collect \SI{12}{\hour} of full-resolution SDO/AIA observations of NOAA 1158 in six EUV channels: \SIlist{94;131;171;193;211;335}{\angstrom}. We then co-align each image to a single time such that a given pixel in each image corresponds to approximately the same spatial coordinate and then crop the image to an area of \SI{500}{\arcsecond}-by-\SI{500}{\arcsecond} centered on the \AR{}.
 
 Next, we compute two diagnostics from these observed intensities: the emission measure slope and the timelag. We time-average the intensities of all six channels and use the method \citet{hannah_differential_2012} to compute the emission measure distribution in each pixel of the \AR{}. We then compute the emission measure slope, $a$, by fitting $\log_{10}\textup{EM}\sim a\log_{10}T$ over the temperature range $\SI{8e5}{\kelvin}\le T < T_{peak}$. Next, we apply the timelag analysis of \citet{viall_evidence_2012} to the full \SI{12}{\hour} of observations of NOAA 1158 and compute the timelag, $\tau_{AB}$, and maximum cross-correlation, $\max\mathcal{C}_{AB}$, in each pixel of the \AR{} for all possible ``hot-cool'' pairs of the six EUV channels, 15 in total.
 

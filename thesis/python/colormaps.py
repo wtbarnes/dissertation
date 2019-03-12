@@ -1,5 +1,5 @@
 """
-Custom matplotlib colormaps
+Create custom matplotlib colormaps and register them
 """
 import matplotlib
 import matplotlib.colors
@@ -9,12 +9,17 @@ __all__ = []
 
 
 seaborn_deep = seaborn.color_palette('deep')
+seaborn_colorblind = seaborn.color_palette('colorblind')
 
 # Nicer red-blue colormaps using seaborn
 better_rdbu = matplotlib.colors.LinearSegmentedColormap.from_list(
     'better_RdBu', [seaborn_deep[3], 'w', seaborn_deep[0]])
 better_rdbu_r = matplotlib.colors.LinearSegmentedColormap.from_list(
     'better_RdBu_r', [seaborn_deep[0], 'w', seaborn_deep[3]])
+
+# Discrete colormap for heating frequencies
+discrete_heating_frequency = matplotlib.colors.ListedColormap(
+    seaborn_colorblind[:3], N=3, name='discrete_heating_frequency')
 
 # IDL colormap for timelags
 # See https://github.com/planetarymike/IDL-Colorbars
@@ -281,4 +286,5 @@ idl_bgry_004 = matplotlib.colors.LinearSegmentedColormap.from_list(
 # Register maps
 matplotlib.cm.register_cmap(name=better_rdbu.name, cmap=better_rdbu)
 matplotlib.cm.register_cmap(name=better_rdbu_r.name, cmap=better_rdbu_r)
+matplotlib.cm.register_cmap(name=discrete_heating_frequency.name, cmap=discrete_heating_frequency)
 matplotlib.cm.register_cmap(name=idl_bgry_004.name, cmap=idl_bgry_004)

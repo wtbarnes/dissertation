@@ -1,2 +1,788 @@
 % Text for chapter 7
-\chapter{Mapping the Frequency of Heating Events in Active Region NOAA 11158}\label{ch:classifying_observables}
+\chapter{Mapping the Heating Frequency in Active Region NOAA 11158}\label{ch:classifying-observables}
+
+In this chapter, I use a machine learning classification model to classify the heating frequency in each observed pixel of \AR{} NOAA 1158. In particular, I train a random forest classifier using the predicted emission measure slopes, timelags, and cross-correlations from \autoref{ch:modeling-observables}. I then classify each pixel of NOAA 1158 as consistent with high-, intermediate-, or low-frequency heating based on the emission measure slopes, timelags, and cross-correlations computed from the real AIA data. This chapter is adapted directly from \citet{barnes_understanding_2019-1} which is currently in preparation for publication.
+
+\section{Introduction}\label{sec:classifying-observables:introduction}
+
+A central problem in the study of the solar corona is whether EUV and soft X-ray observations of \AR s imply the plasma is heated steadily or impulsively. Observations of hot plasma by the X-Ray Telescope \citep[XRT,][]{golub_x-ray_2007} on the \textit{Hinode} spacecraft \citep{kosugi_hinode_2007} indicate that \AR{} cores are heated steadily \citep[e.g.][]{warren_constraints_2011,winebarger_using_2011}. Alternatively, observations of cooler ($\sim\SI{1}{\mega\kelvin}$) plasma have been shown to be more consistent with impulsive heating where the plasma is allowed to cool significantly \citep[e.g]{winebarger_evolving_2003,mulu-moore_determining_2011,ugarte-urra_investigation_2006,viall_patterns_2011,viall_evidence_2012}. More recent work \citep{del_zanna_evolution_2015,bradshaw_patterns_2016} suggests that observations of a single \AR{} may be consistent with both steady and impulsive heating, depending on the location within the \AR{}. Collectively, these results suggest that \AR s are heated by a range of frequencies.
+
+Two often-used diagnostics of the frequency of energy deposition in the coronal plasma are the cool emission measure slope and the timelag, the temporal offset which maximizes the cross-correlation between pairs of imaging channels. The emission measure distribution, $\mathrm{EM}(T)=\int\mathrm{d}h\,n_e^2$, where $n_e$ is the electron density and the integration is taken along the line of sight, is well-described by the power-law relationship $\textup{EM}(T)\sim T^a$, for $a>0$, over the temperature range $\SI{e5.5}{\kelvin}\lesssim T\lesssim\SI{e6.5}{\kelvin}$ \citep{jordan_structure_1975,jordan_structure_1976}. $a$, the emission measure slope in $\log-\log$ space, parameterizes the width of the emission measure distribution and is a commonly used diagnostic for the heating frequency \citep[e.g.][]{tripathi_emission_2011,winebarger_using_2011,warren_constraints_2011,mulu-moore_can_2011,bradshaw_diagnosing_2012,schmelz_cold_2012,reep_diagnosing_2013,del_zanna_evolution_2015}. \autoref{sec:em_slope} provides a detailed discussion of the emission measure slope.
+
+The timelag analysis of \citet{viall_evidence_2012} provides an additional diagnostic of the heating frequency. \citet{viall_patterns_2011} showed that, as the plasma cools, the intensity will peak in successively cooler passbands of the Atmospheric Imaging Assembly \citep[AIA,][]{lemen_atmospheric_2012} on the Solar Dynamics Observatory \citep[SDO,][]{pesnell_solar_2012} spacecraft. The temporal offset which maximizes the cross-correlation between these intensities is a proxy for the cooling time of the plasma between these channels. Provided the ``hot'' channel precedes the ``cool'' channel, cooling plasma produces a positive timelag. Additional details about the timelag and the calculation of the cross-correlation are given in \autoref{sec:timelag}. 
+
+Any viable heating model must account for the range of observed emission measure slopes and timelags \citep{viall_survey_2017}. However, accurately predicting the distributions of these observables for a given heating model is challenging as several factors are likely to impact these diagnostics, including multiple emitting structures along the LOS and non-equilibrium ionization \citep[e.g.][]{barnes_inference_2016}.
+
+In \autoref{ch:modeling-observables}, we forward modeled emission from \AR{} NOAA 1158 as observed by the six EUV channels of AIA. Using a potential field extrapolation combined with $5\times10^3$ separate instances of the Enthalpy-based Thermal Evolution of Loops model \citep[EBTEL,][]{klimchuk_highly_2008,cargill_enthalpy-based_2012,cargill_enthalpy-based_2012-1,barnes_inference_2016}, we predicted time-dependent intensities in each pixel of the \AR{} for a range of nanoflare heating frequencies. We defined the heating frequency in terms of the dimensionless ratio 
+\begin{equation}\tag{\ref{eq:modeling-observables:heating_types}}
+    \varepsilon = \frac{\langle\twait\rangle}{\tau_{\textup{cool}}}
+    \begin{cases} 
+        < 1, &  \text{high frequency},\\
+        \sim1, & \text{intermediate frequency}, \\
+        > 1, & \text{low frequency},
+     \end{cases}
+\end{equation}
+where $\tau_{\textup{cool}}$ is the fundamental cooling timescale due to thermal conduction and radiation \citep[see appendix of][]{cargill_active_2014} and $\langle \twait\rangle$ is the average waiting time between consecutive heating events on a given strand. As in \autoref{ch:classifying-observables}, we define a \textit{strand} to be a flux tube with the largest possible isothermal cross-section and the fundamental unit of the corona while a \textit{loop} is an intensity enhancement relative to the background diffuse emission and an observationally-defined feature.
+
+From our predicted intensities, we computed the emission measure slope as well as the timelag and the maximum cross-correlation for all 15 AIA channel pairs. We found that signatures of the heating frequency persist in both the emission measure slope and the timelag and that, in particular, negative timelags where the ``cool'' channel is \SI{131}{\angstrom}, provide a possible diagnostic for $\ge\SI{10}{\mega\kelvin}$ plasma.
+
+While such predicted diagnostics are useful in understanding how observables respond to the frequency of energy deposition, systematically assessing real observations in terms of said model results is nontrivial. Attempts to tune model parameters to exactly match a single observation (e.g. a lightcurve from a single pixel) are not likely to generalize well to other data (``overfitting''). Additionally, purely qualitative comparisons between real data and forward models provide no constraint on the observation with respect to the model inputs, regardless of how sophisticated the simulation may be.
+
+Because of the ability to learn non-linear relationships from arbitrary data, machine learning  is an excellent tool for systematically comparing observations and simulations for a range of input parameters. Machine learning has a variety of applications in solar physics, from predicting coronal mass ejections \citep[e.g.][]{bobra_predicting_2016} to deconvolving magnetograms \citep{baso_enhancing_2018}. In particular, \citet{tajfirouze_time-resolved_2016} trained a probabilistic neural network (PNN) on  $>10^5$ modeled \SI{94}{\angstrom} and \SI{335}{\angstrom} AIA light curves simulated using EBTEL for a large parameter space of heating properties. They found that a sample of observed light curves were most consistent with many frequent events drawn from a power-law distribution with index $\alpha=-1.5$ though the overall agreement between the best fit and the observation was poor. Combined with predicted observables from sophisticated forward models, systematic comparisions using machine learning methods are well-poised to place strong constraints on heating properties in \AR s.
+
+In this paper, the second in a series concerned with constraining nanoflare heating properties, we train a random forest classification model to classify the heating frequency in each pixel of \AR{} NOAA 1158 using the predicted emission measure slopes, timelags, and maximum cross-correlations from \autoref{ch:modeling-observables}. In \autoref{sec:classifying-observables:observations}, we describe how the full 12 hours of multi-wavelength AIA observations were processed and how we computed the emission measure slope (\autoref{sec:classifying-observables:em_slopes}) and timelag (\autoref{sec:classifying-observables:timelags}). \autoref{sec:classifying-observables:compare} describes the random forest classification model as well as the data preparation procedure (\autoref{sec:classifying-observables:data-prep}) and \autoref{sec:classifying-observables:feature-combos} and \ref{sec:classifying-observables:feature-importance} show the predicted heating frequency in each pixel for several different combinations of features. In \autoref{sec:classifying-observables:discussion} we discuss the results of our classification model and provide some concluding comments in \autoref{sec:classifying-observables:conclusions}. To our knowledge, this paper represents the first attempt to use multiple diagnostics and machine learning to map the heating properties across an observed \AR{}.
+
+\section{Observations and Analysis}\label{sec:classifying-observables:observations}
+
+% spell-checker: disable %
+\begin{pycode}[chapter7_observations]
+name = 'chapter7'
+ch7_observations = texfigure.Manager(
+    pytex,
+    os.path.join('.', name),
+    number=7,
+    python_dir=os.path.join( '.', f'{name}', 'python'),
+    fig_dir=os.path.join( '.', f'{name}', 'figures'),
+    data_dir=os.path.join('.', 'chapter6', 'data'),
+)
+
+channels = [94, 131, 171, 193, 211, 335]
+heating = [ 'high_frequency', 'intermediate_frequency', 'low_frequency']
+channel_pairs = [
+    (94,335),
+    (94,171),
+    (94,193),
+    (94,131),
+    (94,211),
+    (335,131),
+    (335,193),
+    (335,211),
+    (335,171),
+    (211,131),
+    (211,171),
+    (211,193),
+    (193,171),
+    (193,131),
+    (171,131),
+]
+correlation_threshold = 0.1
+rsquared_threshold = 0.75
+\end{pycode}
+% spell-checker: enable %
+
+We analyze \SI{12}{\hour} of AIA observations of \AR{} NOAA 1158 in six EUV channels, \SIlist{94;131; 171;193;211;335}{\angstrom}, beginning at 2011 February 12 12:00:00 UTC and ending at 2011 February 13 00:00:00 UTC. The \AR{} was chosen from the catalogue of \AR s originally compiled by \citet{warren_systematic_2012} and was also studied by \citet{viall_survey_2017}. The full-disk, level-1 AIA data products in FITS file format are obtained from the Joint Science Operations Center \citep[JSOC,][]{couvidat_observables_2016} archive at the full instrument cadence of \SI{12}{\second} and the full spatial resolution of \SI{0.6}{\arcsecond\per\pixel}. This amounts to a total of 21597 images across all six channels and the entire \SI{12}{\hour} observing window.
+
+After downloading the data, we apply the \texttt{aiaprep} method, as implemented in SunPy \citep{sunpy_community_sunpypython_2015}, to each full-disk image in order to process the level-1 data into level-1.5 data and divide each image by the exposure time. Next, we align each image with the observation at 2011 February 12 15:33:45 UTC (the time of the original observation of NOAA 1158 by \citet{warren_systematic_2012}) by ``derotating'' each image using the Snodgrass empirical rotation rate \citep{snodgrass_magnetic_1983}. After aligning the images in every channel to a common time, we crop each full-disk image such that the bottom left corner of the image is $(\SI{-440}{\arcsecond},\SI{-375}{\arcsecond})$ and the top right corner is $(\SI{-140}{\arcsecond},\SI{-75}{\arcsecond})$, where the two coordinates are the longitude and latitude, respectively, in the helioprojective coordinate system \citep[see][]{thompson_coordinate_2006} defined by an observer at the location of the SDO spacecraft on 2011 February 12 15:33:45. \autoref{fig:classifying-observables:intensity-maps} shows the level-1.5, derotated and cropped AIA observations of \AR{} NOAA 1158 at 2011 February 12 15:33:45 in all six EUV channels of interest.
+
+% spell-checker: disable %
+\begin{pycode}[chapter7_observations]
+# AIA sample files
+fits_files = [
+    'aia_lev1.5_20110212T153238_94_cutout.fits',
+    'aia_lev1.5_20110212T153245_131_cutout.fits',
+    'aia_lev1.5_20110212T153248_171_cutout.fits',
+    'aia_lev1.5_20110212T153243_193_cutout.fits',
+    'aia_lev1.5_20110212T153248_211_cutout.fits',
+    'aia_lev1.5_20110212T153239_335_cutout.fits',
+]
+
+# Setup figure
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=1,
+    height_ratio=2.25/3,
+))
+plt.subplots_adjust(hspace=0.04, wspace=0.03)
+
+# Plot maps
+for i,f in enumerate(fits_files):
+    m = Map(os.path.join(ch7_observations.data_dir, 'observations', f))
+    m = Map(m.data/m.meta['exptime'], m.meta)
+    m = m.submap(SkyCoord(Tx=-440*u.arcsec,Ty=-380*u.arcsec,frame=m.coordinate_frame),
+                 SkyCoord(Tx=-185*u.arcsec,Ty=-125*u.arcsec,frame=m.coordinate_frame))
+    ax = fig.add_subplot(2, 3, i+1, projection=m)
+    norm = ImageNormalize(vmin=0, vmax=m.data.max(), stretch=SqrtStretch())
+    im = m.plot(axes=ax, title=False, annotate=False, norm=norm)
+    ax.grid(alpha=0)
+    lon,lat = ax.coords
+    lon.set_ticks(color='k', number=4)
+    lat.set_ticks(color='k', number=4)
+    if i != 3:
+        lon.set_ticklabel_visible(False)
+        lat.set_ticklabel_visible(False)
+    else:
+        lat.set_ticklabel(rotation='vertical')
+        lon.set_axislabel('Helioprojective Longitude')
+        lat.set_axislabel('Helioprojective Latitude')
+    xtext,ytext = m.world_to_pixel(SkyCoord(-435*u.arcsec, -130*u.arcsec, frame=m.coordinate_frame))
+    ax.text(
+        xtext.value, ytext.value,
+        f'{m.meta["wavelnth"]}' + r' \si{\angstrom}',
+        color='w',
+        fontsize=plt.rcParams['legend.fontsize'],
+        verticalalignment='top',
+        horizontalalignment='left',
+    )
+    pos = ax.get_position().get_points()
+    cax = fig.add_axes([pos[0,0], pos[1,1]+0.0075, pos[1,0]-pos[0,0], 0.015])
+    cbar = fig.colorbar(im, cax=cax, orientation='horizontal')
+    cbar.locator = matplotlib.ticker.MaxNLocator(nbins=4, prune='lower')
+    cbar.ax.tick_params(labelsize=0.75*plt.rcParams['legend.fontsize'], width=0.5)
+    cbar.update_ticks()
+    cbar.ax.xaxis.set_ticks_position('top')
+    cbar.outline.set_linewidth(0.5)
+
+# Save
+tfig = ch7_observations.save_figure('classifying-observables:intensity-maps', fext='.pdf')
+tfig.caption = r'Active region NOAA 1158 as observed by AIA on 2011 February 12 15:32 UTC in the six EUV channels of interest. The data have been processed to level-1.5, aligned to the image at 2011 February 12 15:33:45 UTC, and cropped to the area surrounding NOAA 1158. The intensities are in units of \si{\dn\per\pixel\per\second}. In each image, the colorbar is on a square root scale and is normalized between zero and the maximum intensity. The color tables are the standard AIA color tables as implemented in SunPy.'
+\end{pycode}
+\py[chapter7_observations]|tfig|
+% spell-checker: enable %
+
+\subsection{Emission Measure Slopes}\label{sec:classifying-observables:em_slopes}
+
+After prepping, aligning, and cropping all \SI{12}{\hour} of AIA data for all six channels, we carry out the same analysis that we applied to our predicted observations in \autoref{ch:modeling-observables} in order to compute two diagnostics of the heating: the emission measure slope and the timelag. First, we compute the emission measure distribution, $\emd$, in each pixel of the \AR{} from the time-averaged intensities from all six channels using the regularized inversion method of \citet{hannah_differential_2012}. As described in \autoref{sec:modeling-observables:em_slopes}, we use temperature bins of width $\Delta\log T=0.1$ with the left and right edges at \SI{e5.5}{\kelvin}  and \SI{e7.2}{\kelvin}, respectively. The uncertainties on the intensities are estimated using the \texttt{aia\_bp\_estimate\_error.pro} procedure provided by the AIA instrument team in the SolarSoftware package \citep[SSW,][]{freeland_data_1998}.
+
+% EM slope figure map
+
+% spell-checker: disable %
+\begin{pycode}[chapter7_observations]
+# Setup figure
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=0.65,
+    height_ratio=1,
+))
+
+# Plot
+slope_map = Map(os.path.join(ch7_observations.data_dir, 'observations', 'em_slope.fits'))
+rsquared_map = Map(os.path.join(ch7_observations.data_dir, 'observations', 'em_slope_rsquared.fits'))
+slope_map = Map(slope_map.data, slope_map.meta, mask=rsquared_map.data < rsquared_threshold)
+slope_map = slope_map.submap(
+    SkyCoord(Tx=-410*u.arcsec,Ty=-325*u.arcsec,frame=slope_map.coordinate_frame),
+    SkyCoord(Tx=-225*u.arcsec,Ty=-150*u.arcsec,frame=slope_map.coordinate_frame))
+ax = fig.gca(projection=slope_map)
+im = slope_map.plot(
+    axes=ax,
+    cmap='viridis',
+    vmin=1.5,
+    vmax=5.5,
+    title=False,
+    annotate=False
+)
+ax.grid(alpha=0)
+
+# Axes
+lon,lat = ax.coords
+lon.set_ticks(number=4)
+lat.set_ticks(number=2)
+lat.set_ticklabel(rotation='vertical')
+lon.set_axislabel('Helioprojective Longitude',)
+lat.set_axislabel('Helioprojective Latitude',)
+
+# Colorbar
+pos = ax.get_position().get_points()
+cax = fig.add_axes([pos[0,0], pos[1,1]+0.01, pos[1,0]-pos[0,0], 0.025])
+cbar = fig.colorbar(im,cax=cax, orientation='horizontal',)
+cbar.ax.xaxis.set_ticks_position('top')
+cbar.set_ticks([2,3,4,5])
+cbar.ax.tick_params(width=0.5)
+cbar.outline.set_linewidth(0.5)
+
+# Save
+tfig = ch7_observations.save_figure('classifying-observables:em-slopes-map', fext='.pdf')
+tfig.caption = r'Map of emission measure slope, $a$, in each pixel of \AR{} NOAA 1158. The $\emd$ is computed from the observed AIA intensities in the six EUV channels time-averaged over the \SI{12}{\hour} observing window. The $\emd$ in each pixel is then fit to $T^a$ over the temperature interval $\SI{8e5}{\kelvin}\le T < T_{peak}$. Any pixels with $r^2<0.75$ are masked and colored white.'
+tfig.figure_width = r'0.65\textwidth'
+\end{pycode}
+\py[chapter7_observations]|tfig|
+% spell-checker: enable %
+
+\autoref{fig:classifying-observables:em-slopes-map} shows the emission measure slope, $a$, as computed from the observed emission measure distribution in each pixel of \AR{} NOAA 1158. We calculate $a$ by fitting a first-order polynomial to the log-transformed emission measure and the temperature bin centers, $\log_{10}\textup{EM}\sim a\log_{10}T$. As in \autoref{ch:modeling-observables}, the fit is only computed over the temperature range $\SI{8e5}{\kelvin}\le T \le T_{peak}$, where $T_\textup{peak}=\argmax_T\,\textup{EM}(T)$ is the temperature at which the emission measure distribution peaks. If $r^2<\py[chapter7_observations]|rsquared_threshold|$ in any pixel, where $r^2$ is the correlation coefficient for the first-order polynomial fit, the pixel is masked and colored white. 
+
+The emission measure slope tends to be more steep near the center of the \AR{} and tends to increase from $\sim2.5$ to $>5$ as we move from the periphery to the inner core of the \AR{}. This result is consistent with \citet{del_zanna_evolution_2015} who computed the emission measure slope in each pixel of \AR{} NOAA 1193 and found that $a$ was greatest near the middle of the \AR{}. The exception to this trend is the spatially-coherent structure on the lower edge of the \AR{} which shows emission measure slopes $>5$. A few regions on the top edge also show higher emission measure slopes. The patchy appearance in some areas of the slope map is due to the different values of $T_\textup{peak}$ and the finite width of the temperature bins in the $\emd$.
+
+% EM slope figure hist
+
+% spell-checker: disable %
+\begin{pycode}[chapter7_observations]
+# Setup figure
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=0.85,
+    height_ratio=0.75,
+))
+ax = fig.gca()
+
+bins = np.arange(0, 8, 0.05)
+colors = ['k'] + PALETTE
+
+# Plot Model EM Slopes
+for i,h in enumerate(['observations'] + heating):
+    m = Map(os.path.join(ch7_observations.data_dir, f'{h}', 'em_slope.fits'))
+    m_rsquared = Map(os.path.join(ch7_observations.data_dir, f'{h}', 'em_slope_rsquared.fits'))
+    m = Map(m.data, m.meta, mask=m_rsquared.data < rsquared_threshold)
+    _,b,_ = ax.hist(
+        m.data[~m.mask],
+        bins='fd',
+        histtype='step',
+        density=True,
+        color=colors[i],
+        label=h.split('_')[0].capitalize(),
+        lw=plt.rcParams['lines.linewidth'],
+    )
+    if h == 'observations':
+        a_mean = m.data[~m.mask].mean()
+        a_std = m.data[~m.mask].std()
+
+# Ticks and Labels
+ax.set_xlim(1, 8);
+ax.xaxis.set_major_locator(matplotlib.ticker.FixedLocator([2, 3, 4, 5, 6, 7]))
+ax.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(nbins=7, prune='both'))
+ax.set_xlabel(r'$a$')
+ax.set_ylabel(r'Number of Pixels (Normalized)')
+ax.legend(frameon=False, loc=1)
+
+### Save ###
+tfig = ch7_observations.save_figure('classifying-observables:em-slopes-hist', fext='.pgf')
+tfig.caption = r'Distribution of emission measure slopes from \autoref{fig:classifying-observables:em-slopes-map} (black) and from \autoref{ch:modeling-observables} (blue, orange, green). In each case, the bins are determined using the Freedman Diaconis estimator \citep{freedman_histogram_1981} as implemented in the Numpy package for array computation in Python \citep{oliphant_guide_2006}. Each histogram is normalized such that the area under the histogram is equal to 1.'
+tfig.figure_width = r'0.85\columnwidth'
+\end{pycode}
+\py[chapter7_observations]|tfig|
+% spell-checker: enable %
+
+\autoref{fig:classifying-observables:em-slopes-hist} shows the distribution of emission measure slopes for every pixel in the \AR{} where $r^2\ge\py[chapter7_observations]|rsquared_threshold|$. As noted in the legend, the black histogram denotes the slopes computed from the real AIA observations while the blue, orange, and green histograms are the distributions of emission measure slopes computed from the predicted AIA intensities in \autoref{ch:modeling-observables} for high-, intermediate-, and low-frequency nanoflares, respectively. The mean of the observed distribution of $a$ is \py[chapter7_observations]|f'{a_mean:.2f}'| and the standard deviation is \py[chapter7_observations]|f'{a_std:.2f}'|. 
+
+We find that the observed distribution of slopes overlaps the distributions of predicted slopes for all three heating scenarios, suggesting that a range of nanoflare heating frequencies is operating across the \AR. In particular, the observed distribution of slopes overlaps quite strongly with both the intermediate- and high frequency-slopes. Compared to the simulated distributions of $a$ for low- and intermediate-frequency heating, the observed distribution is wide with a relatively flat top between $a\approx3$ and $a\approx4$. The observed distribution is not strongly peaked about a single value of $a$.
+
+\subsection{Timelags}\label{sec:classifying-observables:timelags}
+
+Next, we apply the timelag analysis of \citet{viall_evidence_2012} to every pixel in the \AR{} over the entire 12-hour observing window at the full temporal and spatial resolution. As in \autoref{sec:modeling-observables:timelags}, we compute the cross-correlation, $\mathcal{C}_{AB}$, between all possible ``hot-cool'' pairs, $AB$, of the six EUV channels of AIA (15 in total) and find the timelag, $\tau_{AB}$, the temporal offset which maximizes the cross-correlation, in each pixel of the observed \AR{}. We consider all possible offsets over the interval $\pm\SI{6}{\hour}$. Following the convention of \citet{viall_evidence_2012}, the channel pairs are ordered such that the ``hot'' channel is listed first, meaning that \textit{a positive timelag indicates cooling plasma}. The response for each of the six EUV channels of AIA as a function of temperature is shown in \autoref{fig:aia-temperature-response}. The details of the cross-correlation and timelag calculations can be found in \autoref{sec:timelag}.
+
+Note that \citet{viall_survey_2017} carried out the timelag analysis on this same \AR{}, NOAA 1158 (their region 2), as part of a survey of the catalogue of \AR{}s compiled by \citet{warren_systematic_2012}. We repeat this analysis here to ensure that we are treating the observed intensities in the exact same manner as the predicted intensities from \autoref{ch:modeling-observables}.
+
+% spell-checker: disable %
+\begin{pycode}[chapter7_observations]
+# Setup figure
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=1,
+    height_ratio=2.95/5,
+))
+plot_params = {
+    'title': False, 
+    'annotate': False,
+    'vmin': -(5e3*u.s).to(u.s).value,
+    'vmax': (5e3*u.s).to(u.s).value,
+    'cmap': 'idl_bgry_004',
+}
+file_format = os.path.join(ch7_observations.data_dir, 'observations', '{}_{}_{}.fits')
+
+# Plot each map
+axes = []
+for i,cp in enumerate(channel_pairs):
+    m = Map(file_format.format( 'timelag', *cp))
+    mc = Map(file_format.format( 'correlation', *cp))
+    m = Map(m.data, m.meta, mask=np.where(mc.data<=correlation_threshold, True, False))
+    m = m.submap(SkyCoord(Tx=-440*u.arcsec,Ty=-380*u.arcsec,frame=m.coordinate_frame),
+                 SkyCoord(Tx=-185*u.arcsec,Ty=-125*u.arcsec,frame=m.coordinate_frame))
+    ax = fig.add_subplot(3, 5, i+1, projection=m)
+    axes.append(ax)
+    im = m.plot(axes=ax, **plot_params)
+    ax.grid(alpha=0)
+    lon = ax.coords[0]
+    lat = ax.coords[1]
+    lon.set_ticks(number=3)
+    lat.set_ticks(number=3,) 
+    if i == 5:
+        lat.set_ticklabel(rotation='vertical', exclude_overlapping=True)
+        lat.set_axislabel(r'Helioprojective Latitude',)
+    else:
+        lat.set_ticklabel_visible(False)
+    if i == 11:
+        lon.set_axislabel(r'Helioprojective Longitude')
+        lon.set_ticklabel(exclude_overlapping=True)
+    else:
+        lon.set_ticklabel_visible(False)
+    xtext,ytext = m.world_to_pixel(SkyCoord(-190*u.arcsec, -360*u.arcsec, frame=m.coordinate_frame))
+    ax.text(
+        xtext.value,ytext.value,
+        '{}-{}'.format(*cp) + r' \si{\angstrom}',
+        color='k',
+        fontsize=0.75*plt.rcParams['legend.fontsize'],
+        horizontalalignment='right',
+        verticalalignment='bottom',
+    )
+plt.subplots_adjust(wspace=0.03, hspace=0.03)
+
+# Colorbar
+cax = fig.add_axes([
+    axes[0].get_position().get_points()[0,0],
+    axes[4].get_position().get_points()[1,1] + 0.01,
+    axes[-1].get_position().get_points()[1,0] - axes[0].get_position().get_points()[0,0], 
+    0.02
+])
+cbar = fig.colorbar(im, cax=cax, orientation='horizontal')
+cbar.ax.xaxis.set_ticks_position('top')
+cbar.ax.tick_params(width=0.5)
+cbar.outline.set_linewidth(0.5)
+
+# Save
+tfig = ch7_observations.save_figure('classifying-observables:timelags', fext='.pdf')
+tfig.caption = r'Timelag maps of \AR{} NOAA 1158 for all 15 channel pairs. The value of each pixel indicates the temporal offset, in \si{\second}, which maximizes the cross-correlation (see \autoref{subsec:cross_correlation}). The range of the colorbar is $\pm\SI{5000}{\second}$. If $\max\mathcal{C}_{AB}<0.1$, the pixel is masked and colored white. Each map has been cropped to emphasize the core of the \AR{} such that the bottom left corner and top right corner of each image correspond to $(\SI{-440}{\arcsecond},\SI{-380}{\arcsecond})$ and $(\SI{-185}{\arcsecond},\SI{-125}{\arcsecond})$, respectively.'
+\end{pycode}
+\py[chapter7_observations]|tfig|
+% spell-checker: enable %
+
+\autoref{fig:classifying-observables:timelags} shows the timelag maps of \AR{} NOAA 1158 for all 15 channel pairs. Blacks, blues, and greens indicate negative timelags while reds, oranges, and yellows correspond to positive timelags. Olive green denotes zero timelag. The range of the colorbar is $\pm\SI{5000}{\second}$. If the maximum cross-correlation in a given pixel is too small ($\max\mathcal{C}_{AB}<\py[chapter7_observations]|correlation_threshold|$), the pixel is masked and colored white.
+
+For the majority of the channel pairs, we find persistent positive timelags across most of the \AR{}, indicative of plasma cooling through the AIA passbands. The 94-131, 211-131, 193-171, and 193-131 \si{\angstrom} pairs show coherent positive timelags near the edge of the \AR{}, but zero timelag in the center of the \AR{}. On the other hand, the 211-193 and 171-131 \si{\angstrom} channel pairs show zero timelag in nearly every pixel of the \AR{}. From \autoref{fig:aia-temperature-response}, we see that both of these channel pairs are strongly overlapping in temperature space such that their respective peaks in intensity are likely to be close to coincident in time as the plasma cools. 
+
+Additionally, the 94-335, 94-193, and 94-211 \si{\angstrom} pairs all show significant coherent negative timelags. Because the \SI{94}{\angstrom} channel is bimodal in temperature (see \autoref{fig:aia-temperature-response}), a negative timelag is indicative of the plasma cooling first through the ``cool'' channel and then through the cooler component of the \SI{94}{\angstrom} bandpass. The 94-171 and 94-131 pairs show only positive timelags because the \SIlist{171;131}{\angstrom} channels peak at cooler temperatures than the cool component of the \SI{94}{\angstrom} channel. See \citet{viall_survey_2017} for a more detailed discussion of the timelag results from NOAA 1158. Note that unlike the predicted timelags in \autoref{ch:modeling-observables}, none of the pairs involving the \SI{131}{\angstrom} channel, which is also bimodal in temperature, show any coherent negative timelags and, in particular, the inner cores of each \SI{131}{\angstrom} pair show zero timelag.
+
+% spell-checker: disable %
+\begin{pycode}[chapter7_observations]
+# Setup figure
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=1,
+    height_ratio=2.95/5,
+))
+
+plot_params = {
+    'title': False, 
+    'annotate': False,
+    'vmin': 0,
+    'vmax': 1,
+    'cmap': 'magma',
+}
+
+# Plot maps
+axes = []
+for i,cp in enumerate(channel_pairs):
+    m = Map(file_format.format('correlation', *cp))
+    m = m.submap(SkyCoord(Tx=-440*u.arcsec,Ty=-380*u.arcsec,frame=m.coordinate_frame),
+                 SkyCoord(Tx=-185*u.arcsec,Ty=-125*u.arcsec,frame=m.coordinate_frame))
+    ax = fig.add_subplot(3, 5, i+1, projection=m)
+    axes.append(ax)
+    im = m.plot(axes=ax, **plot_params)
+    ax.grid(alpha=0)
+    lon = ax.coords[0]
+    lat = ax.coords[1]
+    lon.set_ticks(number=3)
+    lat.set_ticks(number=3,) 
+    if i == 5:
+        lat.set_ticklabel(rotation='vertical', exclude_overlapping=True)
+        lat.set_axislabel(r'Helioprojective Latitude',)
+    else:
+        lat.set_ticklabel_visible(False)
+    if i == 11:
+        lon.set_axislabel(r'Helioprojective Longitude')
+        lon.set_ticklabel(exclude_overlapping=True)
+    else:
+        lon.set_ticklabel_visible(False)
+    xtext,ytext = m.world_to_pixel(SkyCoord(-430*u.arcsec, -135*u.arcsec, frame=m.coordinate_frame))
+    ax.text(
+        xtext.value,ytext.value,
+        '{}-{}'.format(*cp) + r' \si{\angstrom}',
+        color='w',
+        fontsize=0.75*plt.rcParams['legend.fontsize'],
+        horizontalalignment='left',
+        verticalalignment='top',
+    )
+plt.subplots_adjust(wspace=0.03, hspace=0.03)
+
+# Colorbar
+cax = fig.add_axes([
+    axes[0].get_position().get_points()[0,0],
+    axes[4].get_position().get_points()[1,1] + 0.01,
+    axes[-1].get_position().get_points()[1,0] - axes[0].get_position().get_points()[0,0], 
+    0.02
+])
+cbar = fig.colorbar(im, cax=cax, orientation='horizontal')
+cbar.ax.xaxis.set_ticks_position('top')
+cbar.ax.tick_params(width=0.5)
+cbar.outline.set_linewidth(0.5)
+
+# Save
+tfig = ch7_observations.save_figure('classifying-observables:correlations', fext='.pdf')
+tfig.caption = r'Same as \autoref{fig:classifying-observables:timelags} except here we show the maximum value of the cross-correlation, $\max\mathcal{C}_{AB}$, for each channel pair.'
+\end{pycode}
+\py[chapter7_observations]|tfig|
+% spell-checker: enable %
+
+\autoref{fig:classifying-observables:correlations} shows the maximum cross-correlation, $\max\mathcal{C}_{AB}$, in each pixel of the \AR{}. In this figure, we do not mask any of the pixels. Though the value of the cross-correlation can range from $-1$ (perfectly anti-correlated) to $+1$ (perfectly correlated), the colorbar only ranges from 0 to 1 as we are only interested in whether the lightcurves in each channel pair are in phase.
+
+In every channel pair, we find that the maximum cross-correlation is highly structured, indicating that these loops and the surrounding diffuse emission are evolving coherently through the AIA passbands. In most channel pairs, the inner core tends to have the highest cross-correlation while areas near the corners of the images have low cross-correlation. Note that the channel pairs which had the most zero timelags in \autoref{fig:classifying-observables:timelags}, 211-193 and 171-131, show high cross-correlations across the entire \AR{}. This again emphasizes the point that zero timelags do not correspond to steady heating. If the whole \AR{} was heated steadily, we would expect low cross-correlation and no preferred timelag due to the photon noise dominating the variability in each channel \citep{viall_signatures_2016}.
+
+\section{Classification Model}\label{sec:classifying-observables:compare}
+
+% spell-checker: disable %
+\begin{pycode}[chapter7_compare]
+# Setup manager
+name = 'chapter7'
+ch7_compare = texfigure.Manager(
+    pytex,
+    os.path.join('.', name),
+    number=7,
+    python_dir=os.path.join( '.', f'{name}', 'python'),
+    fig_dir=os.path.join( '.', f'{name}', 'figures'),
+    data_dir=os.path.join('.', 'chapter6', 'data'),
+)
+
+
+# Define cmap function and import needed functions
+def heating_cmap():
+    return matplotlib.colors.ListedColormap(PALETTE[:3], N=3)
+
+from classify import prep_data, classify_ar
+
+# Define needed parameters
+channels = [94, 131, 171, 193, 211, 335]
+heating = [ 'high_frequency', 'intermediate_frequency', 'low_frequency']
+channel_pairs = [
+    (94,335), (94,171), (94,193), (94,131), (94,211), (335,131), (335,193), (335,211), (335,171),
+    (211,131), (211,171), (211,193), (193,171), (193,131), (171,131),
+]
+correlation_threshold = 0.1
+rsquared_threshold = 0.75
+
+# Prep data
+X, Y, X_observation, bad_pixels = prep_data(
+    ch7_compare.data_dir,
+    channel_pairs,
+    heating,
+    correlation_threshold=correlation_threshold,
+    rsquared_threshold=rsquared_threshold,
+    scale_slope=False,
+    scale_timelag=False,
+    scale_correlation=False,
+)
+# Dummy metadata for creating maps
+meta = Map(os.path.join(ch7_compare.data_dir, 'observations', 'timelag_171_131.fits')).meta
+
+# ML classification code here
+rf_options = {
+    'n_estimators': 100,
+    'max_features': 'sqrt',
+    'criterion': 'gini',
+    'max_depth': 30,
+    'min_samples_leaf': 1,
+    'min_samples_split': 2,
+    'bootstrap': True,
+    'oob_score': True,
+    'max_leaf_nodes': None,
+    'min_impurity_decrease': 0,
+    'n_jobs': -1,
+}
+frequency_maps = {}
+probability_maps = {}
+test_error = {}
+
+# EM slope only
+f_map, p_maps, _, err = classify_ar(rf_options, X[:,-1:], Y, X_observation[:,-1:], bad_pixels,)
+frequency_maps['a'] = f_map
+probability_maps['a'] = p_maps
+test_error['a'] = err
+
+# Timelags, cross-correlation only
+f_map, p_maps, _, err = classify_ar(rf_options, X[:,:-1], Y, X_observation[:,:-1], bad_pixels)
+frequency_maps['b'] = f_map
+probability_maps['b'] = p_maps
+test_error['b'] = err
+
+# EM slope, timelags, cross-correlation
+f_map, p_maps, clf, err = classify_ar(rf_options, X, Y, X_observation, bad_pixels)
+frequency_maps['c'] = f_map
+probability_maps['c'] = p_maps
+test_error['c'] = err
+
+# Calculate feature importances
+importances = clf.feature_importances_
+i_important = np.argsort(importances)[::-1]
+std = np.std([t.feature_importances_ for t in clf.estimators_], axis=0)
+
+# Top 10 features
+f_map, p_maps, _, err = classify_ar(rf_options, X[:, i_important[:10]], Y,
+                                    X_observation[:, i_important[:10]], bad_pixels)
+frequency_maps['d'] = f_map
+probability_maps['d'] = p_maps
+test_error['d'] = err
+\end{pycode}
+% spell-checker: enable %
+
+Rather than manually comparing our observations and simulations using all of the aformentioned diagnostics, we systematically assess our observations of NOAA 1158 in terms of the heating frequency by training a random forest classifier comprised of many decision tress on our predicted observables from \autoref{ch:modeling-observables}. We then use our trained model to classify each observed pixel in terms of high-, intermediate-, or low-frequency heating as defined in \autoref{eq:modeling-observables:heating_types}. Unlike more traditional statistical methods, this approach allows us to simultaneously consider an arbitrarily large number of features when deciding which frequency best fits the observation. In the parlance of statistical learning, the heating frequency (low, intermediate, or high) is the \textit{class}, the emission measure slope, timelag, and cross-correlation are the \textit{features}, and the pixels are the \textit{samples}.
+
+Following the explanation of \citet[chapter 8]{james_introduction_2013}, a decision tree recursively partitions the feature space of interest into a set of terminal nodes, or leaves, using a top-down, ``greedy'' approach called recursive binary splitting. At each node in the tree, a feature and an associated split point are chosen to maximize the number of observations of a single class in the resulting nodes. A common measure of the homogeneity or \textit{purity} of each node is the Gini index,
+\begin{equation}\label{eq:classifying-observables:gini-index}
+    G_m = \sum_k \hat{p}_{mk} (1 - \hat{p}_{mk}),
+\end{equation}
+where $k$ indexes the class, $m$ indexes the node, and $\hat{p}_{mk}$ is the proportion of the observations at node $m$ that belong to class $k$. Note that as the purity of $m$ increases (i.e. $\hat{p}_{mk}\to0,1$), $G_m$ decreases ($G_m\to0$). Alternative measures of node purity may also be used \citep[see section 9.2.3 of][]{hastie_elements_2009}. For every resulting terminal node in the tree, the assigned class is determined by the most commonly occurring class of every observation at that node.
+
+Decision trees are commonly used in classification problems because they are computationally efficient and relatively easy to interpret. Unlike many statistical learning techniques, decision trees do not assume any functional mapping between the inputs and outputs such that arbitrary, non-linear relatationships can be learned by the model. However, decision trees have two primary weaknesses: (1) they are known to have lower predictive accuracy than other more restrictive classification strategies and (2) they have high variance such that a single tree is not very robust to small changes in the training data \citep{james_introduction_2013}.
+
+While individual decision trees are ``weak learners'', combined they give accurate and robust predictions. Random forest classifiers, first developed by \citet{breiman_random_2001}, provide an ensemble statistical learning method for combining many noisy, decorrelated decision trees in order to improve prediction accuracy and robustness. As in the bootstrap-aggregation, or ``bagging'', technique developed by \citet{breiman_bagging_1996}, each tree in the random forest is trained on only a subset of the total training data in order to reduce the variance of the model. Additionally, at each node in each tree, a random subset of the total features are considered as candidates for splitting in order to decrease the correlation between trees. A typical rule-of-thumb is to consider only $\left\lfloor\sqrt{p}\right\rfloor$ features at each split, where $p$ is the total number of features. This further reduces the variance and prevents a single feature from dominating the decision in every tree. Once each tree in the forest has been built using the training data, an unlabeled observation is classified by traversing each tree in the forest and taking the majority vote of the class at the terminal node of each tree. See chapter 15 of \citet{hastie_elements_2009} for a detailed discussion of random forests for both classification and regression.
+
+\subsection{Data Preparation and Model Parameters}\label{sec:classifying-observables:data-prep}
+
+To build our classification model, we use the random forest classifier as implemented in the scikit-learn package for machine learning in Python \citep{pedregosa_scikit-learn_2011}. Using the predicted emission measure slopes, timelags, and maximum cross-correlations from \autoref{ch:modeling-observables} we train a single random forest classifier composed of \py[chapter7_compare]|rf_options['n_estimators']| trees each with a maximum depth of \py[chapter7_compare]|rf_options['max_depth']|. At each node, $\left\lfloor\sqrt{31}\right\rfloor=\py|f'{int(np.sqrt(31)):.0f}'|$ possible split candidates are randomly selected from the $15\,\textup{timelags} + 15\,\textup{cross-correlations} + 1\,\textup{emission measure slope}=31$ total features. We note that all of these features are likely to be correlated with one another to some extent.
+
+Before training the model, we flatten the predicted emission measure slope, timelag, and cross-correlation maps from \autoref{ch:modeling-observables} for the high-, intermediate-, and low-frequency heating cases into an array of length $n_xn_y$, where $n_x$ and $n_y$ are the dimensions of the predicted images. As before, we mask pixels where $r^2<\py[chapter7_compare]|rsquared_threshold|$ for the emission measure slope fit and where $\max\mathcal{C}_{AB}<\py[chapter7_compare]|correlation_threshold|$ for the cross-correlation. If a pixel is masked in one frequency case, we mask it in all other frequencies to ensure that we have an equal number of high-, intermediate-, and low-frequency data points. We stack each flattened array column-wise in features and row-wise in heating frequency such that all of the simulated data are encapsulated in a single data matrix $X$ of dimension $n\times p$. $p=31$ is the total number of features and $n=3n_xn_y - n_\textup{mask}=\py[chapter7_compare]|f'{X.shape[0]:.0f}'|$ is the total number of pixels for all heating frequencies minus those pixels which were masked in at least one feature of one frequency. The heating frequency label or class is numerically encoded as 0 (high), 1 (intermediate), or 2 (low) and similarly stacked to create a single response vector $Y$ of dimension $n\times1$. We apply a $2/3-1/3$ test-train split to $X$ and $Y$ such that approximately $1/3$ of the samples are reserved for model evaluation to ensure that our model has not overfit the data. This produces four separate matrices: $X_\textup{train},Y_\textup{train},X_\textup{test},Y_\textup{test}$. The data are not centered to a mean of 0 or scaled to unit standard deviation. By transforming the data in this manner, we are treating each pixel in the image as an independent sample with $p$ associated features per sample.
+
+The same procedure as described above is applied to the observed emission measure slopes, timelags, and cross-correlations as shown in \autoref{fig:classifying-observables:em-slopes-map}, \autoref{fig:classifying-observables:timelags}, and \autoref{fig:classifying-observables:correlations}, respectively. These results are flattened to a single data matrix $X^\prime$ of dimension $n^\prime\times p$, where $n^\prime=n_x^\prime n_y^\prime - n^\prime_\textup{mask}=\py[chapter7_compare]|f'{X_observation.shape[0]:.0f}'|$. The random forest model is trained on $X_\textup{train},Y_\textup{train}$ and model performance is evaluated on the ``unseen'' test set $X_\textup{test},Y_\textup{test}$. The trained model is then applied to $X^\prime$ in order to predict the heating frequency in each pixel, $Y^\prime$.
+
+We do not apply any formal hyperparameter tuning or cross-validation procedure, though a manual exploration of the hyperparameters revealed that adding more than \py[chapter7_compare]|rf_options['n_estimators']| trees to the random forest provided only a marginal decrease in the test error while increasing the training time. Similarly, we find a maximum depth of \py[chapter7_compare]|rf_options['max_depth']| for each decision tree provides sufficient complexity to each tree as evaluated by the test error while not significantly increasing the computational cost of the training. However, in case A (see \autoref{tab:classifying-observables:cases}), we find that less complex trees (i.e. lower maximum depth) result in a reduction in the misclassification error by $7-8\%$.
+
+\subsection{Different Feature Combinations}\label{sec:classifying-observables:feature-combos}
+
+% spell-checker: disable %
+\begin{pycode}[chapter7_compare]
+cases = [ 'a', 'b', 'c', 'd' ]
+tab = {
+    'Case': [c.upper() for c in cases],
+    'Parameters': [r'$a$', r'$\tau_{AB},\mathcal{C}_{AB}$', r'$a,\tau_{AB},\mathcal{C}_{AB}$', r'Top 10 features from \autoref{tab:classifying-observables:importance}'],
+    r'$p$': [1, 30, 31, 10],
+    'Error': [test_error[c] for c in cases],
+    'High': [frequency_maps[c][frequency_maps[c] == 0].size/frequency_maps[c][~np.isnan(frequency_maps[c])].size for c in cases],
+    'Inter.': [frequency_maps[c][frequency_maps[c] == 1].size/frequency_maps[c][~np.isnan(frequency_maps[c])].size for c in cases],
+    'Low': [frequency_maps[c][frequency_maps[c] == 2].size/frequency_maps[c][~np.isnan(frequency_maps[c])].size for c in cases],
+}
+caption = r'The four different combinations of emission measure slope, timelag, and maximum cross-correlation. The third column lists the total number of features used in the classification. The fourth column gives the misclassification error as evaluated on $X_\textup{test},Y_\textup{test}$. The fifth, sixth, and seventh columns show the percentage of pixels labeled as high-, intermediate-, and low-frequency heating, respectively.\label{tab:classifying-observables:cases}'
+formats = {
+    'Error': '%.2f',
+    'High': '%.3f',
+    'Inter.': '%.3f',
+    'Low': '%.3f'
+}
+with io.StringIO() as f:
+    astropy.io.ascii.write(
+        tab,
+        format='latex',
+        caption=caption,
+        output=f,
+        formats=formats,
+        latexdict = { 'data_start':r'\midrule', 'data_end': r'\bottomrule',
+                      'header_start': r'\toprule', 'col_align': 'ccccccc',
+                      'preamble':r'\begin{center}', 'tablefoot':r'\end{center}'},
+    )
+    table = f.getvalue()
+\end{pycode}
+\py[chapter7_compare]|table|
+% spell-checker: enable %
+
+We apply the train-test-predict procedure described above to all four cases listed in \autoref{tab:classifying-observables:cases}. In case A, the random forest classifier is trained only on the emission measure slope, $a$, such that the $X$ and $X^\prime$ have dimensions $n\times1$ and $n^\prime\times1$, respectively. In case B, the classifier is trained on the timelags and maximum cross-correlations for all 15 channel pairs for a total of $p=30$ features while in case C, every feature (emission measure slope, 15 timelags, 15 maximum cross-correlations) is used such that $p=31$. We discuss case D in \autoref{sec:classifying-observables:feature-importance}. The fourth column in \autoref{tab:classifying-observables:cases} lists the misclassification error as evaluated on the test set, $X_\textup{test},Y_\textup{test}$ and the fifth, sixth, and seventh columns show the fraction of pixels classified as high-, intermediate-, and low-frequency.
+
+% spell-checker: disable %
+\begin{pycode}[chapter7_compare]
+# Setup figure
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=1,
+    height_ratio=4/3*0.96,
+))
+
+axes = []
+for j,c in enumerate(('a','b','c','d')):
+    for i,h in enumerate(heating):
+        m = GenericMap(probability_maps[c][h], meta)
+        m = m.submap(SkyCoord(Tx=-410*u.arcsec,Ty=-325*u.arcsec,frame=m.coordinate_frame),
+                     SkyCoord(Tx=-225*u.arcsec,Ty=-150*u.arcsec,frame=m.coordinate_frame))
+        ax = fig.add_subplot(4, 3, 3*j+i+1, projection=m)
+        axes.append(ax)
+        im = m.plot(axes=ax, annotate=False, title=False, vmin=0, vmax=1, cmap='viridis',)
+        ax.grid(alpha=0)
+        lon,lat = ax.coords
+        lon.set_ticks(number=4)
+        lat.set_ticks(number=2)
+        if i == 0 and j==3:
+            lon.set_axislabel('Helioprojective Longitude',)
+            lat.set_axislabel('Helioprojective Latitude', )
+            lat.set_ticklabel(rotation='vertical')
+        else:
+            lat.set_ticklabel_visible(False)
+            lon.set_ticklabel_visible(False)
+        if i == 0:
+            xtext,ytext = m.world_to_pixel(
+                SkyCoord(-405*u.arcsec,-155*u.arcsec,frame=m.coordinate_frame))
+            ax.text(
+                xtext.value, ytext.value,
+                f'{c.capitalize()}',
+                horizontalalignment='left',
+                verticalalignment='top',
+                color='k', fontsize=plt.rcParams['legend.fontsize'])
+        if j == 0:
+            xtext,ytext = m.world_to_pixel(
+                SkyCoord(-230*u.arcsec,-315*u.arcsec,frame=m.coordinate_frame))
+            ax.text(int(xtext.value), int(ytext.value),
+                    h.split('_')[0].capitalize(),
+                    horizontalalignment='right',
+                    verticalalignment='bottom',
+                    color='k', fontsize=plt.rcParams['legend.fontsize'])
+plt.subplots_adjust(wspace=0.03,hspace=0.03)
+
+# Colorbar
+cax = fig.add_axes([
+    axes[0].get_position().get_points()[0,0],
+    axes[0].get_position().get_points()[1,1]+0.0075,
+    axes[-1].get_position().get_points()[1,0] - axes[0].get_position().get_points()[0,0],
+    0.01
+])
+cbar = fig.colorbar(im, cax=cax, orientation='horizontal')
+cbar.ax.xaxis.set_ticks_position('top')
+cbar.ax.tick_params(width=0.5)
+cbar.outline.set_linewidth(0.5)
+
+### Save ###
+tfig = ch7_compare.save_figure('classifying-observables:probability-maps', fext='.pdf')
+tfig.caption = r'Classification probability for each pixel in the observed \AR{}. The rows denote the different cases in \autoref{tab:classifying-observables:cases} and the columns correspond to the different heating frequency classes. If any of the 31 features is not valid in a particular pixel, the pixel is masked and colored white. Note that summing over all heating probabilities in each row gives 1 in every pixel.'
+tfig.placement = '!h'
+\end{pycode}
+\py[chapter7_compare]|tfig|
+% spell-checker: enable %
+
+After computing the predicted heating frequency for each $X^\prime$, the resulting classifications, $Y^\prime$, are mapped back to the corresponding observed pixel locations to create a map of the heating frequency. \autoref{fig:classifying-observables:probability-maps} shows the probability that each pixel corresponds to a particular heating frequency. The rows denote the different feature subsets as given in \autoref{tab:classifying-observables:cases} and the columns correspond to the different heating frequency classes. The class probability, as computed by the scikit-learn package, in each pixel is the mean class probability of all trees in the random forest classifier. The class probability for an individual tree is the proportion of all training samples at the terminal node that belong to that class.
+
+% spell-checker: disable %
+\begin{pycode}[chapter7_compare]
+# Setup figure
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=1,
+    height_ratio=0.96,
+))
+
+# Plot maps
+axes = []
+for i,c in enumerate(('a','b','c','d')):
+    m = GenericMap(frequency_maps[c],meta)
+    m = m.submap(SkyCoord(Tx=-410*u.arcsec,Ty=-325*u.arcsec,frame=m.coordinate_frame),
+                 SkyCoord(Tx=-225*u.arcsec,Ty=-150*u.arcsec,frame=m.coordinate_frame))
+    ax = fig.add_subplot(2, 2, i+1, projection=m)
+    axes.append(ax)
+    im = m.plot(axes=ax, title=False,annotate=False, vmin=-0.5, vmax=2.5, cmap=heating_cmap())
+    ax.grid(alpha=0)
+    # Axes and ticks
+    lon, lat = ax.coords
+    if i == 2:
+        lon.set_axislabel('Helioprojective Longitude',)
+        lat.set_axislabel('Helioprojective Latitude',)
+        lat.set_ticklabel(rotation='vertical')
+    else:
+        lon.set_ticklabel_visible(False)
+        lat.set_ticklabel_visible(False)
+    lon.set_ticks(number=4)
+    lat.set_ticks(number=2)
+    xtext,ytext = m.world_to_pixel(SkyCoord(-405*u.arcsec,-155*u.arcsec,frame=m.coordinate_frame))
+    ax.text(
+        xtext.value, ytext.value,
+        f'{c.capitalize()}',
+        horizontalalignment='left',
+        verticalalignment='top',
+        color='k', fontsize=plt.rcParams['legend.fontsize'])
+plt.subplots_adjust(wspace=0.03,hspace=0.03)
+
+# Colorbar
+cax = fig.add_axes([
+    axes[0].get_position().get_points()[0,0],
+    axes[0].get_position().get_points()[1,1] + 0.01,
+    axes[-1].get_position().get_points()[1,0] - axes[0].get_position().get_points()[0,0],
+    0.015
+])
+cbar = fig.colorbar(im, cax=cax,orientation='horizontal')
+cbar.ax.xaxis.set_ticks_position('top')
+cbar.set_ticks([-0.25,1,2.25])
+cbar.ax.set_xticklabels([h.split('_')[0].capitalize() for h in heating],)
+cbar.ax.tick_params(axis='x', which='both', length=0)
+cbar.outline.set_linewidth(0.5)
+
+# Save
+tfig = ch7_compare.save_figure('classifying-observables:frequency-maps', fext='.pdf')
+tfig.caption = r'Predicted heating frequency classification in each pixel of NOAA 1158 for each of the cases in \autoref{tab:classifying-observables:cases}. The classification is determined by which heating frequency class has the highest mean probability over all trees in the random forest. Each pixel is colored blue, orange, or green depending on whether the most likely heating frequency is high, intermediate, or low, respectively. If any of the 31 features is not valid in a particular pixel, the pixel is masked and colored white.'
+tfig.placement = '!h'
+\end{pycode}
+\py[chapter7_compare]|tfig|
+% spell-checker: enable %
+
+\autoref{fig:classifying-observables:frequency-maps} shows the heating frequency, or class, as predicted by the random forest classifier in each pixel of the observed \AR{} for all four cases in \autoref{tab:classifying-observables:cases}. The predicted class is the one which has the highest mean probability as computed over all trees in the random forest. Each pixel is colored blue, orange, or green depending on whether the class with the highest mean probability is high-, intermediate-, or low-frequency, respectively.
+
+We find that for each combination of features in \autoref{tab:classifying-observables:cases}, high-frequency heating dominates at the center of the \AR{}. This result is consistent with \AR{} core observations of hot, steady emission \citep{warren_evidence_2010,warren_constraints_2011}, steep emission measure slopes \citep[e.g.][]{winebarger_using_2011,del_zanna_evolution_2015}, and lack of variability in the intensity \citep[e.g.][]{antiochos_constraints_2003} and the velocity \citep{brooks_flows_2009} near the loop footpoints. The frequency classification map for case A is as expected given the observed emission measure slope map in \autoref{fig:classifying-observables:em-slopes-map} and the well-separated distributions of emission measure slopes from the different heating frequencies as shown in \autoref{fig:classifying-observables:em-slopes-hist}.
+
+From the fourth column of \autoref{tab:classifying-observables:cases}, we find that adding more features to the classifier significantly improves the accuracy as computed on the test data set. However, comparing frequency maps in cases A ($p=1$) and C ($p=31$), we find that the general pattern of heating frequency across the \AR{} is similar despite the large differences between the misclassification error in case A (\py[chapter7_compare]|f"{tab['Error'][0]:.2f}"|) and case C (\py[chapter7_compare]|f"{tab['Error'][2]:.2f}"|). Additionally, looking at the seventh column of \autoref{tab:classifying-observables:cases} and the panels in the third column of \autoref{fig:classifying-observables:probability-maps}, we find that adding the timelag and maximum cross-correlation features significantly decreases the number of pixels classified as low frequency. Training the classifier on only the emission measure slope versus all of the features has a comparatively small impact on the fraction of pixels classified as intermediate frequency.
+
+Interestingly, we find that when we use relatively shallow trees to build the random forest (e.g. a maximum depth of $<10$), the misclassification error on the test data set in case B becomes larger than that of case A, despite $p_\textup{B}>p_\textup{A}$. If very complex trees (maximum depth $>100$) are used in case A, the model overfits the data and the resulting classification becomes very noisy. However, in case B (and C), increasing the maximum depth continually decreases the test error, indicating that the model is not overfitting the data. This seems to suggest that the relationship between the heating frequency and the timelag, as well as the maximum cross-correlation, is much more complex than that of the relationship between the heating frequency and the emission measure slope.
+
+\subsection{Feature Importance}\label{sec:classifying-observables:feature-importance}
+
+In addition to the predicted heating frequency, $Y^\prime$, for a set of features, $X^\prime$, it is also useful to know which of the $p$ features is most important in deciding to which class each observation (pixel) belongs. One measure of the importance of each feature is the decrease in the Gini index,
+\begin{equation}\label{eq:classifying-observables:gini_gain}
+    \Delta G_m = \frac{M_m}{M}\left( G_m - \frac{M_{m,R}}{M_m}G_{m,R} - \frac{M_{m,L}}{M_m}G_{m,L} \right),
+\end{equation}
+where $G_m$ is the Gini index as given by \autoref{eq:classifying-observables:gini-index}, $M$ is the total number of samples in the tree, $M_m$ is the total number of samples at parent node $m$, $M_{m,R(L)}$ is the total number of samples at the right (left) child node, and $G_{m,R(L)}$ is the Gini index at the right (left) child node \citep{sandri_bias_2008}. The importance of a particular feature in the random forest classification is then determined by summing \autoref{eq:classifying-observables:gini_gain} over all nodes which split on that feature for every tree and averaging over all trees \citep{breiman_classification_1984}.
+
+Note that if $G_{m,R}=G_{m,L}=G_m$, $\Delta G_m=0$ because the split at node $m$ did not improve the discrimination between classes compared to the split at the previous node. However, if the purity of the left or right node increases such that $G_{m,R}$ or $G_{m,L}$ decreases relative to $G_m$, $\Delta G_m > 0$ because the split at node $m$ has added information to the classifier by preferentially sorting samples of a single class to either the left or right child node.
+
+% spell-checker: disable %
+\begin{pycode}[chapter7_compare]
+all_labels = np.array([r'$\tau_{{{},{}}}$'.format(*cp) for cp in channel_pairs] +
+                      [r'$\mathcal{{C}}_{{{},{}}}$'.format(*cp) for cp in channel_pairs] + 
+                      [r'$a$'])
+tab2 = {
+    'Feature': all_labels[i_important[:10]],
+    'Importance': importances[i_important[:10]]/importances[i_important[0]],
+    r'$\sigma$': std[i_important[:10]],
+}
+formats = { 'Importance': '%.4f', r'$\sigma$': '%.4f' }
+caption = r'Ten most important features as determined by the random forest classifier in case C. The second column shows the variable importance as computed by \autoref{eq:classifying-observables:gini_gain} and the third column, $\sigma$, is the standard deviation of the feature importance over all trees in the random forest. The second column is normalized such that the most important feature is equal to 1.\label{tab:classifying-observables:importance}'
+
+with io.StringIO() as f:
+    astropy.io.ascii.write(
+        tab2,
+        format='latex',
+        caption=caption,
+        output=f,
+        formats=formats,
+        latexdict = { 'data_start':r'\midrule', 'data_end': r'\bottomrule',
+                      'header_start': r'\toprule', 'col_align': 'ccc',
+                      'preamble':r'\begin{center}', 'tablefoot':r'\end{center}'}
+    )
+    table = f.getvalue()
+\end{pycode}
+\py[chapter7_compare]|table|
+% spell-checker: enable %
+
+\autoref{tab:classifying-observables:importance} shows the ten most important features from case C as determined by \autoref{eq:classifying-observables:gini_gain} summed over all nodes in each tree and averaged over all trees. The importance in the second column is normalized such that the most important feature is equal to 1. In case D as listed in the last row of \autoref{tab:classifying-observables:cases}, only these ten features are used to train the random forest classifier and classify each observed pixel. The probability of each heating frequency for case D is shown in the last row of \autoref{fig:classifying-observables:probability-maps} and the map of the most likely heating frequency in each pixel is shown in the bottom-right panel of \autoref{fig:classifying-observables:frequency-maps}. We find that the probability maps in the last row of \autoref{fig:classifying-observables:probability-maps} and the frequency map in the bottom right panel of \autoref{fig:classifying-observables:frequency-maps} reveal approximately the same patterns of heating frequency across the \AR{} as the maps for case C in which all 31 features were included. Additionally, using less than $1/3$ of the total number of features, we achieve a misclassification error of \py[chapter7_compare]|f"{tab['Error'][3]:.2f}"|, comparable to case C.
+
+According to \autoref{tab:classifying-observables:importance}, the emission measure slope, $a$, has the most discriminating power in the random forest classifier. In particular, $a$ is more important than the second most important feature by over a factor of 2 and more important than the most important timelag feature by nearly an order of magnitude.
+
+While useful, the feature importance in random forest classifiers should be interpreted cautiously, especially in cases where the features are correlated. The timelags, as well as the maximum cross-correlations, in all channel pairs are very strongly correlated. The emission measure slope is also likely correlated with the timelag and cross-correlation though perhaps more weakly so. In particular, \citet{altmann_permutation_2010} found that as the number of correlated features in a random forest classifier increased, the individual importance of each feature in the correlated group decreased and that for a very large number of correlated features ($\sim50$), the feature importance of each was close to zero. Here, we have at least two groups of 15 strongly correlated features each. Thus, the values shown in \autoref{tab:classifying-observables:importance} for the timelag and cross-correlation should be regarded as lower bounds on the feature importance. However, the presence of highly-correlated or unimportant features is not expected to affect the robustness or accuracy of the classifier.
+
+\section{Discussion}\label{sec:classifying-observables:discussion}
+
+As evidenced in \autoref{fig:classifying-observables:probability-maps} and \autoref{fig:classifying-observables:frequency-maps}, we find that high-frequency heating is likely to dominate in the core of the \AR. Comparing the heating frequency maps in \autoref{fig:classifying-observables:frequency-maps} for the different cases in \autoref{tab:classifying-observables:cases}, this high-frequency classification seems largely due to the steep observed emission measure slopes in the center of the \AR{} as seen in \autoref{fig:classifying-observables:em-slopes-map}. This result is consistent with X-ray observations of hot, steady emission \citep{warren_evidence_2010,warren_constraints_2011,winebarger_using_2011} as well as the result of \citet{del_zanna_evolution_2015} who found high values of the emission measure slope in the center of NOAA 11193.
+
+Comparing case C in \autoref{fig:classifying-observables:frequency-maps} with the observed magnetogram of NOAA 1158 shown in \autoref{fig:modeling-observables:magnetogram}, we find that the areas of strongest magnetic field are spatially coincident with most of the pixels classified as high-frequency. This suggests that those strands whose footpoints are rooted in areas of large magnetic field strength are heated more frequently. We will explore the relationship between the heating frequency and the underlying magnetic field strength in a future paper.
+
+The longer loops surrounding the core are consistent with intermediate frequency heating. Notably, the results from our classifier imply that low-frequency heating, as defined by \autoref{eq:modeling-observables:heating_types}, is not needed to explain the observed timelags, suggesting that the waiting time on each strand in this \AR{} is likely to be on the order of or less than $\tau_\textup{cool}$. This result is consistent with that of \citet{bradshaw_patterns_2016} who found that intermediate and high frequency nanoflares both produced timelags consistent with observations while their cooling experiment, similar to our low-frequency nanoflares, showed fundamental disagreements with the observed timelag maps.
+
+After the emission measure slope, $a$, the next three most important features in the classification are the maximum cross correlations for the 211-193, 193-171, and 211-171 \si{\angstrom} channel pairs. These three channels, \SIlist{211;193;171}{\angstrom}, peak sequentially in temperature at \SIlist{1.8;1.6;0.8}{\mega\kelvin}, respectively (see \autoref{fig:aia-temperature-response}), suggesting that the plasma dynamics in this temperature range, which are dominated by radiative cooling and draining \citep[e.g.][]{bradshaw_cooling_2005,bradshaw_cooling_2010,bradshaw_new_2010}, are coupled to, and indicative of, the frequency at which energy is deposited in the plasma and that thermal conduction has not erased all signatures of the heating. A strand heated by low-frequency nanoflares will be allowed to cool well below 1 MK, producing a strong cross-correlation in these channel pairs, while a strand heated by high-frequency nanoflares will rarely be allowed to cool below the equilibrium temperature such that the cross-correlation, particularly in the \SI{171}{\angstrom} channel pairs, is likely to be relatively low. This cooling behavior is illustrated for a single strand in \autoref{fig:modeling-observables:hydro-profiles}
+
+While the maximum cross-correlation in the 211-193 \si{\angstrom} channel pair (see bottom row of \autoref{fig:classifying-observables:correlations}) is very high across the whole \AR{}, the 193-171 \si{\angstrom} and 211-171 \si{\angstrom} maps (as well as the other \SI{171}{\angstrom} pairs except for 171-131 \si{\angstrom}) show a comparatively low cross-correlation. Combined with the heating frequency maps in \autoref{fig:classifying-observables:frequency-maps} which indicate that the center of the \AR{} is consistent with high-frequency heating, this suggests that many of the loops in the core are kept from cooling much below \SI{1.6}{\mega\kelvin}.
+
+An important caveat to this method for systematic comparison as we have applied it here is that the random forest classifier trained on the simulated emission measure slopes, timelags, and maximum cross-correlations cannot provide any assessment of the accuracy of our model. The classifier can only say, out of the provided classes (high-, intermediate-, or low-frequency), which type of heating best describes the data. However, given another method for assessing the heating frequency or perhaps some alternative forward-modeling approach, a random forest classifier could be used to compare these two methods. In this way, machine learning also provides a promising strategy for reconciling different modeling approaches.
+
+\section{Conclusions and Summary}\label{sec:classifying-observables:conclusions}
+
+In this paper, the second in our series on constraining nanoflare heating properties, we have used predicted diagnostics from \autoref{ch:modeling-observables} to systematically classify each pixel of \AR{} NOAA 1158 in terms of frequency of energy deposition. In particular, we first collect \SI{12}{\hour} of full-resolution SDO/AIA observations of NOAA 1158 in six EUV channels: \SIlist{94;131;171;193;211;335}{\angstrom}. We then co-align each image to a single time such that a given pixel in each image corresponds to approximately the same spatial coordinate and then crop the image to an area of \SI{500}{\arcsecond}-by-\SI{500}{\arcsecond} centered on the \AR{}.
+
+Next, we compute two diagnostics from these observed intensities: the emission measure slope and the timelag. We time-average the intensities of all six channels and use the method \citet{hannah_differential_2012} to compute the emission measure distribution in each pixel of the \AR{}. We then compute the emission measure slope, $a$, by fitting $\log_{10}\textup{EM}\sim a\log_{10}T$ over the temperature range $\SI{8e5}{\kelvin}\le T < T_{peak}$. Next, we apply the timelag analysis of \citet{viall_evidence_2012} to the full \SI{12}{\hour} of observations of NOAA 1158 and compute the timelag, $\tau_{AB}$, and maximum cross-correlation, $\max\mathcal{C}_{AB}$, in each pixel of the \AR{} for all possible ``hot-cool'' pairs of the six EUV channels, 15 in total.
+
+Finally, we train a random forest classifier using the predicted emission measure slopes, timelags, and cross-correlations for three different heating frequencies from \autoref{ch:modeling-observables}. We then use our trained model to classify each observed pixel as consistent with either high-, intermediate-, or low-frequency heating and map the heating frequency across the entire \AR{}.
+
+Our results can be summarized as follows:
+\begin{enumerate}
+    \item The distribution of observed emission measure slopes overlaps with the distributions of predicted emission measure slopes for high-, intermediate-, and low-frequency heating, suggesting a range of heating frequencies across the \AR{}.
+    \item High-frequency heating dominates in the center of \AR{} and is coincident with the areas of large magnetic field strength.
+    \item Intermediate-frequency heating is more likely in longer loops surrounding the center of the \AR{}. In most pixels, low-frequency heating, as defined in \autoref{eq:modeling-observables:heating_types}, is not needed to explain the observed diagnostics
+    \item The emission measure slope is the strongest predictor of the heating frequency. Radiative cooling and draining around \SIrange{1}{2}{\mega\kelvin} as manifested in the maximum cross-correlation also appears to be a strong indicator relative to the timelags. However, the feature importance as determined by the classifer should be interpreted carefully.
+\end{enumerate}
+
+We have demonstrated an efficient and powerful technique for constraining the heating frequency in active region cores and, more broadly, for systematically comparing models and observations. Given that the diagnostics here are known to vary with age \citep[e.g.][]{schmelz_cold_2012,del_zanna_evolution_2015} and from one \AR{} to the next \citep{warren_systematic_2012,viall_survey_2017}, the next step is to apply this methodology to a large sample of \AR s to place strong constraints on the frequency of energy deposition in the magnetically-closed corona.

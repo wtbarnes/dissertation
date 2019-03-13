@@ -22,25 +22,245 @@ from formatting import remove_ticks_and_spines
 % transition to discussion of ancient eclipse observations
 % sun affects us everyday: life, space weather, analogue for other stars
 
-\section{The Structure of the Solar Atmosphere}
+\section{The Structure of the Solar Atmosphere}\label{sec:structure}
 
-% diagram of structure of the corona
+The Sun is a main-sequence G2 type star and its current age is $\approx\SI{4.6e9}{\year}$. It has a mass of $M_\solar = \SI{1.99e33}{\gram}$ and a radius of $R_\solar = \SI{6.955e10}{\cm}$ \citep{priest_magnetohydrodynamics_2014}. The Sun emits primarily as a blackbody in the visible and the infrared and the effective temperature of the surface is $T_\textup{eff}=\SI{5777}{\kelvin}$ \citep{carroll_introduction_2007}. However, as will be discussed in later sections, the temperature structure of the solar atmosphere is far more complicated. In the following sections, I discuss the structure of the stellar interior (\autoref{sec:interior}) and then give a brief description of each layer of the solar atmosphere: the photosphere (\autoref{sec:photosphere}), the chromosphere (\autoref{sec:chromosphere}), the transition region (\autoref{sec:transition_region}), and finally the corona (\autoref{sec:corona}).
 
-%\subsection{Interior}
-%
-%\subsubsection{Core}
-%\subsubsection{Radiative Zone}
-%\subsubsection{Convection Zone}
-%
-%\subsection{Photosphere}
+\subsection{Interior}\label{sec:interior}
 
-% three panel figure with 4500, 304, 131/193 showing transition from photosphere to chromosphere to corona
+% spell-checker: disable %
+\begin{pycode}[chapter1]
+from matplotlib.patches import Wedge
+# set location parameters
+xcen,ycen = -0.5,0
+theta = 33
+ctheta = np.cos(theta * np.pi/180)
+stheta = np.sin(theta * np.pi/180)
+
+# setup figure and axes
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=1,
+    height_ratio=0.8,
+))
+ax = fig.gca()
+ax.set_ylim(-0.75,0.75)
+ax.set_xlim(-0.75,0.75)
+ax.set_aspect('equal')
+remove_ticks_and_spines(ax)
+
+# Core
+w_c = Wedge((xcen,ycen), 0.3, -theta, theta,
+            facecolor=PALETTE[3], edgecolor='k')
+ax.add_patch(w_c)
+ax.text(0.3*ctheta+xcen, 0.3*stheta+ycen, r'$0.3R_\odot$',
+        verticalalignment='bottom', horizontalalignment='center',
+        rotation=theta)
+ax.annotate('Core',
+            xy=(xcen + 0.3/2, ycen), xycoords='data',
+            xytext=(xcen-0.1,-0.35+ycen), textcoords='data',
+            arrowprops=dict(
+                arrowstyle="-|>",
+                color='k',
+                shrinkA=15, shrinkB=0,
+                patchA=None,
+                patchB=None,
+                connectionstyle='angle,angleA=180,angleB=-90,rad=0',
+            ),
+)
+
+# Radiative zone
+w_r = Wedge((xcen,ycen), 0.714, -theta, theta,
+            width=0.714-0.3,
+            facecolor=PALETTE[1], edgecolor='k')
+ax.add_patch(w_r)
+ax.text(0.714*ctheta+xcen, 0.714*stheta+ycen,
+        r'$0.714R_\odot$',
+        verticalalignment='bottom', horizontalalignment='center',
+        rotation=theta)
+ax.annotate('Radiative Zone',
+            xy=(xcen + 0.25 + (0.714-0.3)/2, ycen),xycoords='data',
+            xytext=(xcen-0.2,ycen+0.4),textcoords='data',
+            arrowprops=dict(
+                arrowstyle="-|>",
+                color='k',
+                shrinkA=50, shrinkB=0,
+                patchA=None,
+                patchB=None,
+                connectionstyle='angle,angleA=180,angleB=-90,rad=0',
+            ),
+)
+
+# Convection zone
+w_con = Wedge((xcen,ycen), 1, -theta, theta,
+              width=1-0.714,
+              facecolor=PALETTE[0], edgecolor='k')
+ax.add_patch(w_con)
+ax.text(1*ctheta+xcen, 1*stheta+ycen,
+        r'$1R_\odot$',
+        verticalalignment='bottom', horizontalalignment='center',
+        rotation=theta)
+ax.annotate('Convection Zone',
+            xy=(xcen + 0.714 + (1-0.714)/2, ycen),xycoords='data',
+            xytext=(xcen+1,ycen+0.4),textcoords='data',
+            arrowprops=dict(
+                arrowstyle="-|>",
+                color='k',
+                shrinkA=10, #shrinkB=25,
+                patchA=None,
+                patchB=None,
+                connectionstyle='angle,angleA=-90,angleB=180,rad=0',
+            ),
+)
+
+#save
+tfig = ch1.save_figure('interior-cartoon', fext='.pgf')
+tfig.caption = r'Schematic of the solar interior. In the core and radiative zone, radiation is the dominant energy transfer mechanism while convection dominates in the convection zone. Adapted from Figure 11.2 of \citet{carroll_introduction_2007}.'
+\end{pycode}
+\py[chapter1]|tfig|
+% spell-checker: enable %
+
+
+The interior of the Sun cannot be directly observed because it is opaque to radiation such that all knowledge of its structure must be inferred from detailed stellar structure calculations or through helioseismology, the study of global oscillations \citep{priest_magnetohydrodynamics_2014}. The solar interior can be divided into three distinct layers: the core, the radiative zone, and the convection zone. This is illustrated in \autoref{fig:interior-cartoon}.
+
+\begin{figure}
+    \tikzstyle{arrow} = [thick, ->, >=stealth]
+    \tikzstyle{ghost} = [rectangle, rounded corners, text centered, draw=white]
+    \centering
+    \begin{tikzpicture}[node distance=2.5cm]
+        % Create nodes
+        \node(top){
+            $\begin{aligned}
+            \isotope[1][1]{H} + \isotope[1][1]{H} \to& \isotope[2][1]{H} + e^+ + \nu_e \\
+            \isotope[2][1]{H} + \isotope[1][1]{H} \to& \isotope[3][2]{H} + \gamma
+            \end{aligned}$
+        };
+        \node(g1)[below of=top]{};
+        \node(pp1)[left of=g1]{
+            $\begin{aligned}
+            \isotope[3][2]{He} + \isotope[3][2]{He} \to& \isotope[4][2]{He} + 2\isotope[1][1]{H} \\
+            (\textup{ppI})&
+            \end{aligned}$
+        };
+        \node(pp23)[right of=g1]{
+            $\isotope[3][2]{He} + \isotope[4][2]{He} \to \isotope[7][4]{Be} + \gamma$
+        };
+        \node(g2)[below of=pp23]{};
+        \node(pp2)[left of=g2]{
+            $\begin{aligned}
+            \isotope[7][4]{Be} + e^- \to& \isotope[7][3]{Li} + \nu_e \\
+            \isotope[7][3]{Li} + \isotope[1][1]{H} \to& 2\isotope[4][2]{He} \\
+            (\textup{ppII})&
+            \end{aligned}$
+        };
+        \node(pp3)[right of=g2]{
+            $\begin{aligned}
+            \isotope[7][4]{Be} + \isotope[1][1]{H} \to& \isotope[8][5]{B} + \gamma \\
+            \isotope[8][5]{B} \to& \isotope[8][4]{Be} + e^+ + \nu_e \\
+            \isotope[8][4]{Be} \to& \isotope[4][2]{He} \\
+            (\textup{ppIII})&
+            \end{aligned}$
+        };
+        % Draw arrows
+        \draw [arrow] (top) -- (pp1);
+        \draw [arrow] (top) -- (pp23);
+        \draw [arrow] (pp23) -- (pp2);
+        \draw [arrow] (pp23) -- (pp3);
+    \end{tikzpicture}
+    \caption{The three branches of the proton-proton nucleosynthesis reaction. The ppI branching ratio is 69\% and the ppII branching ratio is 99.7\%. Adapted from Figure 10.8 in \citet{carroll_introduction_2007}.}
+    \label{fig:pp-chain}
+\end{figure}
+
+The \textit{core} of the Sun is very hot, $\approx\SI{1.57e7}{\kelvin}$, and dense, $\approx\SI{9e25}{\per\cubic\cm}$ \citep{carroll_introduction_2007,bahcall_solar_2001} and, as denoted in \autoref{fig:interior-cartoon}, extends radially to $r\lesssim 0.3R_\solar$. The primary mechanism of energy production in the core is the fusion of \isotope[1][1]{H} into \isotope[4][2]{He} via a reaction called the proton-proton chains or the ``pp'' chains. Besides \isotope[4][2]{He}, the pp chain also produces positrons ($e^+$), weakly-interacting neutrinos ($\nu_e$) which travel uninhibited out of the interior, and photons ($\gamma$). The full reaction chain is shown in \autoref{fig:pp-chain}. These reactions can only occur at very high densities such as those found in the core as quantum tunneling is required to overcome the Coulomb barrier between the two \isotope[1][1]{H} atoms.
+
+Moving radially outward from the core, the density drops, inhibiting the production of photons through the pp chain, and the temperature decreases such that $dT/dr < 0$. This decrease in temperature causes a decrease in radiation pressure with increasing $r$, leading to the slow upward diffusion of photons produced by the pp chain reactions. These photons thus undergo a ``random walk'' from the core to the surface as the photons are continually absorbed and reemitted isotropically. Radiation is the dominant energy transport mechanism in the region $0.3R_\solar\le r\le 0.714R_\solar$, often referred to as the radiative zone \citep{carroll_introduction_2007}. 
+
+While radiation is the dominant transport process deep in the core, convection is likely to be more efficient in the region $0.714R_\solar<r\le1R_\solar$, the so-called convective zone (see \autoref{fig:interior-cartoon}. As the temperature gradient continues to steepen, the opacity increases thus inhibiting energy transport by radiation and convection becomes the dominant transport mechanism. In particular, the transition from radiative to convective transport occurs when the temperature gradient becomes ``super adiabatic'' \citep[see Section 10.4 of][]{carroll_introduction_2007}. In the convective zone, hot, buoyant mass elements carry excess energy outward while cool mass elements fall inward and the cycle repeats, repeatedly carrying energy to the surface. 
+
+\subsection{Photosphere}\label{sec:photosphere}
+
+% spell-checker: disable %
+\begin{pycode}[chapter1]
+# Read in VAL atmosphere and interpolate
+from hs_atmosphere import read_VAL3c_MTW, interpolate_atmosphere
+data = read_VAL3c_MTW(
+    ch1.data_file('VALIIIC.dat'),
+    MTW_file=ch1.data_file('mcwhirter.dat')
+)
+Z = data['Z'].to(u.Mm)
+atmos = interpolate_atmosphere(data, Z)
+
+# Setup figure
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+))
+ax = fig.gca()
+ax2 = ax.twinx()
+
+# Plot
+ax.plot(Z, data['T'].to(u.K), color=PALETTE[0], marker='o', ls='', markevery=2)
+line_T = ax.plot(Z, atmos['T'].to(u.K), color=PALETTE[0], ls='-', label=r'$T$')
+ax2.plot(Z, (data['p']/const.k_B/2/data['T']).to('cm^-3'),
+            color=PALETTE[1], marker='o', ls='', markevery=2)
+line_n = ax2.plot(Z, (atmos['p']/const.k_B/2/atmos['T']).to('cm^-3'),
+                    color=PALETTE[1], ls='-', label=r'$n$')
+
+# Labels
+ax.set_xlabel(r'$h$ $[\si{\mega\m}]$')
+ax.set_ylabel(r'$T$ $[\si{\kelvin}]$')
+ax2.set_ylabel(r'$n$ $[\si{\per\cubic\cm}]$')
+ax.set_xlim(Z[0].value,(5*u.Mm).value)
+ax2.set_xlim(Z[0].value,(5*u.Mm).value)
+ax.set_ylim(2e3,1e6)
+ax.set_yscale('log')
+ax2.set_yscale('log')
+
+# Legend
+lns = line_T + line_n
+labs = [l.get_label() for l in lns]
+ax.legend(lns, labs, frameon=False, loc='center right')
+
+# Annotate regions
+ax.vlines([Z[np.argmin(data['T'])].value, 2.05, 2.35], 2e3, 1e6,
+            colors='k',linestyles='dotted',)
+ax.annotate('Photosphere',
+            xytext=(0.25,1.1), textcoords=('data','axes fraction'),
+            xy=(0.25,0.7), xycoords=('data','axes fraction'),
+            va='center',ha='center',
+            arrowprops=dict(arrowstyle="-|>", color='k'),
+)
+ax.annotate('Chromosphere',
+            xy=(1.25,3e5),xycoords='data',
+            va='center',ha='center',
+)
+ax.annotate('Transition Region',
+            xytext=(2.2,1.1), textcoords=('data','axes fraction'),
+            xy=(2.2,0.7), xycoords=('data','axes fraction'),
+            va='center',ha='center',
+            arrowprops=dict(arrowstyle="-|>", color='k'),
+)
+ax.annotate('Corona',
+            xy=(3.5,1e5),xycoords='data',
+            va='center',ha='center',
+)
+
+# Save
+tfig = ch1.save_figure('val-atmosphere', fext='.pgf')
+tfig.caption = r'Temperature (blue, left axis) and density (orange, right axis) of the solar atmosphere as a function of height, $h$, above the solar surface. These profiles are based on the semi-empirical models of \citet{mcwhirter_heating_1975} and \citet{vernazza_structure_1981}. The data points show the exact values from the models and the smooth lines are first-order spline fits to the data.'
+\end{pycode}
+\py[chapter1]|tfig|
+% spell-checker: enable %
+
+Just above the convection zone lies the \textit{photosphere}, the lowest layer of the solar atmosphere and often considered the ``surface'' of the Sun. The photosphere is a dense, relatively thin layer and can be observed in visible light. Here, the optical depth, $\tau$, or the transparency of the plasma, is $\tau\lesssim1$ in the visible band such that photons in these wavelengths can escape without being absorbed and reemitted. Thus, most of the Sun's emission in the visible spectrum originates in the photosphere \citep{priest_magnetohydrodynamics_2014}. The photosphere extends to approximately $\SI{500}{\km}$ above the surface and corresponds to a minimum in the temperature as a function of height. This is illustrated in \autoref{fig:val-atmosphere}. The top left panel of \autoref{fig:example-images} shows an observation of the photosphere at \SI{4500}{\angstrom} by the Atmospheric Imaging Assembly instrument \citep[AIA][]{lemen_atmospheric_2012} on the Solar Dynamics Observatory spacecraft \citep[SDO][]{pesnell_solar_2012}.
+
+\subsection{Chromosphere}\label{sec:chromosphere}
+
+
+\subsection{Transition Region}\label{sec:transition_region}
+
 %
-%\subsection{Chromosphere}
-%
-%\subsection{Transition Region}
-%
-%\subsection{Corona}
+
+\subsection{Corona}\label{sec:corona}
 
 % characteristics of the corona
 % discuss EUV and X-ray observations of the corona (ref figure)
@@ -49,20 +269,20 @@ from formatting import remove_ticks_and_spines
 \begin{pycode}[chapter1]
 # Import all maps
 maps = []
-instrs = [ 'sxt', 'eit', 'xrt', 'aia' ]
-for i in instrs:
-    maps.append(Map(os.path.join(ch1.data_dir, f'{i}_example.fits' )))
+names = [ 'aia_4500_example', 'aia_304_example', 'aia_171_example', 'xrt_example' ]
+for i in names:
+    maps.append(Map(ch1.data_file(f'{i}.fits' )))
 # Fix XRT metadata
-maps[2] = Map(maps[2].data,{**maps[2].meta,
-                        'wavelnth': f'{maps[2].meta["ec_fw1_"]}/{maps[2].meta["ec_fw2_"]}'})
+maps[3] = Map(
+    maps[3].data,
+    {**maps[3].meta, 'wavelnth': f'{maps[3].meta["ec_fw1_"]}/{maps[3].meta["ec_fw2_"]}'}
+)
 # Set colormap normalization
-for m in maps:
+for i,m in enumerate(maps):
+    f = 1 if i == 0 else 0.1
     m.plot_settings['norm'] = ImageNormalize(vmin=max(0,m.data.min()),
-                                             vmax=m.data.max(),
-                                             stretch=LogStretch())
-maps[-1].plot_settings['norm'] = ImageNormalize(vmin=max(0, maps[-1].data.min()),
-                                                vmax=maps[-1].data.max()*0.25,
-                                                stretch=AsinhStretch(0.1))
+                                             vmax=f*m.data.max(),
+                                             stretch=AsinhStretch(0.1))
 
 # Make figure
 fig = plt.figure(figsize=texfigure.figsize(
@@ -86,13 +306,13 @@ for i,m in enumerate(maps):
         wvl = f"{m.meta['wavelnth']} {u.Angstrom.to_string(format='latex')}"
     except ValueError:
         wvl = m.meta['wavelnth']
-    ax.text(0, m.dimensions.y.value-10,
+    ax.text(20, m.dimensions.y.value-20,
             f'{m.observatory}/{m.instrument.split(" ")[0]} {wvl}',
             color='w',
             fontsize=plt.rcParams['legend.fontsize']*0.75,
             horizontalalignment='left',
             verticalalignment='top',)
-    ax.text(m.dimensions.x.value,0,
+    ax.text(m.dimensions.x.value-20,20,
             astropy.time.Time(m.date).strftime('%Y/%d/%m'),
             color='w',
             fontsize=plt.rcParams['legend.fontsize']*0.75,
@@ -102,14 +322,12 @@ plt.subplots_adjust(hspace=0.01,wspace=0.01)
 
 # Save figure
 tfig = ch1.save_figure('example-images', fext='.pdf')
-tfig.caption = r''
+tfig.caption = r"The layers of the Sun's atmosphere Sun as revealed by multiple wavelengths at approximately 19:00 UTC on 2010 December 1. The top left panel shows the photosphere, the top right panel shows chromosphere, and the bottom left panel shows the EUV corona all imaged by SDO/AIA. The bottom right panel shows the hot X-ray corona as observed by \textit{Hinode}/XRT. All data are courtesy of the AIA and XRT instrument teams."
 \end{pycode}
 \py[chapter1]|tfig|
 % spell-checker: enable %
 
-%\subsection{Solar Wind}
-
-% very briefly
+% mention solar wind briefly, no separate section 
 
 \section{The Solar Magnetic Field}
 

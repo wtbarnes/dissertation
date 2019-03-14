@@ -19,12 +19,13 @@ from hydrad_tools.parse import Profile, Strand
 from synthesizAR.physics import RTVScalingLaws
 
 from physics import power_law_rad_loss, isothermal_loop, beta_gary
+from run_ebtel import run_ebtel
 \end{pycode}
 % spell-checker: enable
 
-% conceptual comments on loops, see Reale (2010)
-% define plasma beta
-% define distinction between loops and strands
+While parts of the solar magnetic field may ``open'' to form the solar wind, many field lines close back at the photosphere to form arch-like structures extending high into the tenuous corona called \textit{coronal loops}, the primary building blocks of the highly structured solar corona \citep{reale_coronal_2010}. Because magnetic pressure, $B^2/8\pi$ dominates over the thermal pressure, $p$, of the plasma such that $\beta=8\pi p/B^2\ll1$ in the corona (see left panel of \autoref{fig:beta-trace}), the plasma is strongly confined by the magnetic field such that all plasma motion is directed along the field with negligible cross-field motion. The conduction of heat is also severely inhibited perpendicular to the field-aligned direction such that loops are thermally isolated. As a result, hot and radiating  coronal plasma traces out the enormously complicated solar magnetic field. The right panel of \autoref{fig:beta-trace} shows several distinct loop structures observed off the solar limb by the Transition Region and Coronal Explorer satellite \citep[TRACE][]{handy_transition_1999}.
+
+Because of the relatively high temperatures of the corona ($\sim\SIrange{e5}{e7}{\kelvin}$), coronal loops are observed primarily in the extreme ultraviolet (EUV) and X-ray bands and are long-lived structures, observable for many hours and sometimes even days. While most coronal loop temperatures exceed \SI{e5}{\kelvin}, loop plasma can span a range of temperatures and densities, due to both the complexity of the underlying field and the fact that individual loops are thermally isolated.Additionally, loops are often categorized based on their thermal properties: \textit{cool}, \SIrange{0.1}{1}{\mega\kelvin}, \textit{warm}, \SIrange{1}{1.5}{\mega\kelvin}, and \textit{hot}, $\ge\SI{2}{\mega\kelvin}$ \citep{reale_coronal_2010}. Whether these thermal categories actually represent distinct classes of loops or if they are all just transient states of the same type of loop is an open question. 
 
 % spell-checker: disable %
 \begin{pycode}[chapter2]
@@ -77,10 +78,18 @@ plt.subplots_adjust(wspace=0.1)
 
 # Save
 tfig = ch2.save_figure('beta-trace', fext='.pdf')
-tfig.caption = r'\textit{Left:} A simple empirical model of $\beta$ as a function of height, $h$, above the solar surface as calculated by Equation 2 and Equation 3 of \citet{gary_plasma_2001} for the magnetic field above a sunspot (blue) and a plage region (orange). The dotted lines indicate the tops of the photosphere, chromosphere and corona. The dashed line denotes $\beta=1$. Adapted from Figure 3 of \citet{gary_plasma_2001}. \textit{Right:} An arcade of loops extending into the corona observed off the solar limb by the TRACE satellite on 6 November 1999. Adapted from Figure 11 of \citet{reale_coronal_2010}.'
+tfig.caption = r'\textit{Left:} A simple empirical model of $\beta$ as a function of height, $h$, above the solar surface as calculated by Equation 2 and Equation 3 of \citet{gary_plasma_2001} for the magnetic field above a sunspot (blue) and a plage region (orange). The dotted lines indicate the tops of the photosphere, chromosphere and corona. The dashed line denotes $\beta=1$. Adapted from Figure 3 of \citet{gary_plasma_2001}. \textit{Right:} An arcade of loops extending into the corona observed off the solar limb by the \SI{171}{\angstrom} EUV band of the TRACE satellite on 6 November 1999. Adapted from Figure 11 of \citet{reale_coronal_2010}.'
 \end{pycode}
 \py[chapter2]|tfig|
 % spell-checker: enable %
+
+The first evidence of magnetically confined loop structures came from soft X-ray observations on rocket missions in the late 1960s as reported by \citet{vaiana_x-ray_1968}. Analysis of data from these early missions also allowed for classification of distinct topological features on the solar surface by \citet{vaiana_identification_1973}. These early findings provided the first look at the X-ray-bright, highly-structured corona. Later, observations from the Orbiting Solar Observatory IV, equipped with a grazing-incidence X-ray telescope, and the X-ray telescope aboard the \textit{Skylab} space station \citep{krieger_results_1972,reale_coronal_2010} allowed for more accurate determinations of loop lifetimes, better comparisons between observations and loop models, and, perhaps most importantly, the finding that the coronal loop is the essential building block of all coronal structures \citep{rosner_dynamics_1978}. Modern EUV observing instruments such as TRACE, the EUV Imaging Spectrometer \citep[EIS,][]{culhane_euv_2007} on the \textit{Hinode} satellite \citep{kosugi_hinode_2007} and most recently the AIA telescope on SDO have revealed dynamic, multi-thermal structures that are incompatible with the model of a simple hydrostatic atmosphere \citep[e.g.][]{warren_hydrodynamic_2002,winebarger_steady_2002,del_zanna_flows_2008,viall_evidence_2012} 
+
+Additionally, it is now apparent that loop structures are \textit{multi-stranded} \citep{gomez_normal_1993}; that is, they are composed of many sub-resolution \textit{strands}, where a strand is the smallest loop for which the cross-section is isothermal \citep{bradshaw_diagnosing_2012}. The fundamental limit of the fine-structuring of the corona is unknown though recent sounding rocket flights have sought to address this question \citep{cirtain_energy_2013,aschwanden_width_2017}.
+
+This natural discretization of the corona by the magnetic field means that the dynamics of the plasma can be modeled in the \textit{field-aligned} direction as an ensemble of individual isolated atmospheres rather than having to solve the equations of magnetohydrodynamics in three dimensions. Furthermore, because these models greatly simplify the geometry of the system, they are efficient, relatively easy to interpret, and capable of resolving the spatial and length scales needed to accurately model the dynamics in the corona and TR \citep{bradshaw_collisional_2013}.
+
+In this chapter, I provide a detailed discussion of the field-aligned physics and modeling of coronal loops. In \autoref{sec:hydrostatic}, I discuss the case of hydrostatic equilibrium and various methods for solving the energy and pressure balance equations in order to determine the thermal structure of a loop for some energy supplied by coronal heating. Then, in \autoref{sec:hydrodynamics}, I discuss the equations of field-aligned hydrodynamics (\autoref{sec:hydrodynamic-equations}) and the physics of loop heating, cooling and draining cycle (\autoref{sec:heating-cooling-cycle}). Additional, I provide a detailed description of the EBTEL model in \autoref{sec:ebtel} which will be used extensively in this thesis to efficiently model the response of loops to impulsive heating.
 
 \section{Hydrostatics}\label{sec:hydrostatic}
 
@@ -92,7 +101,7 @@ For a single strand in hydrostatic equilibrium with uniform cross-sectional area
     \frac{d}{ds}p &= m_ing, \label{eq:hydrostatic_pressure} \\
     p &= 2k_BnT, \label{eq:ideal_gas_law}
 \end{align}
-where $Q$ is the heating rate, $\Lambda(T)$ is the radiative loss term, $F_c$ is the conductive flux, $p$ is the thermal pressure, $n$ is the number density, $T$ is the temperature, $m_i$ is the average ion mass, $g=-g_\solar\left(\frac{R_\solar}{r}\right)^2\frac{dr}{ds}$ is the gravitational acceleration along the fieldline, $r$ is the radial distance from the center of the Sun, and $g_\solar$ is the gravitational acceleration at the solar surface ($r=R_\solar$).
+where $Q$ is the heating rate, $\Lambda(T)$ is the radiative loss term, $F_c$ is the conductive flux, $p$ is the thermal pressure, $n$ is the number density, $T$ is the temperature, $m_i$ is the average ion mass, $g=-g_\solar\left(\frac{R_\solar}{r}\right)^2\frac{dr}{ds}$ is the gravitational acceleration along the field line, $r$ is the radial distance from the center of the Sun, and $g_\solar$ is the gravitational acceleration at the solar surface ($r=R_\solar$).
 
 To determine $n$ and $T$ as a function of $s$ along the strand, one must solve \autoref{eq:hydrostatic_energy} and \autoref{eq:hydrostatic_pressure} given some predefined heating rate $Q$, which is, in general, a function of the loop coordinate and is often assumed to be proportional to powers of $n$ and $T$ \citep{priest_magnetohydrodynamics_2014}. Both of these equations are subject to closure by the equation of state given in \autoref{eq:ideal_gas_law}.
 
@@ -545,7 +554,7 @@ The electron and ion equations are coupled through the first and third terms on 
 \end{equation}
 where $\ln{\Lambda}$ is the Coulomb logarithm \citep[see both Eq. 2.5e and Section 3 of][]{braginskii_transport_1965}. Though the expression presented here differs by a factor of 2 compared to that of \citeauthor{braginskii_transport_1965}, the electron-ion equilibration time is not significantly changed by this relatively small numerical factor.
 
-Lastly, $Q_e$ and $Q_i$ denote the energy injected into the electrons and ions by a the heating term. In general, this is a free parameter and may be a function of both $s$ and $t$. While it is often assumed, that all of the heating is supplied to the electrons, some heating mechanisms may also preferentially energize the ions. See \autoref{ch:inferring_hot_plasma} for more details. 
+Lastly, $Q_e$ and $Q_i$ denote the energy injected into the electrons and ions by the heating term. In general, this is a free parameter and may be a function of both $s$ and $t$. While it is often assumed, that all of the heating is supplied to the electrons, some heating mechanisms may also preferentially energize the ions. See \autoref{ch:inferring_hot_plasma} for more details. 
 
 Assuming electron-ion equilibrium ($T_e=T_i$) and adding \autoref{eq:hydrodynamic_energy_e} and \autoref{eq:hydrodynamic_energy_i} gives the single-fluid hydrodynamic energy equation,
 \begin{equation}\label{eq:hydrodynamic_energy}
@@ -553,7 +562,7 @@ Assuming electron-ion equilibrium ($T_e=T_i$) and adding \autoref{eq:hydrodynami
 \end{equation}
 were $E=E_e + E_i$, $p=p_e+p_i$, and $F_c=F_{c,e} + F_{c,i}$. Under the  assumption of hydrostatic equilibrium ($v=0,\frac{\partial}{\partial t}=0$), this reduces to the equation of hydrostatic energy balance, \autoref{eq:hydrostatic_energy}.
 
-\subsection{The Heating and Cooling Cycle of Coronal Loops}\label{sec:heating-cooling-cycle}
+\subsection{The Heating, Cooling, and Draining Cycle of Coronal Loops}\label{sec:heating-cooling-cycle}
 
 \begin{figure}
     \centering
@@ -564,7 +573,7 @@ were $E=E_e + E_i$, $p=p_e+p_i$, and $F_c=F_{c,e} + F_{c,i}$. Under the  assumpt
 
 If energy supplied by coronal heating cannot be balanced by radiation and thermal conduction in order to maintain hydrostatic equilibrium, the loop undergoes a cycle of heating, cooling, and draining according to the physics in \autoref{eq:hydrodynamic_mass}, \autoref{eq:hydrodynamic_momentum}, \autoref{eq:hydrodynamic_energy_e}, and \autoref{eq:hydrodynamic_energy_i}. This response of the coronal loop plasma to an impulsive release of energy is reasonably well-understood and has been studied extensively, both in the context of flares and nanoflares \citep[e.g.][]{antiochos_influence_1976,antiochos_evaporative_1978,cargill_implications_1994,cargill_cooling_1995,cargill_nanoflare_2004,bradshaw_cooling_2005,bradshaw_reinterpretation_2008,bradshaw_new_2010,bradshaw_cooling_2010}. \autoref{fig:heating-cooling-cycle-cartoon} shows a cartoon of the different phases of the heating, filling, cooling, and draining cycle of a coronal loop.
 
-Consider a loop initially in hydrostatic equilibrium that is then (uniformly) heated sufficiently quickly such that radiation and thermal conduction do not have time to balance this energy input. For the sake of simplicity, I will assume the single-fluid approximation as given in \autoref{eq:hydrostatic_energy} and a semi-circular loop with half-length $L$ that is symmetric about the apex as shown in \autoref{fig:heating-cooling-cycle-cartoon}. This is illustrated in phase (a) of \autoref{fig:heating-cooling-cycle-cartoon}. This excess heat raises the temperature of the loop and sets up a strong heat flux toward the lower atmosphere because $F_c \propto -T^{5/2}\frac{\partial T}{\partial s}$ and $T$ monotonically increases with $s$ from the TR up to the apex. This is shown in phase (b). Once conduction is able to match the coronal heating rate, the plasma begins to cool.
+Consider a loop initially in hydrostatic equilibrium that is then (uniformly) heated sufficiently quickly such that radiation and thermal conduction do not have time to balance this energy input. For the sake of simplicity, I will assume the single-fluid approximation as given in \autoref{eq:hydrostatic_energy} and a semi-circular loop with half-length $L$ that is symmetric about the apex as shown in \autoref{fig:heating-cooling-cycle-cartoon}. This is illustrated in phase (a) of \autoref{fig:heating-cooling-cycle-cartoon}. This excess heat raises the temperature of the loop and sets up a strong heat flux toward the lower atmosphere because $F_c \propto -T^{5/2}\frac{\partial T}{\partial s}$ and $T$ monotonically increases with $s$ from the TR up to the apex. This is shown in phase (b). Once conduction is able to match the coronal heating rate, the plasma begins to cool. At this point, the loop is said to be ``underdense'' as its density is lower than that expected from hydrostatic equilibrium given the increase in temperature.
 
 Both radiation and conduction remove energy from corona and thus cool the plasma, but during this initial phase, conduction is more efficient. This is easily proved by considering the respective timescales of each of these processes. Following \citet{cargill_cooling_1995}, dropping all but the thermal conduction and radiative loss terms in \autoref{eq:hydrodynamic_energy} gives an apprximation of the conductive cooling time,
 \begin{align}
@@ -580,9 +589,9 @@ and the radiative cooling time,
 \end{align}
 For $\alpha=-1/2$, $\tau_C \ll \tau_R$ for high temperatures and low densities such that conduction is more efficient than radiation at removing the excess energy in the corona. 
 
-Because energy lost by radiation is proportional to $n^2$, the dense underlying chromosphere and TR are efficient at radiating away the energy conducted downward from the corona. However, if radiation cannot keep pace with the coronal conductive flux, this excess energy will heat the chromosphere and effectively destabilize the pressure balance in \autoref{eq:hydrostatic_pressure}. This increase in temperature causes chromospheric and TR \citep{bradshaw_influence_2013} material to expand into the corona and increase the coronal density. This process is illustrated in phase (c) of \autoref{fig:heating-cooling-cycle-cartoon} and is called chromospheric ablation\footnote{Historically, this process is referred to as chromospheric ``evaporation.'' However, this terminology is potentially misleading and ``ablation'' is a more accurate term.}. Note that this upflow of material provides energy to the corona via an enthalpy flux \citep{antiochos_evaporative_1978}.
+Because energy lost by radiation is proportional to $n^2$, the dense underlying chromosphere and TR are efficient at radiating away the energy conducted downward from the corona. However, if transition region radiative losses cannot keep pace with the coronal conductive flux, this excess energy will heat the chromosphere and effectively destabilize the pressure balance in \autoref{eq:hydrostatic_pressure}. This increase in temperature causes chromospheric and TR \citep{bradshaw_influence_2013} material to expand into the corona and increase the coronal density. This process is illustrated in phase (c) of \autoref{fig:heating-cooling-cycle-cartoon} and is called chromospheric ablation\footnote{Historically, this process is referred to as chromospheric ``evaporation.'' However, this terminology is potentially misleading and ``ablation'' is a more accurate term.}. Note that this upflow of material provides energy to the corona via an enthalpy flux \citep{antiochos_evaporative_1978}.
 
-As material fills the corona, $n$ increases and radiative cooling becomes more efficient. This further lowers the coronal temperature, weakens the downward conductive flux, and thus reduces chromospheric ablation. This is illustrated in panel (d). Once the corona has cooled sufficiently such that the downward conductive flux can be balanced by radiative losses in the TR, chromospheric ablation ceases. At this point, radiation has become just as efficient as thermal conduction such that $\tau_R\sim\tau_C$.
+As material fills the corona, $n$ increases and radiative cooling becomes more efficient. This further lowers the coronal temperature, weakens the downward conductive flux, and thus reduces chromospheric ablation. This is illustrated in panel (d). Once the corona has cooled sufficiently such that the downward conductive flux can be balanced by radiative losses in the TR, chromospheric ablation ceases. At this point, radiation has become just as efficient as thermal conduction such that $\tau_R\sim\tau_C$. In contrast to phase (b), the loops now said to be ``overdense'' as the increased density in the loop due to chromospheric ablation is greater than that expected from hydrostatic equilibrium.
 
 As the corona continues to cool, the ablated material can no longer support the upward pressure gradient and the plasma falls back down the loop due to gravity (see \autoref{eq:hydrostatic_pressure}). This is shown in phase (e) of \autoref{fig:heating-cooling-cycle-cartoon}. At this point, radiative cooling is much more efficient compared to conductive cooling such that $\tau_R\gg\tau_C$. However, \citep{bradshaw_cooling_2010} note that the resulting enthalpy flux out of the corona from the downflow of material also represents a significant and sometimes dominant loss mechanism during this radiative and enthalpy-driven cooling phase\footnote{While this phase of the loop evolution is often referrred to as only the ``radiative cooling phase,'' this nomenclature is incomplete as it neglects an important component of the energy budget.}. Furthermore, \citep{bradshaw_reinterpretation_2008,bradshaw_cooling_2010} show that this enthalpy flux is important in powering the TR against collapse due to runaway radiative cooling.
 
@@ -593,113 +602,413 @@ Provided the time-independent heating that initially supported the loop in hydro
 %Discuss HYDRAD in here, advantages, maybe a sample solution
 % briefly discuss capabilities, numerical treatment
 
+Taken together, \autoref{eq:hydrodynamic_mass}, \autoref{eq:hydrodynamic_momentum}, \autoref{eq:hydrodynamic_energy_e}, and \autoref{eq:hydrodynamic_energy_i} are a set of coupled, non-linear partial differential equations and must be solved numerically. The state-of-the-art Hydrodynamics and Radiation code \citep[HYDRAD][]{bradshaw_radiative_2003,bradshaw_self-consistent_2003,bradshaw_influence_2013} solves the two-fluid, field-aligned hydrodynamic equations over a full loop of arbitrary geometry using an adaptively-refined grid using an explicit second-order finite difference scheme. HYDRAD runs easily on a variety of platforms, from a laptop computer to a large computing cluster and has recently been modified to take advantage of multiple threads via the OpenMP library for multithreading \citep{reep_efficient_2019}. The code also includes a Java GUI for easily and intuitively configuring the input parameters to the code. 
+
+A critical feature of HYDRAD is the use of adaptive mesh refinement (AMR) as it ensures that the code adequately resolve steep gradients and/or discontinuities (e.g. shocks) that can develop along the loop. For example, failure to adequately resolve the TR in cases of very impulsive heating can result in severe underestimation of the coronal density and temperature \citep{bradshaw_influence_2013}. Furthermore, AMR allows the code to add grid cells as needed by ensuring that $\rho$, $E_e$, and/or $E_i$ do not vary by more than some predefined tolerance (e.g. 10\%) from one grid cell to the next. The maximum level of refinement can also be adjusted by the user to increase computational efficiency in cases where high-spatial resolution is not needed. HYDRAD also uses an adaptive timestep in order to adequately resolve the thermal conduction timescale, a restriction that can greatly increase compute times for very long loops or very impulsive heating \citep[though see a possible alternative in][]{johnston_new_2017}.
+
+HYDRAD also (optionally) simultaneously solves the time-dependent ionization and recombination equations (\autoref{eq:population_fraction}) for any number of elements. These time-dependent population fractions can then be fed back in to the calculation \autoref{eq:rad-loss} to account for non-equilibrium ionization in the radiative loss function. Additionally, \citep{reep_efficient_2019} recently added the ability to solve the H level populations in non-local thermal equilibrium (NLTE) in order to more properly account for optically-thick radiation in the chromosphere. 
+
+It should be mentioned that a number of codes have been developed to solve the field-aligned hydrodynamic equations including the NRL Solar Flux Tube Model \citep{mariska_numerical_1989,warren_evolving_2003}, RADYN \citep{allred_unified_2015}, Lare1D \citep{johnston_new_2017}, and the model of \citet{mikic_importance_2013}. However, all of these models lack at least one of the following critical features: separate treatment of electron and ion fluids, adaptively-refined grid to ensure proper spatial resolution, incorporation of non-equilibrium ionization, ease of use. 
+
 \subsection{The EBTEL Model}\label{sec:ebtel}
 
 %Derive normal and two-fluid EBTEL equations, show examples
 
+While field-aligned models like HYDRAD are extremely powerful, they are often too computationally expensive to be used in a paramater space exploration, for example, of a range of heating properties. Such studies are critical to constraining properties of the heating in coronal loops. To this end, many ``0D'' loop models have been developed \citep{kuin_thermal_1982,fisher_equation_1990,kopp_coronal_1993,cargill_implications_1994,aschwanden_hydrodynamic_2009}, so-called because they solve for the hydrodynamic evolution of a single, spatially-unresolved point rather than an entire loop. Such models are very useful as they incorporate the key physics of the evolution of a coronal loop, but are extremely efficient such that a large parameter space can be explored in a reasonable amount of time. Once a parameter space is sufficiently constrained, a more sophisticated field-aligned model can be used.
+
+By far the most advanced and widely-used 0D model is the enthalpy-based thermal evolution of loops model \citep[EBTEL][]{klimchuk_highly_2008}. Unlike earlier 0D models, EBTEL can include any form of time-dependent heating, accounts for cooling by thermal conduction and radiation at all times, and can account for heat flux saturation (see \autoref{sec:heat-flux}). The idea behind the EBTEL model is to equate an enthalpy flux due to ablation or draining with the balance between the heat flux out of the corona and radiative loss rate in the TR. If the TR radiation cannot balance the downward heat flux, this drives an upflow. Conversely, if the TR is radiating away more energy than the heat flux can supply, this drives a downflow.
+
+EBTEL was originally developed by \citet{klimchuk_highly_2008} as an improvement to the widely-used cooling model of \citet{cargill_implications_1994}. Later, \citet{cargill_enthalpy-based_2012} improved the model by including a more sophisticated treatment of the ratio between the radiative losses in the TR and corona. Most recently, \citet{barnes_inference_2016} generalized the EBTEL model to treat the electron and ion fluids separately. I will now derive the two-fluid EBTEL equations from the field-aligned hydrodynamic equations (\autoref{sec:ebtel-two-fluid}) and then show how these reduce to the original single-fluid EBTEL equations of \citet{klimchuk_highly_2008,cargill_enthalpy-based_2012}. In \autoref{sec:c1-correction}, I discuss the ratio between the TR and coronal radiative losses.
+
 \subsubsection{Two-fluid Model}\label{sec:ebtel-two-fluid}
 
-% Derivation of two-fluid model as given in second appendix of Barnes et al (2016a)
-% details of numerical approach in ebtel++
-
-Plugging in these expressions for $E_e$ and $E_i$ and using the assumptions of sub-sonic flows ($v<C_s$) and loops shorter than a gravitational scale height ($L<150$ Mm) as outlined in \citet{klimchuk_highly_2008}, the two-fluid field-aligned hydrodynamic energy equations can be written,
+This derivation is adapted directly from Appendix B of \citet[\autoref{ch:inferring_hot_plasma} of this thesis]{barnes_inference_2016} and closely follows the derivation of the original EBTEL equations in \citet{klimchuk_highly_2008} and \citet{cargill_enthalpy-based_2012}. First, plug the definitions of the electron and ion energy, \autoref{eq:hydrodynamic_energy_e_def} and \autoref{eq:hydrodynamic_energy_i_def}, into the electron and ion energy equations, \autoref{eq:hydrodynamic_energy_e} and \autoref{eq:hydrodynamic_energy_i}, to get expressions for the evolution of the electron pressure, $p_e$, and ion pressure, $p_i$,
 \begin{align}
-    \frac{1}{\gamma - 1}\frac{\partial p_e}{\partial t} + \frac{\gamma}{\gamma - 1}\frac{\partial}{\partial s}(p_ev) &= v\frac{\partial p_e}{\partial s} - \frac{\partial F_{ce}}{\partial s} + \frac{1}{\gamma - 1}k_Bn\nu_{ei}(T_i-T_e) -n^2\Lambda(T_e)+Q_{e}, \label{eq:1denergy_e_simp} \\[0.5em]
-    \frac{1}{\gamma - 1}\frac{\partial p_i}{\partial t} + \frac{\gamma}{\gamma - 1}\frac{\partial }{\partial s}(p_iv)&= -v\frac{\partial p_e}{\partial s} - \frac{\partial F_{ci}}{\partial s} + \frac{1}{\gamma - 1}k_Bn\nu_{ei}(T_e-T_i) + Q_{i}. \label{eq:1denergy_i_simp}
+    \frac{1}{\gamma - 1}\frac{\partial p_e}{\partial t} + \frac{\gamma}{\gamma - 1}\frac{\partial}{\partial s}(p_ev) =& v\frac{\partial p_e}{\partial s} - \frac{\partial F_{ce}}{\partial s} + \frac{1}{\gamma - 1}k_Bn\nu_{ei}(T_i-T_e) \label{eq:1denergy_e_simp} \\
+    &- n^2\Lambda(T_e) + Q_{e}, \nonumber \\
+    \frac{1}{\gamma - 1}\frac{\partial p_i}{\partial t} + \frac{\gamma}{\gamma - 1}\frac{\partial }{\partial s}(p_iv) =& -v\frac{\partial p_e}{\partial s} - \frac{\partial F_{ci}}{\partial s} + \frac{1}{\gamma - 1}k_Bn\nu_{ei}(T_e-T_i) + Q_{i}. \label{eq:1denergy_i_simp}
 \end{align}
-Notice that we have dropped the ion viscous and gravitational terms from  \autoref{eq:1denergy_i} as well as the kinetic energy term from \autoref{eq:ei_closure}. $Q_{e}$ and $Q_{i}$ represent the electron and ion heating terms, respectively. $F_{ce}$ and $F_{ci}$ are the electron and ion heat flux terms, respectively. In the case of Spitzer conduction, $\kappa_{0,e}=7.8\times10^{-7}$ and $\kappa_{0,i}=3.2\times10^{-8}$.
 
-The analysis now follows that of \citet{klimchuk_highly_2008} and \citet{cargill_enthalpy-based_2012}. Assuming symmetry about the loop apex, we integrate \autoref{eq:1denergy_e_simp} and \autoref{eq:1denergy_i_simp} over the coronal loop half-length $L$,
+Note that three terms have been dropped: the kinetic energy component of $E_i$ and the viscous and gravitational terms in the ion energy equation. Following \citet{klimchuk_highly_2008}, under the assumptions of sub-sonic flows, $v<C_s=\num{1.5e4}T^{1/2}$ ($=\SI{2.6e7}{\cm\per\second}$ at $T=\SI{3}{\mega\kelvin}$), where $C_s$ is the sound speed, terms which are second-order (or higher) in $v$ are small such that kinetic energy and viscous terms can be neglected. Furthermore, for loops shorter than a gravitational scale height, $L<\lambda_g=\num{5e3}T$($=\SI{150}{\mega\m}$ for $T=\SI{3}{\mega\kelvin}$), the gravitational contribution to the ion energy is negligible.
+
+The next step is to integrate each equation over the coronal portion of the loop in order to ``zero-dimensionalize'' them. Assuming symmetry about the loop apex, the coronal average of a quantity $x\equiv x(s,t)$ is defined as,
+\begin{equation*}
+    \bar{x} = \frac{1}{L}\int_C\dd{s}x = \frac{1}{L}\int_{s_0}^{s_a}\dd{s}x,
+\end{equation*}
+where $L$ is the loop half-length, the subscript ``$a$'' denotes the apex of the loop, and the subscript ``$0$'' denotes the base of the corona where thermal conduction changes from being an energy source in the TR to an energy sink in the corona. For terms differentiated with respect to $s$, the coronal average can be expressed as,
+\begin{equation*}
+    \int_C\dd{s}\frac{\partial}{\partial s}x = x(s_a) - x(s_0).
+\end{equation*}
+
+Averaging \autoref{eq:1denergy_e_simp} and \autoref{eq:1denergy_i_simp} over the coronal portion of the loop gives,
 \begin{align}
-    \frac{L}{\gamma - 1}\frac{d \bar{p}_e}{dt} &= \frac{\gamma}{\gamma - 1}(p_ev)_0 + F_{ce,0} + \psi_C - \mathcal{R}_C + L\bar{Q}_{e},\label{eq:1denergy_e_C} \\[0.5em]
+    \frac{L}{\gamma - 1}\frac{d \bar{p}_e}{dt} &= \frac{\gamma}{\gamma - 1}(p_ev)_0 + F_{ce,0} + \psi_C - R_C + L\bar{Q}_{e},\label{eq:1denergy_e_C} \\
     \frac{L}{\gamma - 1}\frac{d \bar{p}_i}{dt} &= \frac{\gamma}{\gamma - 1}(p_iv)_0 + F_{ci,0} - \psi_C + L\bar{Q}_{i},\label{eq:1denergy_i_C}
 \end{align}
-where we have assumed the enthalpy flux and heat flux go to zero at the loop apex, $R_C=\int_C\mathrm{d}s\,n^2\Lambda(T_e)$ and,
-\begin{equation}
-    \psi_C=\int_C\mathrm{d}s\,v\frac{\partial p_e}{\partial s} + \int_C\mathrm{d}s\,\frac{k_B}{\gamma - 1}n\nu_{ei}(T_i - T_e).
+where the heat flux at the base of the loop, $s=s_0$ can be expressed as
+\begin{equation}\label{eq:heat-flux-ebtel}
+    F_{c,0} = -\kappa_0T^{5/2}\frac{dT}{ds} \approx -\frac{2}{7}\kappa_0\frac{T_a^{7/2}}{L}
+\end{equation}
+\citep{klimchuk_highly_2008}, $v(s_a)=0$ and $F_c(s_a)=0$ due to the assumption of symmetry about the apex, $R_C=\int_C\mathrm{d}s\,n^2\Lambda(T_e)$ and,
+\begin{equation}\label{eq:psi_c_full}
+    \psi_C=\int_C\dd{s}v\frac{\partial p_e}{\partial s} + \int_C\dd{s}\frac{k_B}{\gamma - 1}n\nu_{ei}(T_i - T_e).
 \end{equation}
 
-Similarly, integrating over the TR portion of the loop of thickness $\ell$, we obtain,
+Similarly, the integrals of $x$ and $\partial x/\partial s$ over the TR are defined as,
 \begin{align}
-    \frac{\gamma}{\gamma - 1}(p_ev)_0 &= - F_{ce,0} + \psi_{TR} - \mathcal{R}_{TR}, \label{eq:1denergy_e_TR} \\[0.5em]
+    \bar{\bar{x}} =& \frac{1}{\ell}\int_{TR}\dd{s}x = \frac{1}{\ell}\int_{s_c}^{s_0}\dd{s}x,\nonumber \\
+    \int_{TR}\dd{s}\frac{\partial}{\partial s}x =& x(s_0) - x(s_c),\nonumber
+\end{align}
+where $\ell\ll L$ is the length of the TR and the ``$c$'' subscript denotes the top of the chromosphere. Integrating \autoref{eq:1denergy_e_simp} and \autoref{eq:1denergy_i_simp} over the TR portion of the loop gives,
+\begin{align}
+    \frac{\gamma}{\gamma - 1}(p_ev)_0 &= - F_{ce,0} + \psi_{TR} - R_{TR}, \label{eq:1denergy_e_TR} \\
     \frac{\gamma}{\gamma - 1}(p_iv)_0 &=  - F_{ci,0} - \psi_{TR}, \label{eq:1denergy_i_TR}
 \end{align}
-where several terms are neglected because $\ell\ll L$ \citep{klimchuk_highly_2008}. Additionally, we have assumed that the enthalpy flux and heat flux go to zero at the top of the chromosphere, $R_{TR}=\int_{TR}\mathrm{d}s\,n^2\Lambda(T_e)$ and
-\begin{equation}
-    \psi_{TR}=\int_{TR}\mathrm{d}s\,v\frac{\partial p_e}{\partial s} + \int_{TR}\mathrm{d}s\,\frac{k_B}{\gamma - 1}n\nu_{ei}(T_i - T_e).
+Any terms $\propto\ell$ are neglected because $\ell\ll L$ \citep{klimchuk_highly_2008} and it is assumed that the enthalpy flux and heat flux go to zero at the top of the chromosphere. Additionally, $R_{TR}=\int_{TR}\dd{s},n^2\Lambda(T_e)$ and
+\begin{equation}\label{eq:psi_tr_full}
+    \psi_{TR}=\int_{TR}\dd{s}v\frac{\partial p_e}{\partial s} + \int_{TR}\dd{s}\frac{k_B}{\gamma - 1}n\nu_{ei}(T_i - T_e).
 \end{equation}
-The second term in this expression is usually small, but is retained for completeness.  Plugging \autoref{eq:1denergy_e_TR} (\autoref{eq:1denergy_i_TR}) into \autoref{eq:1denergy_e_C} (\autoref{eq:1denergy_i_C}),
+The second term in this expression is usually small, but is retained for completeness.
+
+Plugging \autoref{eq:1denergy_e_TR}  into \autoref{eq:1denergy_e_C} and \autoref{eq:1denergy_i_TR} into \autoref{eq:1denergy_i_C} gives,
 \begin{align}
-    \frac{L}{\gamma - 1}\frac{d\bar{p}_e}{dt} =& \psi_{TR} + \psi_C -(\mathcal{R}_C + \mathcal{R}_{TR}) + L\bar{Q}_{e},\label{eq:0d_press_e_sub} \\[0.5em]
+    \frac{L}{\gamma - 1}\frac{d\bar{p}_e}{dt} =& \psi_{TR} + \psi_C -(R_C + R_{TR}) + L\bar{Q}_{e},\label{eq:0d_press_e_sub} \\
     \frac{L}{\gamma - 1}\frac{d\bar{p}_i}{dt} =& -(\psi_{C} + \psi_{TR}) +  L\bar{Q}_{i}.\label{eq:0d_press_i_sub}
 \end{align}
-Note that adding \autoref{eq:0d_press_e_sub} and \autoref{eq:0d_press_i_sub} gives the correct single-fluid EBTEL model (i.e. \autoref{eq:energy_0d}).
+These equations describe the spatially-averaged evolution of the coronal electron and ion energy given some heating input $\bar{Q}_e$ and $\bar{Q}_i$. 
 
-As in the single-fluid case, we find that the spatially-integrated coronal density evolution is described by,
-\begin{equation}
-    L\frac{d\bar{n}}{dt} = (nv)_0.
-\end{equation}
-Using \autoref{eq:1denergy_e_TR} and the equation of state for $p_e$, the above equation can be written as
+As with the energy expressions, \autoref{eq:hydrodynamic_mass} can be similarly averaged over the corona,
 \begin{align}
-    (nv)_0 =& \frac{(p_ev)_0}{k_BT_{e,0}} = \frac{c_2(\gamma - 1)}{c_3\gamma k_B\bar{T}_e}(-F_{ce,0} - \mathcal{R}_{TR} + \psi_{TR}),\\
-    L\frac{d\bar{n}}{dt} =& \frac{c_2(\gamma - 1)}{c_3\gamma k_B\bar{T}_e}(-F_{ce,0} - \mathcal{R}_{TR} + \psi_{TR}).\label{eq:0d_mass_sub}
+    \frac{\partial}{\partial t}\rho =& -\frac{\partial}{\partial s}(\rho v), \nonumber \\
+    \int_C\dd{s}\frac{\partial}{\partial t}\rho =& - \int_C\dd{s}\frac{\partial}{\partial s}(\rho v), \nonumber \\
+    L\frac{d\bar{n}}{dt} =& (nv)_0.
 \end{align}
+Using \autoref{eq:1denergy_e_TR} and \autoref{eq:ideal_gas_law_e}, the above equation can be written as
+\begin{align}
+    (nv)_0 =& \frac{(p_ev)_0}{k_BT_{e,0}}, \nonumber \\
+    (nv)_0 =& \frac{c_2(\gamma - 1)}{c_3\gamma k_B\bar{T}_e}(-F_{ce,0} - R_{TR} + \psi_{TR}),\nonumber \\
+    L\frac{d\bar{n}}{dt} =& \frac{c_2(\gamma - 1)}{c_3\gamma k_B\bar{T}_e}(-F_{ce,0} - R_{TR} + \psi_{TR}),\label{eq:0d_mass_sub}
+\end{align}
+where $c_2=\bar{T}_e/T_{e,a}$ and $c_3=T_{e,0}/T_{e,a}$. This equation describes the spatially-averaged evolution of the coronal density in response to the heating. The problem now is to find expressions for the integrals $\psi_{TR}$ and $\psi_C$.
 
-To obtain \autoref{eq:press_e_0d_2fl}, \autoref{eq:press_i_0d_2fl}, and \autoref{eq:mass_0d_2fl}, we need to find expressions for $\psi_C$ and $\psi_{TR}$. Recall that $\psi_C$ and $\psi_{TR}$ are comprised of terms associated with the quasi-neutral electric field and temperature equilibration. The integral of the former can be considered as the gain or loss of energy associated with plasma motion through the net electric potential. Consider the first integral in the definition of $\psi_C$. Using integration by parts,
-\begin{equation}
-    \int_C\mathrm{d}s\,v\frac{\partial p_e}{\partial s} = (p_ev)\Big|^{``a"}_{``0"} - \int_C\mathrm{d}v\,p_e = -(p_ev)_0 - \int_C\mathrm{d}v\,p_e\approx -(p_ev)_0 -\bar{p}_e\int_C\mathrm{d}v = -(p_ev)_0 + \bar{p}_ev_0 \approx 0.
-\end{equation}
-Thus, we can express $\psi_C$ as
+Recall that $\psi_C$ and $\psi_{TR}$ are comprised of terms associated with the quasi-neutral electric field and temperature equilibration. The integral of the former can be considered as the gain or loss of energy associated with plasma motion through the net electric potential. Using integration by parts, the first integral in \autoref{eq:psi_c_full} becomes,
+\begin{align}
+    \int_C\dd{s}v\frac{\partial p_e}{\partial s} &= (p_ev)\Big|^{s_a}_{s_0} - \int_C\dd{v}p_e = -(p_ev)_0 - \int_C\dd{v} p_e\nonumber\\
+    &\approx -(p_ev)_0 -\bar{p}_e\int_C\mathrm{d}v = -(p_ev)_0 + \bar{p}_ev_0 \approx 0.
+\end{align}
+Thus, \autoref{eq:psi_c_full} becomes,
 \begin{equation}
     \psi_C\approx\frac{k_BL}{\gamma -1}\bar{n}\nu_{ei}(\bar{T}_i - \bar{T}_e),
     \label{eq:psi_C}
 \end{equation}
-where $\nu_{ei}=\nu_{ei}(\bar{T}_e,\bar{n})$. To find an expression for $\psi_{TR}$, we first note that, using the equation of state for both the electrons and the ions and the quasi-neutrality condition ($n_e=n_i$),
+where $\nu_{ei}=\nu_{ei}(\bar{T}_e,\bar{n})$.
+
+The next step is to find an expression for $\psi_{TR}$. Dividing \autoref{eq:ideal_gas_law_e} and \autoref{eq:ideal_gas_law_i}, multiplying by $v$, and using the quasi-neutrality condition ($n=n_e=n_i$) gives,
 \begin{equation}
     \frac{p_ev}{p_iv} = \frac{T_e}{T_i}.
 \end{equation}
-Evaluating this expression at the TR/corona interface (denoted by ``0''), plugging in \autoref{eq:1denergy_e_TR} and \autoref{eq:1denergy_i_TR},
+Evaluating this expression at the TR/corona interface, $s=s_0$, and using \autoref{eq:1denergy_e_TR} and \autoref{eq:1denergy_i_TR} yields,
 \begin{equation}
-    \frac{- F_{ce,0} + \psi_{TR} - \mathcal{R}_{TR}}{- F_{ci,0} - \psi_{TR}} = \xi,
+    \frac{- F_{ce,0} + \psi_{TR} - R_{TR}}{- F_{ci,0} - \psi_{TR}} = \xi,
 \end{equation}
-where $\xi\equiv T_{e,0}/T_{i,0}$. Solving for $\psi_{TR}$, we find,
-\begin{equation}
-    \psi_{TR} = \frac{1}{1+\xi}(F_{ce,0} + \mathcal{R}_{TR} - \xi F_{ci,0}).
-    \label{eq:psi_TR}
+where $\xi\equiv T_{e,0}/T_{i,0}$. Solving for $\psi_{TR}$ gives,
+\begin{equation}\label{eq:psi_TR}
+    \psi_{TR} = \frac{1}{1+\xi}(F_{ce,0} + R_{TR} - \xi F_{ci,0}).
 \end{equation}
 
-Plugging \autoref{eq:psi_C} and \autoref{eq:psi_TR} into \autoref{eq:0d_press_e_sub}, \autoref{eq:0d_press_i_sub}, and \autoref{eq:0d_mass_sub} gives us our set of two-fluid EBTEL equations as given in \autoref{eq:press_e_0d_2fl}, \autoref{eq:press_i_0d_2fl}, and \autoref{eq:mass_0d_2fl}. The prescription for $c_1$, $c_2$, and $c_3$ is the same as the single-fluid version of EBTEL. As discussed in \citet{cargill_enthalpy-based_2012}, these play little role in the early heating phase when two-fluid effects are important.
+Finally, the set of two-fluid EBTEL equations can be expressed as,
+\begin{align}
+    \frac{d}{dt}p_e =& \frac{\gamma - 1}{L}(\psi_{TR} - R_C(1 + c_1)) + k_Bn\nu_{ei}(\bar{T}_i - \bar{T}_e) + (\gamma - 1)\bar{Q}_e,\label{eq:press_e_0d_2fl} \\
+    \frac{d}{dt}p_i =& -\frac{\gamma - 1}{L}\psi_{TR} + k_Bn\nu_{ei}(\bar{T}_e - \bar{T}_i) + (\gamma - 1)\bar{Q}_i,\label{eq:press_i_0d_2fl} \\
+    \frac{d}{dt}n =& -\frac{\xi}{1+\xi}\frac{c_2(\gamma - 1)}{c_3L\gamma k_B\bar{T}_e}(F_{ce,0} + F_{ci,0} + c_1R_C),\label{eq:mass_0d_2fl}
+\end{align}
+where $c_1=R_{TR}/R_C$ is discussed more fully in \autoref{sec:c1-correction}, $R_C=L\bar{n}^2\Lambda(\bar{T}_e)$, $c_2\approx0.9$, and $c_3\approx0.6$.
 
-%% FIGURE HERE %%
+\autoref{eq:press_e_0d_2fl}, \autoref{eq:press_i_0d_2fl}, and \autoref{eq:mass_0d_2fl} are a set of three coupled, non-linear ordinary differential equations. While they still need to be solved numerically, solving these equations is fast and relatively straight forward compared to resolved field-aligned codes (e.g. HYDRAD) due to the lack of a spatial grid. The ebtel++ code\footnote{ebtel++ is thoroughly documented and openly developed. The full source code is available here: \href{https://github.com/rice-solar-physics/ebtelPlusPlus}{github.com/rice-solar-physics/ebtelPlusPlus}. The original single-fluid EBTEL model of \citet{klimchuk_highly_2008,cargill_enthalpy-based_2012} is implemented in IDL and is available here: \href{https://github.com/rice-solar-physics/EBTEL}{github.com/rice-solar-physics/EBTEL}} solves the two-fluid EBTEL equations using an Runge-Kutta Cash-Karp method \citep[Section 16.2]{press_numerical_1992} given a loop half-length $L$ and a prescribed heating function. ebtel++ is written in the C++ programming language and can use either a static or an adaptive timestep. ebtel++ is very efficient and is capable of computing solutions for thousands of loop evolving over many hours of simulation time in a few minutes or less. The ebtel++ code is used extensively in both \autoref{ch:inferring_hot_plasma} and \autoref{ch:modeling-observables}.
+
+% spell-checker: disable %
+\begin{pycode}[chapter2]
+# define function for heating frequency
+def calc_nu_ei(n,Te):
+    c1 = 16.*np.sqrt(np.pi)/3.
+    c2 = const.e.gauss.value**4/(const.m_e.cgs.value*const.m_p.cgs.value)
+    c3 = 2.*const.k_B.cgs.value*Te/const.m_e.cgs.value
+    colLog = 20.
+    return c1*c2*c3**(-3./2.)*n*colLog
+
+# ebtel++ config
+base_config = {
+    'total_time': 5e3,
+    'tau': 0.1,
+    'tau_max': 10,
+    'loop_length': 4e9,
+    'saturation_limit': 1,
+    'force_single_fluid': False,
+    'use_c1_loss_correction': True,
+    'use_c1_grav_correction': True,
+    'use_flux_limiting': True,
+    'use_power_law_radiative_losses': True,
+    'calculate_dem': False,
+    'save_terms': True,
+    'use_adaptive_solver': True,
+    'adaptive_solver_error': 1e-8,
+    'adaptive_solver_safety': 0.5,
+    'c1_cond0': 6.0,
+    'c1_rad0': 0.6,
+    'helium_to_hydrogen_ratio': 0.075,
+    'surface_gravity': 1.0,
+    'heating': OrderedDict({
+        'partition': 1.,
+        'background': 3.5e-5,
+        'events': [{'event':{
+            'magnitude':0.1,
+            'rise_start':0.0,
+            'rise_end':100.0,
+            'decay_start':100.0,
+            'decay_end':200.0}}
+        ]
+    }),
+}
+
+# Run results and alias some parameters
+res = run_ebtel(base_config, EBTEL_DIR)
+t = res['time']
+Te = res['electron_temperature']
+Ti = res['ion_temperature']
+n = res['density']
+Fe = res['f_e']
+Fi = res['f_i']
+r = res['rad']
+c1 = res['c_1']
+L = base_config['loop_length']
+
+# Setup figure
+fig = plt.figure(figsize=texfigure.figsize(pytex,))
+ax = fig.gca()
+
+# Plot terms
+# Electron thermal conduction
+ax.plot(t, Fe/L/(1 + Te/Ti), color=PALETTE[0], label=r'$e^-$ thermal conduction')
+## Ion thermal conduction
+ax.plot(t, -Fi/L*(Te/Ti)/(1 + Te/Ti), color=PALETTE[1], label=r'ion thermal conduction')
+## Radiation
+ax.plot(t, -(Te/Ti*(c1 + 1.) + 1.)/(1. + Te/Ti)*(n**2)*r, color=PALETTE[2], label=r'radiation')
+## Equilibration
+equil = const.k_B.cgs.value/(5./3. - 1.)*n*calc_nu_ei(n, Te)*(Ti - Te)
+ax.plot(t, equil, color=PALETTE[3], label=r'equilibration')
+## Psi_TR
+psi_tr = 1.0/L*1./(1.+Te/Ti)*(Fe + c1*L*(n.value**2)*r - Te/Ti*Fi)
+ax.plot(t, psi_tr, color=PALETTE[4], label=r'$\psi_{TR}$')
+
+## Ticks and labels
+ax.set_xscale('log')
+ax.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(nbins=4))
+ax.set_xlim([1, base_config['total_time']])
+ax.set_xlabel(r'$t$ $[\si{\second}]$')
+ax.set_ylabel(r'$\Delta\bar{E}_e$ $[\si{\erg\per\cubic\cm\per\second}]$')
+ax.legend(frameon=False, loc=3)
+      
+## Save
+tfig = ch2.save_figure('psi-tr-compare', fext='.pgf')
+tfig.caption = r'Energy loss and gain mechanisms arising from a nanoflare with $\tau=\SI{200}{\second}$ and electron heating only. The various curves correspond to the terms in the EBTEL two-fluid electron energy equation, \autoref{eq:press_e_0d_2fl}. Electron and ion thermal conduction, radiation, binary Coulomb interactions, and $\psi_{TR}$ are shown. The loop parameters are as in \autoref{hot-plasma:sec:results}.'
+\end{pycode}
+\py[chapter2]|tfig|
+% spell-checker: enable %
 
 Plugging \autoref{eq:psi_TR} into \autoref{eq:press_e_0d_2fl}, the electron energy evolution equation can be written,
-\begin{equation}
-    \frac{1}{\gamma -1}\frac{d\bar{p}_e}{dt} = \frac{1}{L(1+\xi)}F_{ce,0} - \frac{\xi}{L(1+\xi)}F_{ci,0} - \frac{\xi(c_1+1) + 1}{L(1+\xi)}\mathcal{R}_C + \frac{k_B}{\gamma-1}\bar{n}\nu_{ei}(\bar{T}_i-\bar{T}_e) + \bar{Q}_e,
-    \label{eq:press_e_0d_2fl_breakdown}
-\end{equation}
-where the first two terms on the right-hand side represent the contributions from electron and ion thermal conduction, the third term represents losses from radiation, and the last two terms are as before. \autoref{fig:psi_tr_compare} shows the contribution of each term, with the exception of the heating term, $\bar{Q}_e$. As expected, (electron) thermal conduction dominates during the early heating and cooling phase and losses from radiation takeover in the late draining and cooling stage. Between these two phases, energy exchange between the two species is important to the evolution of the electron energy. $\psi_{TR}$, indicated by the black dotted line, is included to show its importance in the formation of the two-fluid EBTEL equations.
+\begin{align}
+    \frac{1}{\gamma -1}\frac{d\bar{p}_e}{dt} =& \frac{1}{L(1+\xi)}F_{ce,0} - \frac{\xi}{L(1+\xi)}F_{ci,0} - \frac{\xi(c_1+1) + 1}{L(1+\xi)}R_C \label{eq:press_e_0d_2fl_breakdown} \\
+    &+ \frac{k_B}{\gamma-1}\bar{n}\nu_{ei}(\bar{T}_i-\bar{T}_e) + \bar{Q}_e, \nonumber
+\end{align}
+where the first two terms on the right-hand side represent the contributions from electron and ion thermal conduction, the third term represents losses from radiation, and the last two terms are as before. \autoref{fig:psi-tr-compare} shows the contribution of each term, with the exception of the heating term, $\bar{Q}_e$. As expected, (electron) thermal conduction dominates during the early heating and cooling phase and losses from radiation takeover in the late draining and cooling stage. Between these two phases, energy exchange between the two species is important to the evolution of the electron energy. $\psi_{TR}$, indicated by the black dotted line, is included to show its importance in the formation of the two-fluid EBTEL equations.
 
 \subsubsection{Single-fluid Model}\label{sec:ebtel-single-fluid}
 
-% Show how two-fluid equations simplify to single-fluid model
-% point out that this was original model, developed by Klimchuk, Cargill, et al.
+I now show how the two-fluid EBTEL equations reduce to the original single-fluid EBTEL equations developed by \citet{klimchuk_highly_2008,cargill_enthalpy-based_2012}. In the single-fluid limit, $\nu_{ei}\to\infty$ such that the electron and ion populations are always in equilibrium, $T_e=T_i$. Adding \autoref{eq:0d_press_e_sub} and \autoref{eq:0d_press_i_sub} gives,
+\begin{align}
+    \frac{L}{\gamma - 1}\left(\frac{d}{dt}\bar{p}_e + \frac{d}{dt}\bar{p}_i\right) =& -R_C(c_1 + 1) + L(\bar{Q}_e + \bar{Q}_i), \nonumber\\
+    \frac{L}{\gamma - 1}\frac{d}{dt}\bar{p} =& -R_C(c_1 + 1) + L\bar{Q},\nonumber
+\end{align}
+where $\bar{p}=\bar{p}_e+\bar{p}_i=2k_B\bar{n}\bar{T}$ and $\bar{Q}=\bar{Q}_e+\bar{Q}_i$. This expression is equivalent to \autoref{hot-plasma:eq:energy_0d}, the single-fluid EBTEL energy equation.
+
+In the case of $T_e=T_i$, $\xi=1$ and \autoref{eq:mass_0d_2fl} becomes,
+\begin{equation}
+\frac{d}{dt}\bar{n} = -\frac{c_2(\gamma - 1)}{2c_3L\gamma k_B\bar{T}}(F_{c,0} + c_1R_C),
+\end{equation}
+where $F_{ce,0} + F_{ci,0}=F_{c,0}$ because $\kappa_0 = \kappa_{0,e} + \kappa_{0,i}$. Comparison with \autoref{hot-plasma:eq:mass_0d} shows that the single-fluid equation is recovered in the limit of infinitely fast binary Coulomb collisions between electrons and ions.
 
 \subsubsection{Modifications to $c_1$ During the Conductive Cooling Phase}\label{sec:c1-correction}
 
-In Section 3 of \citet{cargill_enthalpy-based_2012} we assumed that the parameter $c_1$ decreased from its equilibrium value at the time of maximum density, to that commensurate with radiative/enthalpy cooling as the loop drained. This was defined in terms of the ratio $n/n_{eq}$, where $n_{eq}$ was the loop density that would exist for the calculated temperature were the loop to be in static equilibrium \citep[Equation 17 of][]{cargill_enthalpy-based_2012}. In this radiative phase, $n > n_{eq}$. On the other hand, when $n < n_{eq}$, we assumed $c_1$ took on its equilibrium value, $c_{1,eq}$. Defining $\Delta\equiv(n_{\mathrm{EBTEL}} - n_{\mathrm{HYDRAD}})/n_{\mathrm{HYDRAD}}$, this gave $\Delta\lesssim0.2$, acceptable errors in the EBTEL value of $n$, as shown in the figures in \citet{cargill_enthalpy-based_2012}, in particular for the mild nanoflares we considered.
-
-It is now clear that a modified description of $c_1$ for $n < n_{eq}$ is needed for many of the examples discussed in the present paper. Specifically, for intense heating events, the coronal density calculated by the version of EBTEL in \citet{cargill_enthalpy-based_2012} is unacceptably high when compared to results from the HYDRAD code. Quantitatively, we find $\Delta\gtrsim0.3$ at $n_{max}$. While this may seem to be reasonable for an aproximate model, the high EBTEL density is a systematic feature, and requires further investigation.
-
-Examination of the HYDRAD results shows that EBTEL significantly underestimates the TR radiative losses during the heating and conductive cooling phases. At this time, the loop is under-dense \citep[e.g.][]{cargill_nanoflare_2004}, so that an excess of the conducted energy goes into evaporating TR material. We have modified $c_1$ as follows for $n < n_{eq}$,
-\begin{equation}
-    c_1 = \frac{2c_{1,eq} + c_{1,cond}((n_{eq}/n)^2-1)}{1+(n_{eq}/n)^2},
-    \label{eq:c1_mod}
+This section is adapted directly from Appendix A of \citet[\autoref{ch:inferring_hot_plasma} of this thesis]{barnes_inference_2016}. The coefficient $c_1$ is defined as the ratio between the radiative losses in the TR and corona,
+\begin{equation}\label{eq:c1_def}
+    c_1 = \frac{R_{TR}}{R_C}.
 \end{equation}
-as a direct analogy to Eq. 18 of \citet{cargill_enthalpy-based_2012}. In the early phases of an event, $n \ll n_{eq}$, so that $c_1 \approx c_{1,cond}$. When $n = n_{eq}$, $c_1 = c_{1,eq}$. After some experimentation, we have settled on a choice of $c_{1,cond} = 6$ since that gives reasonable agreement between EBTEL and HYDRAD. There is no impact on the solution for $n > n_{eq}$.
+As can be seen in \autoref{eq:press_e_0d_2fl}, \autoref{eq:press_i_0d_2fl}, and \autoref{eq:mass_0d_2fl}, $c_1$ plays an important role in the evolution of the loop in response to the energy supplied by heating. \citet{klimchuk_highly_2008} initially assumed a constant value of $c_1=4$ though they found $c_1$ was much larger at high temperatures. \citet{cargill_enthalpy-based_2012} modified the calculation of $c_1$ to include a correction for gravitational stratification and a more sophisticated approach to radiative cooling such that,
+\begin{equation}\label{eq:c1_mod1}
+    c_1 =
+    \begin{cases}
+        c_1^\textup{eqm}, n < n_\textup{eq}, \\
+        \frac{2c_1^\textup{eqm} + c_1^\textup{rad}((n/n_\textup{eq})^2 - 1)}{1 + (n/n_\textup{eq})^2}, n > n_\textup{eq},
+    \end{cases}
+\end{equation} 
+where $n_{eq}$ was the loop density that would exist for the calculated temperature were the loop to be in static equilibrium \citep[Equation 17 of][]{cargill_enthalpy-based_2012} and $c_1^\textup{eqm}$ and $c_1^\textup{rad}$ are the values of $c_1$ in equilibrium and during the radiative cooling phase \citep[see Equations 12 and 16 of][]{cargill_enthalpy-based_2012}. 
 
-\autoref{tab:table_c1_compare} shows a set of runs we have carried out to compare the results from HYDRAD and EBTEL with $c_1=c_{1,eq}=2$ (fifth column) and with $c_1$ given by \autoref{eq:c1_mod} (sixth column), when $n<n_{eq}$. We find that using the modification in \autoref{eq:c1_mod} gives, for the more intense heating cases with $\tau\ge200$ s, $\Delta\sim0.1$ at $n_{max}$. For the more gentle heating profiles of \citet{cargill_enthalpy-based_2012} and \citet{bradshaw_influence_2013} (i.e. rows 3, 4, 6, and 8 of \autoref{tab:table_c1_compare}), we continue to find $\Delta\lesssim0.2$, confirming that the modification proposed here is applicable to a wide range of heating scenarios. For short, intense pulses like the $\tau=20,40$ s cases addressed in this paper, we still find $\Delta>0.2$. The limitations of such cases are addressed in \autoref{hot-plasma:subsubsec:hydrad_comparison_sf}.
+In Section 3 of \citet{cargill_enthalpy-based_2012} it was assumed that the parameter $c_1$ decreased from its equilibrium value at the time of maximum density, to that commensurate with radiative/enthalpy cooling as the loop drained, defined in terms of the ratio $n/n_\textup{eq}$. In the radiative phase, $n > n_\textup{eq}$ while $c_1$ takes on its equilibrium value, $c_1^\textup{eqm}$ when $n < n_\textup{eq}$. Defining $\Delta\equiv(n_{\mathrm{EBTEL}} - n_{\mathrm{HYDRAD}})/n_{\mathrm{HYDRAD}}$, this gave $\Delta\lesssim0.2$, acceptable errors in the EBTEL value of $n$, as shown in the figures in \citet{cargill_enthalpy-based_2012}, in particular for the mild nanoflares they considered.
 
-% RESULTS TABLE HERE %
+A modified description of $c_1$ for $n < n_\textup{eq}$ is needed for many of the examples discussed in \autoref{ch:inferring_hot_plasma}. Specifically, for intense heating events, the coronal density calculated by the version of EBTEL in \citet{cargill_enthalpy-based_2012} is unacceptably high when compared to results from the HYDRAD code. Quantitatively, it is found that $\Delta\gtrsim0.3$ at $n_\textup{max}$. While this may seem to be reasonable for an aproximate model, the high EBTEL density is a systematic feature, and requires further investigation.
+
+Examination of the HYDRAD results shows that EBTEL significantly underestimates the TR radiative losses during the heating and conductive cooling phases. At this time, the loop is under-dense \citep[e.g.][]{cargill_nanoflare_2004}, so that an excess of the conducted energy goes into evaporating TR material. $c_1$ is modified as follows for $n < n_{eq}$,
+\begin{equation}\label{eq:c1_mod}
+    c_1 = \frac{2c_1^\textup{eqm} + c_1^\textup{cond}((n_\textup{eq}/n)^2-1)}{1+(n_\textup{eq}/n)^2},
+\end{equation}
+as a direct analogy to \autoref{eq:c1_mod1} (Eq. 18 of \citet{cargill_enthalpy-based_2012}). In the early phases of an event, $n \ll n_\textup{eq}$, so that $c_1 \approx c_1^\textup{cond}$. When $n = n_\textup{eq}$, $c_1 = c_1^\textup{eqm}$. After some experimentation, it is found that $c_1^\textup{cond} = 6$  gives reasonable agreement between EBTEL and HYDRAD. There is no impact on the solution for $n > n_\textup{eq}$.
+
+\autoref{tab:table_c1_compare} shows a set of runs we have carried out to compare the results from HYDRAD and EBTEL with $c_1=c_1^\textup{eqm}=2$ (fifth column) and with $c_1$ given by \autoref{eq:c1_mod} (sixth column), when $n<n_\textup{eq}$. Using the modification in \autoref{eq:c1_mod} gives, for the more intense heating cases with $\tau\ge200$ s, $\Delta\sim0.1$ at $n_\textup{max}$. For the more gentle heating profiles of \citet{cargill_enthalpy-based_2012} and \citet{bradshaw_influence_2013} (i.e. rows 3, 4, 6, and 8 of \autoref{tab:table_c1_compare}), $\Delta\lesssim0.2$, confirming that the modification proposed here is applicable to a wide range of heating scenarios. For short, intense pulses like the $\tau=20,40$ s cases addressed in \autoref{ch:inferring_hot_plasma}, $\Delta>0.2$. The limitations of such cases are addressed in \autoref{hot-plasma:subsubsec:hydrad_comparison_sf}.
+
+% spell-checker: disable
+\begin{pycode}[chapter2]
+
+# All HYDRAD cases 
+hydrad_cases = [
+    {'hydrad_nmax':37.6,'total_time':5e+3,'loop_length':40.0,
+     't_pulse_half':100,'h_nano':0.1,'h_back':3.5e-5},
+    {'hydrad_nmax':37.7,'total_time':5e+3,'loop_length':40.0,
+     't_pulse_half':250,'h_nano':0.04,'h_back':3.5e-5},
+    {'hydrad_nmax':3.7,'total_time':1e+4,'loop_length':75.0,'h_nano':1.5e-3,
+     't_pulse_half':250.0,'h_back':2.95e-6},
+    {'hydrad_nmax':10.7,'total_time':6e+3,'loop_length':25.0,'h_nano':1e-2, 
+     't_pulse_half':100.0,'h_back':3.19e-5},
+    {'hydrad_nmax':339,'total_time':2e+3,'loop_length':25.0,'h_nano':2.0,
+     't_pulse_half':100.0,'h_back':1.29e-3},
+    {'hydrad_nmax':15.5,'total_time':2e+3,'loop_length':25.0,'h_nano':1e-2,
+     't_pulse_half':100.0,'h_back':4.45e-4},
+    {'hydrad_nmax':350.0,'total_time':2e3,'loop_length':20.0,'h_nano':0.8, 
+     't_pulse_half':300.0,'h_back':3.19e-5},
+    {'hydrad_nmax':10.0,'total_time':5e3,'loop_length':80.0,'h_nano':0.005,
+     't_pulse_half':300.0,'h_back':3.19e-5}
+]
+
+# EBTEL base config
+base_config = {
+    'total_time': 5e3,
+    'tau': 0.1,
+    'tau_max': 10,
+    'loop_length': 4e9,
+    'saturation_limit': 1,
+    'force_single_fluid': False,
+    'use_c1_loss_correction': True,
+    'use_c1_grav_correction': True,
+    'use_flux_limiting': True,
+    'use_power_law_radiative_losses': True,
+    'calculate_dem': False,
+    'save_terms': False,
+    'use_adaptive_solver': True,
+    'adaptive_solver_error': 1e-8,
+    'adaptive_solver_safety': 0.5,
+    'c1_cond0': 6.0,
+    'c1_rad0': 0.6,
+    'helium_to_hydrogen_ratio': 0.075,
+    'surface_gravity': 1.0,
+    'heating': OrderedDict({
+        'partition': 1.,
+        'background': 3.5e-5,
+        'events': [{'event':{
+            'magnitude':0.1,
+            'rise_start':0.0,
+            'rise_end':100.0,
+            'decay_start':100.0,
+            'decay_end':200.0}}
+        ]
+    }),
+}
+
+# Iterate over HYDRAD cases
+table_data = []
+for t_case in hydrad_cases:
+    table_row = []
+    conf = copy.deepcopy(base_config)
+    conf['total_time'] = t_case['total_time']
+    conf['loop_length'] = t_case['loop_length']*1e+8
+    conf['heating']['background'] = t_case['h_back']
+    conf['heating']['events'] = [
+        {'event':{
+            'magnitude':t_case['h_nano'],
+            'rise_start':0.0,
+            'rise_end':t_case['t_pulse_half'],
+            'decay_start':t_case['t_pulse_half'],
+            'decay_end':2*t_case['t_pulse_half']
+        }}]
+    # No correction
+    conf['c1_cond0'] = 2.0
+    res = run_ebtel(conf, EBTEL_DIR)
+    nmax_uc = np.max(res['density'].value)/1e+8
+    # Correction
+    conf['c1_cond0'] = 6.0
+    res = run_ebtel(conf, EBTEL_DIR)
+    nmax_c = np.max(res['density'].value)/1e+8
+    # Set table entries
+    table_row = [
+        2*t_case['loop_length'],
+        2*t_case['t_pulse_half'],
+        t_case['h_nano'],
+        t_case['hydrad_nmax'],
+        nmax_uc,
+        nmax_c
+    ]
+    # Save to table
+    table_data.append(table_row)
+
+# Setup table
+headers = [
+    r'$2L$',
+    r'$\tau$',
+    r'$H_0$',
+    r'$n_{max}^\textup{H}$',
+    r'$n_{max}^\textup{E}$',
+    r'$n_{max}^\textup{E}$, (Eq. \ref{eq:c1_mod})']
+units = [
+    r'$[\si{\mega\m}]$',
+    r'$[\si{\second}]$',
+    r'$[\si{\erg\per\cubic\cm\per\second}]$',
+    r'$[\SI{e8}{\per\cubic\cm}]$',
+    r'$[\SI{e8}{\per\cubic\cm}]$',
+    r'$[\SI{e8}{\per\cubic\cm}]$',
+]
+headers = [r'\thead{{{}\\{}}}'.format(h,un) for h,un in zip(headers,units)]
+formats={}
+for h,i in zip(headers,range(len(headers))):
+    if i==2:
+        formats[h] = '%.2g'
+    elif i<2:
+        formats[h] = '%.0f'
+    else:
+        formats[h] = '%.1f'
+col_table = []
+for i in range(len(headers)):
+    temp_col = [t[i] for t in table_data]
+    col_table.append(temp_col)
+tab = Table(col_table, names=headers)
+
+# Caption
+caption = r'Comparison between HYDRAD (H) and EBTEL (E) with $c_1=2$ and $c_1$ given by \autoref{eq:c1_mod}, for $n<n_\textup{eq}$. The first three columns show the full loop length, heating pulse duration, and maximum heating rate. The last three columns show $n_{max}$ for the three models. Only $n_\textup{max}$ is shown as $T_\textup{max}$ is relatively insensitive to the value of $c_1$. The first two rows correspond to the $\tau=200,500$ s cases considered in this paper. The next four rows are the four cases shown in Table 2 of \citet{cargill_enthalpy-based_2012}. The last two rows are cases 6 and 11 from Table 1 of \citet{bradshaw_influence_2013}.\label{tab:table_c1_compare}'
+
+# Write to file
+with io.StringIO() as f:
+    astropy.io.ascii.write(
+        tab,
+        format='latex',
+        caption=caption,
+        output=f,
+        formats=formats,
+        latexdict = {
+            'data_start':r'\midrule', 'data_end': r'\bottomrule',
+            'header_start': r'\toprule', 'col_align': 'cccccc',
+            'preamble':r'\begin{center}', 'tablefoot':r'\end{center}'},
+    )
+    table = f.getvalue()
+\end{pycode}
+\py[chapter2]|table|
+% spell-checker: enable
 
 \autoref{eq:c1_mod} is motivated by simplicity while including the essential physics. Alternative, more complex determinations of $c_1$ have been considered, but involve limitations on how EBTEL can be used both now and in the future.
 

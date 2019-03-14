@@ -217,18 +217,18 @@ Note that both the shape and width of the $z$-dimension in the above code exampl
 \end{pyblock}
 % spell-checker: enable %
 
-\subsection{Tracing Magnetic Fieldlines}\label{sec:trace-fieldlines}
+\subsection{Tracing Magnetic Field Lines}\label{sec:trace-fieldlines}
 
-Now that the vector magnetic field has been computed from the observed LOS magnetogram, the next step in the pipeline is to trace magnetic fieldlines through the extrapolated volume in order to obtain three-dimensional coordinates for each of the magnetic strands. synthesizAR wraps the low-level streamline tracing capabilities of yt, a Python package for manipulating large, high-dimensional datasets \citep{turk_yt_2011}. This is encapsulated in a method attached to the \pyv{PotentialField} object instantiated above,
+Now that the vector magnetic field has been computed from the observed LOS magnetogram, the next step in the pipeline is to trace magnetic field lines through the extrapolated volume in order to obtain three-dimensional coordinates for each of the magnetic strands. synthesizAR wraps the low-level streamline tracing capabilities of yt, a Python package for manipulating large, high-dimensional datasets \citep{turk_yt_2011}. This is encapsulated in a method attached to the \pyv{PotentialField} object instantiated above,
 % spell-checker: disable %
 \begin{pyblock}[chapter4][baselinestretch=1,xleftmargin=3em]
 strands = extrapolator.trace_fieldlines(
     B_field, 200, loop_length_range=[20,250]*u.Mm)
 \end{pyblock}
 % spell-checker: enable %
-This traces 200 fieldlines through the extrapolated volume and returns a list of field strengths and three-dimensional coordinates along the strand for each of the 200 traced fieldlines. By default, synthesizAR places seed points for the fieldline tracing on the lower boundary in areas of relatively high magnetic field strength though this parameter can be adjusted. Additionally, only strands whose footpoints are both connected to the surface (closed field) and whose loop lengths fall within the specified range (as shown above) are kept.
+This traces 200 field lines through the extrapolated volume and returns a list of field strengths and three-dimensional coordinates along the strand for each of the 200 traced field lines. By default, synthesizAR places seed points for the field line tracing on the lower boundary in areas of relatively high magnetic field strength though this parameter can be adjusted. Additionally, only strands whose footpoints are both connected to the surface (closed field) and whose loop lengths fall within the specified range (as shown above) are kept.
 
-The last step is to create the magnetic ``skeleton'' object from the traced fieldlines,
+The last step is to create the magnetic ``skeleton'' object from the traced field lines,
 % spell-checker: disable %
 \begin{pyblock}[chapter4][baselinestretch=1,xleftmargin=3em]
 from synthesizAR import Field
@@ -261,7 +261,7 @@ for l in noaa12733.loops:
     coord = l.coordinates.transform_to(m_ar.coordinate_frame)
     ax.plot_coord(coord, ls='-', lw=1, color='k', alpha=0.5)
 tfig = ch4.save_figure('magnetogram-with-strands', fext='.pdf')
-tfig.caption = r'LOS magnetogram of NOAA 12733 as observed by SDO/HMI. All 200 traced fieldlines are overlaid in black.'
+tfig.caption = r'LOS magnetogram of NOAA 12733 as observed by SDO/HMI. All 200 traced field lines are overlaid in black.'
 tfig.figure_width = r'0.65\textwidth'
 \end{pycode}
 \py[chapter4]|tfig|
@@ -357,7 +357,7 @@ where $d$ is the radial distance from the observer, $D_{\solar}$ is the distance
 \end{align}
 where $\Phi_0$ and $B_0$ are the HGS longitude and latitude of the observer. Note that unlike the HGS frame, the HPC and HCC frames are defined in terms of an observer at a particular location in HGS coordinates, $(D_{\solar}, \Phi_0, B_0)$. \autoref{fig:hpc-hgs-grid} shows a comparison between the HGS frame and a HPC frame defined by an observer at $\Phi_0=\SI{0}{\degree}$, $B_0=\SI{-20}{\degree}$, and distance of $D_{\solar}=1\,\textup{AU}$.
 
-After the fieldlines are traced through the extrapolated volume, synthesizAR transforms the coordinates into an HEEQ coordinate frame (using \autoref{eq:local_heeq_transform}) and returns an Astropy \pyv{SkyCoord} object for each strand. These are stored in the \pyv{.coordinates} attributed of each \pyv{Loop} object in the magnetic skeleton. A \pyv{SkyCoord} object stores the numerical values of the coordinates as well as the frame of reference in which the coordinates are defined such that coordinates can easily be represented in different frames. SunPy provides representations of and transformations between many of the common solar coordinate systems as described by \citet{thompson_coordinate_2006}. For example, to define a point \pyv{p} on the surface of the Sun at \SI{20}{\degree} longitude and \SI{20}{\degree} latitude and then transform it to a HPC coordinate system defined by an observer on Earth,
+After the field lines are traced through the extrapolated volume, synthesizAR transforms the coordinates into an HEEQ coordinate frame (using \autoref{eq:local_heeq_transform}) and returns an Astropy \pyv{SkyCoord} object for each strand. These are stored in the \pyv{.coordinates} attributed of each \pyv{Loop} object in the magnetic skeleton. A \pyv{SkyCoord} object stores the numerical values of the coordinates as well as the frame of reference in which the coordinates are defined such that coordinates can easily be represented in different frames. SunPy provides representations of and transformations between many of the common solar coordinate systems as described by \citet{thompson_coordinate_2006}. For example, to define a point \pyv{p} on the surface of the Sun at \SI{20}{\degree} longitude and \SI{20}{\degree} latitude and then transform it to a HPC coordinate system defined by an observer on Earth,
 % spell-checker: disable %
 \begin{pyblock}[][baselinestretch=1,xleftmargin=3em]
 from sunpy.coordinates import Helioprojective

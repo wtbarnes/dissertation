@@ -115,11 +115,10 @@ ax.annotate('Convection Zone',
 
 #save
 tfig = ch1.save_figure('interior-cartoon', fext='.pgf')
-tfig.caption = r'Schematic of the solar interior. In the core and radiative zone, radiation is the dominant energy transfer mechanism while convection dominates in the convection zone. Adapted from Figure 11.2 of \citet{carroll_introduction_2007}.'
+tfig.caption = r'Schematic of the solar interior. In the core and radiative zone, radiation is the dominant energy transfer mechanism while convection, the cyclic rise of hot gas to the surface and subsequent infall of cooled gas, dominates in the convection zone. Adapted from Figure 11.2 of \citet{carroll_introduction_2007}.'
 \end{pycode}
 \py[chapter1]|tfig|
 % spell-checker: enable %
-
 
 The interior of the Sun cannot be directly observed because it is opaque to radiation such that all knowledge of its structure must be inferred from detailed stellar structure calculations or through helioseismology, the study of global oscillations \citep{priest_magnetohydrodynamics_2014}. The solar interior can be divided into three distinct layers: the core, the radiative zone, and the convection zone. This is illustrated in \autoref{fig:interior-cartoon}.
 
@@ -175,7 +174,7 @@ The \textit{core} of the Sun is very hot, $\approx\SI{1.57e7}{\kelvin}$, and den
 
 Moving radially outward from the core, the density drops, inhibiting the production of photons through the pp chain, and the temperature decreases such that $dT/dr < 0$. This decrease in temperature causes a decrease in radiation pressure with increasing $r$, leading to the slow upward diffusion of photons produced by the pp chain reactions. These photons thus undergo a ``random walk'' from the core to the surface as the photons are continually absorbed and reemitted isotropically. Radiation is the dominant energy transport mechanism in the region $0.3R_\solar\le r\le 0.714R_\solar$, often referred to as the radiative zone \citep{carroll_introduction_2007}. 
 
-While radiation is the dominant transport process deep in the core, convection is likely to be more efficient in the region $0.714R_\solar<r\le1R_\solar$, the so-called convective zone (see \autoref{fig:interior-cartoon}. As the temperature gradient continues to steepen, the opacity increases thus inhibiting energy transport by radiation and convection becomes the dominant transport mechanism. In particular, the transition from radiative to convective transport occurs when the temperature gradient becomes ``super adiabatic'' \citep[see Section 10.4 of][]{carroll_introduction_2007}. In the convective zone, hot, buoyant mass elements carry excess energy outward while cool mass elements fall inward and the cycle repeats, repeatedly carrying energy to the surface. 
+While radiation is the dominant transport process deep in the core, convection is likely to be more efficient in the region $0.714R_\solar<r\le1R_\solar$, the so-called convective zone (see \autoref{fig:interior-cartoon}). As the temperature gradient continues to steepen, the opacity increases thus inhibiting energy transport by radiation and convection becomes the dominant transport mechanism. In particular, the transition from radiative to convective transport occurs when the temperature gradient becomes ``super adiabatic'' \citep[see Section 10.4 of][]{carroll_introduction_2007}. In the convective zone, hot, buoyant mass elements carry excess energy outward while cool mass elements fall inward and the cycle repeats, repeatedly carrying energy to the surface. 
 
 \subsection{Photosphere}\label{sec:photosphere}
 
@@ -221,7 +220,7 @@ labs = [l.get_label() for l in lns]
 ax.legend(lns, labs, frameon=False, loc='center right')
 
 # Annotate regions
-ax.vlines([Z[np.argmin(data['T'])].value, 2.05, 2.35], 2e3, 1e6,
+ax.vlines([Z[np.argmin(data['T'])].value, 2.15, 2.35], 2e3, 1e6,
             colors='k',linestyles='dotted',)
 ax.annotate('Photosphere',
             xytext=(0.25,1.1), textcoords=('data','axes fraction'),
@@ -234,8 +233,8 @@ ax.annotate('Chromosphere',
             va='center',ha='center',
 )
 ax.annotate('Transition Region',
-            xytext=(2.2,1.1), textcoords=('data','axes fraction'),
-            xy=(2.2,0.7), xycoords=('data','axes fraction'),
+            xytext=(2.25,1.1), textcoords=('data','axes fraction'),
+            xy=(2.25,0.7), xycoords=('data','axes fraction'),
             va='center',ha='center',
             arrowprops=dict(arrowstyle="-|>", color='k'),
 )
@@ -246,30 +245,29 @@ ax.annotate('Corona',
 
 # Save
 tfig = ch1.save_figure('val-atmosphere', fext='.pgf')
-tfig.caption = r'Temperature (blue, left axis) and density (orange, right axis) of the solar atmosphere as a function of height, $h$, above the solar surface. These profiles are based on the semi-empirical models of \citet{mcwhirter_heating_1975} and \citet{vernazza_structure_1981}. The data points show the exact values from the models and the smooth lines are first-order spline fits to the data.'
+tfig.caption = r'Temperature (blue, left axis) and density (orange, right axis) of the solar atmosphere as a function of height, $h$, above the solar surface. These profiles are based on the semi-empirical models of \citet{mcwhirter_heating_1975} and \citet{vernazza_structure_1981}. The data points show the exact values from the models and the smooth lines are first-order spline fits to the data. The dotted black lines denote the different regions of the solar atmosphere.'
 \end{pycode}
 \py[chapter1]|tfig|
 % spell-checker: enable %
 
-Just above the convection zone lies the \textit{photosphere}, the lowest layer of the solar atmosphere and often considered the ``surface'' of the Sun. The photosphere is a dense, relatively thin layer and can be observed in visible light. Here, the optical depth, $\tau$, or the transparency of the plasma, is $\tau\lesssim1$ in the visible band such that photons in these wavelengths can escape without being absorbed and reemitted. Thus, most of the Sun's emission in the visible spectrum originates in the photosphere \citep{priest_magnetohydrodynamics_2014}. The photosphere extends to approximately $\SI{500}{\km}$ above the surface and corresponds to a minimum in the temperature as a function of height. This is illustrated in \autoref{fig:val-atmosphere}. The top left panel of \autoref{fig:example-images} shows an observation of the photosphere at \SI{4500}{\angstrom} by the Atmospheric Imaging Assembly instrument \citep[AIA][]{lemen_atmospheric_2012} on the Solar Dynamics Observatory spacecraft \citep[SDO][]{pesnell_solar_2012}.
+Just above the convection zone lies the \textit{photosphere}, the lowest layer of the solar atmosphere and often considered the ``surface'' of the Sun. The photosphere is a dense, relatively thin layer and can be observed in visible light. Here, the optical depth, $\tau$, or the transparency of the plasma, is $\tau\lesssim1$ in the visible band such that photons in these wavelengths can escape without being absorbed and reemitted. Thus, most of the Sun's emission in the visible spectrum originates in the photosphere \citep{priest_magnetohydrodynamics_2014}. The photosphere extends to approximately $\SI{500}{\km}$ above the surface and corresponds to a minimum in the temperature as a function of height, $T_\textup{min}\approx\SI{4400}{\kelvin}$. This is illustrated in \autoref{fig:val-atmosphere}. The definition of the base of the photosphere is a bit more arbitrary, but is usually said to be $\approx\SI{100}{\km}$ below the point where $\tau\sim1$ for photons of wavelength \SI{5e3}{\angstrom} \citep{carroll_introduction_2007}. 
+
+The top left panel of \autoref{fig:example-images} shows an observation of the photosphere at \SI{4500}{\angstrom} by the Atmospheric Imaging Assembly instrument \citep[AIA][]{lemen_atmospheric_2012} on the Solar Dynamics Observatory spacecraft \citep[SDO][]{pesnell_solar_2012}. Note that the image appears relatively smooth as the Sun emits primarily as a blackbody in the visible and infrared wavelengths \citep{carroll_introduction_2007}.
 
 \subsection{Chromosphere}\label{sec:chromosphere}
 
-
-\subsection{Transition Region}\label{sec:transition_region}
-
-%
-
-\subsection{Corona}\label{sec:corona}
-
-% characteristics of the corona
-% discuss EUV and X-ray observations of the corona (ref figure)
+Above the photosphere lies the \textit{chromosphere} which has a depth of $\approx\SI{1600}{\km}$. Moving upward through the chromosphere from the temperature minimum at the top of the photosphere, the temperature increases at first gradually and then more rapidly with increasing height to many times \SI{e4}{\kelvin} (see \autoref{fig:val-atmosphere}). At the same time, the density is falling off very rapidly. Though not visible with the naked eye, the chromosphere is highly structured. Spicules, tall columns of gas that extend high into the solar atmosphere thought to heavily impact the behavior of plasma in the corona \citep{de_pontieu_origins_2011}, are primarily visible off the solar disk in $\isotope{H}\alpha$ and originate in the photosphere as well as filaments (spicules observed on-disk) and plage, bright regions surrounding sunspots.
 
 % spell-checker: disable %
 \begin{pycode}[chapter1]
 # Import all maps
 maps = []
-names = [ 'aia_4500_example', 'aia_304_example', 'aia_171_example', 'xrt_example' ]
+names = [
+    'aia_4500_example',
+    'aia_304_example',
+    'aia_171_example',
+    'xrt_example'
+]
 for i in names:
     maps.append(Map(ch1.data_file(f'{i}.fits' )))
 # Fix XRT metadata
@@ -281,8 +279,8 @@ maps[3] = Map(
 for i,m in enumerate(maps):
     f = 1 if i == 0 else 0.1
     m.plot_settings['norm'] = ImageNormalize(vmin=max(0,m.data.min()),
-                                             vmax=f*m.data.max(),
-                                             stretch=AsinhStretch(0.1))
+                                                vmax=f*m.data.max(),
+                                                stretch=AsinhStretch(0.1))
 
 # Make figure
 fig = plt.figure(figsize=texfigure.figsize(
@@ -323,11 +321,26 @@ plt.subplots_adjust(hspace=0.01,wspace=0.01)
 # Save figure
 tfig = ch1.save_figure('example-images', fext='.pdf')
 tfig.caption = r"The layers of the Sun's atmosphere Sun as revealed by multiple wavelengths at approximately 19:00 UTC on 2010 December 1. The top left panel shows the photosphere, the top right panel shows chromosphere, and the bottom left panel shows the EUV corona all imaged by SDO/AIA. The bottom right panel shows the hot X-ray corona as observed by \textit{Hinode}/XRT. All data are courtesy of the AIA and XRT instrument teams."
+tfig.placement = '!h'
 \end{pycode}
 \py[chapter1]|tfig|
 % spell-checker: enable %
 
-% mention solar wind briefly, no separate section 
+The top right panel \autoref{fig:example-images} shows the chromosphere as observed by the \SI{304}{\angstrom} channel of SDO/AIA. Note that the chromosphere is much more highly structured compared to the underlying photosphere.
+
+\subsection{Transition Region}\label{sec:transition_region}
+
+The extremely thin \textit{transition region} (TR) sits between the chromosphere and the corona and primarily emits emission in the extreme ultraviolet (EUV) portion of the electromagnetic spectrum. It is only a few hundred \si{\km} thick, but the temperature increases over an order of magnitude, from a few \SI{e4}{\kelvin} to well above \SI{e5}{\kelvin}, as illustrated in \autoref{fig:val-atmosphere}. The density also continues to rapidly decrease in the TR.
+
+The upper boundary of the TR is not static and is more properly defined in terms of the role of thermal conduction in the TR energy balance. This is discussed in more detail in \autoref{sec:heat-flux}.  
+
+\subsection{Corona}\label{sec:corona}
+
+The outermost layer of the solar atmosphere is the \textit{corona} (Latin, ``crown'') and begins a little over \SI{2e3}{\km} above the surface. The corona is very hot ($\gtrsim\SI{e6}{\kelvin}$) and diffuse ($\lesssim\SI{e9}{\per\cubic\cm}$) and is characterized primarily by \textit{optically-thin} emission in the X-ray and EUV bands such that photons are not reemitted or absorbed once they are produced in the corona. The corona is only visible by the naked eye during an eclipse.
+
+The corona is highly-structured by the complex coronal magnetic field into \textit{coronal loops} because of the relative strength of the magnetic field compared to the gas pressure (see \autoref{ch:loops}). These hot, dynamic structures emit primarily in the EUV and X-ray. The bottom panels of \autoref{fig:example-images} show the corona at $\approx\SI{8e5}{\kelvin}$ as imaged by the \SI{171}{\angstrom} channel of SDO/AIA (left panel) and at $\approx\SI{e7}{\kelvin}$ as imaged by the X-ray Telescope \citep[XRT][]{golub_x-ray_2007} on the \textit{Hinode} satellite \citep{kosugi_hinode_2007}. Note how drastically the appearance of the Sun changes moving upward from the photosphere (top left) to the chromosphere (top right) to the EUV corona (bottom left).
+
+Above the corona, the solar atmosphere transitions to empty space. If the solar magnetic field is open such that it connects to the interplanetary magnetic field rather than closing back at the surface, particles can escape from the Sun into the \textit{solar wind}. The existence of the solar wind was first predicted by \citet{parker_dynamics_1958} based on the relatively simple idea that a hot, hydrostatic corona should be expanding given the pressure measured in interplanetary space. The solar wind has two components: a fast solar wind with velocity $\approx\SI{800}{\km\per\second}$ and a slow solar wind with velocity $\approx\SI{400}{\km\per\second}$ \citep{golub_solar_2010}. While it is generally agreed that the fast wind originates from cool, dark coronal holes, the origin of the slow wind is much less certain.
 
 \section{The Solar Magnetic Field}
 
@@ -479,7 +492,7 @@ plt.subplots_adjust(wspace=0.0)
 
 # Save
 tfig = ch1.save_figure('reconnection-cartoon', fext='.pgf')
-tfig.caption = r'Cartoon illustrating the breaking and reconnecting of magnetic field lines. When two regions of oppositely directed field (red and blue, left panel) are brought together (middle panel), a discontinuity develops in the narrow \textit{diffusion region} (shaded gray box). Non-ideal effects cause the fieldlines to ``reconnect'' (right panel), thus changing the topology of the magnetic field. Adapted from Figure 6.1 of \citet{priest_magnetohydrodynamics_2014}.'
+tfig.caption = r'Cartoon illustrating the breaking and reconnecting of magnetic field lines. When two regions of oppositely directed field (red and blue, left panel) are brought together (middle panel), a discontinuity develops in the narrow \textit{diffusion region} (shaded gray box). Non-ideal effects cause the field lines to ``reconnect'' (right panel), thus changing the topology of the magnetic field. Adapted from Figure 6.1 of \citet{priest_magnetohydrodynamics_2014}.'
 \end{pycode}
 \py[chapter1]|tfig|
 % spell-checker: enable %

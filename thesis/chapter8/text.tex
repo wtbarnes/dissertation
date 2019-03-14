@@ -14,6 +14,10 @@ from script import spatial_heating_profile
 \end{pycode}
 % spell-checker: enable %
 
+\section{Conclusions}\label{sec:conclusions}
+
+% outline three results sections and put the bullets there, just paraphrase from those results sections
+
 \section{Future Work}\label{sec:future-work}
 
 \subsection{Bundle Heating Model}\label{sec:bundle}
@@ -21,7 +25,62 @@ from script import spatial_heating_profile
 % spell-checker: disable %
 \begin{pycode}[chapter8]
 channel_pairs = [(94,335), (335,171), (211,193), (171,131)]
+correlation_threshold = 0.1
+norm = matplotlib.colors.Normalize(vmin=-(5e3*u.s).to(u.s).value,
+                                   vmax=(5e3*u.s).to(u.s).value)
+plot_params = { 'title': False, 'annotate': False, 'norm': norm, 'cmap': 'idl_bgry_004',}
+
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=1,
+    height_ratio=1,
+))
+
+for i,(ca,cb) in enumerate(channel_pairs):
+    m = Map(ch8.data_file(os.path.join('bundle-model', f'timelag_{ca}_{cb}.fits')))
+    mc = Map(ch8.data_file(os.path.join('bundle-model', f'correlation_{ca}_{cb}.fits')))
+    m = Map(m.data, m.meta, mask=np.where(mc.data<=correlation_threshold, True, False))
+    m = m.submap(SkyCoord(Tx=-440*u.arcsec,Ty=-380*u.arcsec,frame=m.coordinate_frame),
+                 SkyCoord(Tx=-185*u.arcsec,Ty=-125*u.arcsec,frame=m.coordinate_frame))
+    ax = fig.add_subplot(2, 2, i+1, projection=m)
+    im = m.plot(axes=ax, **plot_params)
+    ax.grid(alpha=0)
+    lon = ax.coords[0]
+    lat = ax.coords[1]
+    if i == 2:
+        lat.set_axislabel(r'Helioprojective Latitude',)
+        lat.set_ticklabel(rotation='vertical',exclude_overlapping=True)
+        lon.set_axislabel(r'Helioprojective Longitude',)
+        lon.set_ticklabel(exclude_overlapping=True)
+    else:
+        lat.set_ticklabel_visible(False)
+        lon.set_ticklabel_visible(False)
+    xtext,ytext = m.world_to_pixel(SkyCoord(-435*u.arcsec, -130*u.arcsec, frame=m.coordinate_frame))
+    ax.text(xtext.value, ytext.value, r'{}-{} $\si{{\angstrom}}$'.format(ca, cb),
+            color='k', fontsize=plt.rcParams['legend.fontsize'],
+            verticalalignment='top', horizontalalignment='left')
+    if i == 0:
+        pos = ax.get_position().get_points()
+        cbar_x = pos[0,0]
+        cbar_y = pos[1,1]+0.01
+    if i == 1:
+        pos = ax.get_position().get_points()
+        cbar_w = pos[1,0] - cbar_x 
+
+# Colorbar
+cax = fig.add_axes([cbar_x, cbar_y, cbar_w, 0.02])
+cbar = fig.colorbar(im, cax=cax, orientation='horizontal')
+cbar.ax.xaxis.set_ticks_position('top')
+cbar.ax.tick_params(width=0.5)
+cbar.outline.set_linewidth(0.5)
+
+plt.subplots_adjust(wspace=0.025,hspace=0.025)
+
+# Save
+tfig = ch8.save_figure('bundle-timelags', fext='.pdf')
+tfig.caption = r"Timelag maps produced by the bundle heating model as simulated from a field extrapolation of \AR{} NOAA 1158. A sample of four channel pairs are shown here: 94-335, 335-171, 211-193, and 171-131 \si{\angstrom}. The value of each pixel indicates the temporal offset, in seconds, which maximizes the cross-correlation (see \autoref{eq:timelag}). The range of the colorbar is $\pm\SI{5000}{\second}$. If $\max{\mathcal{C}_{AB}}<0.1$, the pixel is masked and colored white."
 \end{pycode}
+\py[chapter8]|tfig|
 % spell-checker: enable %
 
 \subsection{Thermal Non-equilibrium}\label{sec:tne}
@@ -111,5 +170,3 @@ tfig.caption = r'Electron temperature, in \si{\mega\kelvin} (top), and density, 
 \end{pycode}
 \py[chapter8]|tfig|
 % spell-checker: enable %
-
-\section{Conclusions}\label{sec:conclusions}

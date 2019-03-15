@@ -20,7 +20,28 @@ from script import spatial_heating_profile
 
 \section{Future Work}\label{sec:future-work}
 
-\subsection{Bundle Heating Model}\label{sec:bundle}
+% A few more topics:
+% - use HYDRAD not EBTEL
+% - NLFF field extrapolations
+% - additional observables (e.g. doppler shifts)
+
+This work presented in this thesis has made significant progress in understanding the observable signatures of nanoflare heating and placing constraints on the frequency of energy deposition in \AR s. However, a number of improvements remain to be made, particularly in the prescription of the heating model in \autoref{ch:modeling-observables}. The following sections outline several possible improvements.
+
+\subsection{Relating the Heating Frequency to the Magnetic Field Strength}\label{sec:bundle}
+
+The heating model described in \autoref{sec:modeling-observables:heating} parameterizes the heating frequency in terms of a simple ratio $\varepsilon=\frac{\twait}{\tau_\textup{cool}}$ such that $\varepsilon<1$ denotes to high-frequency heating, $\varepsilon\sim1$ denotes intermediate-frequency heating, and $\varepsilon>1$ denotes low-frequency heating. While useful, this prescription leaves $\varepsilon$ as an unconstrained free parameter. However, in the context of the nanoflare model of \citet[see \autoref{sec:nanoflares}]{parker_nanoflares_1988}, the frequency with which field lines reconnect and dissipate their stored energy into the coronal plasma is certainly related to the magnetic field. Thus, the spatial distribution of magnetic flux across an \AR{} provides a potential constraint the heating frequency.
+
+I will now outline a possible method for relating the heating frequency to the observed magnetic field (e.g. from a field extrapolation). First, consider a collection of magnetic strands in an \AR{}, similar to the \num{5e3} traced field lines traced in \autoref{ch:modeling-observables}, whose footpoints all close back at the solar surface. Next, divide up the surface into $n$ equal area boxes and bin the strands into these boxes based on the coordinates of one of their footpoints. This gives $N_\textup{bundles}$ ``bundles'' of strands, where a bundle, $b$, is a collection of strands whose footpoints are in close proximity. Bins with no footpoints are discarded.
+
+Rather than heating each strand individually as in \autoref{ch:modeling-observables}, the strands on each bundle $b$ are heated collectively. This is often referred to as a nanoflare ``storm'' in which each strand in the bundle is heated once in quick succession \citep{klimchuk_key_2015,schmelz_what_2015,mulu-moore_can_2011} such that the strands evolve nearly in-phase. Given a uniform distribution of nanoflare storm onset times $\mathcal{U}(0,t_\textup{total})$, where $t_\textup{total}$ is the total simulation time, $N_\textup{storms}$ onset times are chosen, where $N_\textup{storms}$ is the total number of storms occurring on all bundles in the \AR{}. Each start time $t_s^\textup{start}$ is then assigned to a bundle given the probability,
+\begin{equation}
+    P_b = \frac{B_b}{\sum_b B_b},
+\end{equation}
+where $B_b$ is the average field strength of all strands in bundle $b$,
+\begin{equation}
+    B_b = \frac{\sum_s B_s}{N^\textup{strands}_b},
+\end{equation}
+and $B_s$ is the coronally-averaged field strength of strand $s$ and $N^\textup{strands}_b$ is the total number of strands in $b$. Thus, \textit{bundles rooted in areas of higher field strength are heated much more frequently}. Additionally, $N_\textup{storms}$ can be chosen by constraining the total energy flux of all bundles over all storms based on observations \citep[e.g. \SI{e7}{\erg\per\square\cm\per\second} from][as in \autoref{sec:modeling-observables:heating}]{withbroe_mass_1977}.
 
 % spell-checker: disable %
 \begin{pycode}[chapter8]
@@ -82,6 +103,12 @@ tfig.caption = r"Timelag maps produced by the bundle heating model as simulated 
 \end{pycode}
 \py[chapter8]|tfig|
 % spell-checker: enable %
+
+This model has two primary advantages compared to the parameterization in \autoref{sec:modeling-observables:heating}: (1) the frequency with which each strand is reenergized is chosen based on the observed field strength rather than being left as a free parameter and (2) nanoflare storms leads to coherent evolution within strands, consistent with the observed collective behavior of loops made up of many strands \citep{klimchuk_key_2015}.
+
+As a proof of concept, I have applied this heating model to the collection of \num{5e3} strands traced from NOAA 1158 as described in \autoref{ch:modeling-observables}. The magnetogram of NOAA 1158 is divided into 50 segments in each direction such that there are 2500 possible bundles though most are empty. The total simulation time is $t_\textup{total}=\SI{3e4}{\second}$ and $N_\textup{storms}$ is constrained such that the average flux through the \AR{} is $\approx\SI{e7}{\erg\per\square\cm\per\second}$.
+
+\autoref{fig:bundle-timelags} shows the resulting timelags in four different channel pairs as computed from the predicted intensities from an \AR{} heated by this bundle model. Notably, the timelags in all channel pairs are more spatially coherent than any of the heating scenarios in \autoref{ch:modeling-observables} (except perhaps the pure cooling model). Detailed comparisons with observations may be needed in order to evaluate the viability of tying the heating frequency directly the magnetic field strength.
 
 \subsection{Thermal Non-equilibrium}\label{sec:tne}
 

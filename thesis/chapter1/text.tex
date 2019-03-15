@@ -22,7 +22,7 @@ Perhaps no other consistent celestial event has attracted as much attention as t
 
 The Sun is the most important celestial body to life on Earth. For the last five billion years, it has provided the light by which humans observe the world around them and the heat to save the planet from the frigid temperatures of interplanetary space. Because of its proximity, the Sun provides astronomers an exclusive and unique look into how stars behave. At the same time, space weather on Earth driven by magnetized material ejected from the solar atmosphere, threatens modern technological infrastructure.
 
-The focus of this thesis is the solar corona, the outermost layer of the Sun's atmosphere and the manner in which energy is deposited into the hot, tenuous coronal plasma. This chapter serves as a brief introduction to the astrophysics of the Sun. In \autoref{sec:structure}, I give a brief description of the interior of the Sun and the layers of the solar atmosphere. \autoref{sec:magnetic-field} describes the magnetic field of the Sun and \autoref{sec:coronal-heating} introduces the coronal heating problem. I conclude by summarizing the overall aims of this thesis in \autoref{sec:aims} and offering comments on the use of software and data in this work in \autoref{sec:software-data}.
+The focus of this thesis is the solar corona, the outermost layer of the Sun's atmosphere and the manner in which energy is deposited into the hot, tenuous coronal plasma. This chapter serves as a brief introduction to the astrophysics of the Sun and its dynamic and highly-complex atmosphere. In \autoref{sec:structure}, I give a brief description of the interior of the Sun and the layers of the solar atmosphere. \autoref{sec:magnetic-field} describes the magnetic field of the Sun and \autoref{sec:coronal-heating} introduces the coronal heating problem.
 
 \section{The Structure of the Solar Atmosphere}\label{sec:structure}
 
@@ -648,11 +648,33 @@ Much progress has been made in understanding the role of nanoflares in heating t
 
 Though the original nanoflare concept of \citet{parker_nanoflares_1988} was explicitly tied to reconnection, the modern definition of a nanoflare is far more general. Throughout the remainder of this thesis, I adopt the definition of \citet{klimchuk_key_2015} that a nanoflare is \textit{an impulsive energy release on a small cross-field spatial scale without regard to physical mechanism}. Nanoflares may be caused by waves or by reconnection as both have been shown to be impulsive \citep{klimchuk_solving_2006,klimchuk_key_2015}. Nanoflare events may occur frequently or infrequently on a given flux tube and their energy spectrum may be broad though it is likely to favor lower energy events \citep{hudson_solar_1991}. Rather than probing a specific physical mechanism, the work in this thesis is focused on constraining the properties of the heating, regardless of the underlying driver.
 
-\section{Aims of this Work}\label{sec:aims}
+\section{Thesis Outline}\label{sec:outline}
+
+The primary focus of this thesis is the heating of the solar corona via impulsive nanoflare heating. Understanding the energy deposition in the corona via EUV and X-ray observations is made difficult by several mitigating factors, including the optically-thin nature of the upper solar atmosphere, inadequate spectral, temporal, and spatial resolution of current observing instruments, and uncertainties in the atomic physics. A large volume of high-quality observations combined with detailed forward models are needed to adequately constrain the frequency with which energy is dissipated in the coronal plasma.
+
+In \autoref{ch:loops} I discuss the field-aligned physics of coronal loops and detail both hydrostatic and hydrodynamic approaches to modeling the thermal structure of these loops.
+
+In \autoref{ch:diagnostics} I outline the dominant mechanisms for producing spectral line and continuum emission in the corona. Additionally, I discuss the two primary observables used in this thesis for diagnosing the properties of the heating: the emission measure distribution and the timelag.
+
+\autoref{ch:synthesizar} provides a detailed explanation by example of the synthesizAR forward modeling code developed for predicting optically-thin emission from an \AR{} using an ensemble of many loop models.
+
+The next three chapters make up the primary research findings of this thesis. \autoref{ch:inferring_hot_plasma} examines signatures of nanoflare heating in the ``hot'' component of the differential emission measure distribution. In particular, I use the EBTEL model (see \autoref{sec:ebtel}) to examine the extent to which nanoflare duration, heat flux limiting, ion heating, and non-equilibrium ionization affect the observability of this very hot plasma.
+
+In \autoref{ch:modeling-observables}, I predict the time-dependent, multi-wavelength AIA intensities from \AR{} NOAA 1158 for three different nanoflare heating frequencies using the forward modeling code described in \autoref{ch:synthesizar} combined with the EBTEL model. From these predicted intensities, I compute the emission measure slope and timelag diagnostics in each pixel of the \AR{}.
+
+In \autoref{ch:classifying-observables}, I compute the emission measure slope and timelag from real AIA observations of \AR{} NOAA 1158. I then train a random forest classifier using the predicted diagnostics from \autoref{ch:modeling-observables} and use it to ``map'' the heating frequency across the entire \AR{} based on the classification of the observed diagnostics.
+
+Finally, \autoref{ch:conclusions} summarizes the research findings of this thesis and suggests several topics for future work.
 
 \section{Use of Data and Software}\label{sec:software-data}
 
+This thesis makes use of observational data from the Helioseismic Magnetic Imager as well as the Atmospheric Imaging Assembly, both aboard the Solar Dynamics Observatory spacecraft. Data from both of these instruments are kindly made publicly available by the respective instrument teams via the Joint Science Operations \citep[JSOC,][]{couvidat_observables_2016} operated by Stanford University. All atomic data used in this work are from version 8 of the CHIANTI atomic database (see \autoref{sec:chianti}). CHIANTI is a collaborative project involving George Mason University, the University of Michigan (USA), University of Cambridge (UK), and NASA Goddard Space Flight Center (USA).
 
+The work presented in this thesis makes use of the greater scientific Python ecosystem, including Astropy for unit-aware computation and astronomy-specific functionality \citet{the_astropy_collaboration_astropy_2018}, Dask for parallel and distributed computing \citep{dask_development_team_dask_2016}, matplotlib \citep{hunter_matplotlib_2007} and seaborn \citep{waskom_seaborn_2018} for visualization, NumPy for array computation \citep{oliphant_guide_2006}, scikit-learn for machine learning \citep{pedregosa_scikit-learn_2011}, and scipy for general purpose scientific computing \citet[e.g. interpolation, curve fitting, special functions][]{jones_scipy_2001}. This research has made use of SunPy, an open-source and free community-developed solar data analysis package written in Python \citep{sunpy_community_sunpypython_2015} and PlasmaPy, a community-developed open source core Python package for plasma physics \citep{plasmapy_community_2018_1238132}.
+
+Additionally, this work makes use of SolarSoftware \citep[SSW][]{freeland_data_1998}, a common programming and data analysis environment for solar physics written in the proprietary Interactive Data Language (IDL).
+
+This thesis was typeset in \LaTeX. The Python\TeX package is used to execute Python code from within the document. With the exception of \autoref{fig:nanoflare-cartoon} and \autoref{fig:heating-cooling-cycle-cartoon}, all figures are created inline in the document with Python\TeX and the texfigure Python package.
 
 % Nomenclature
 \nomenclature[a-rsun]{$R_{\solar}$}{radius of the Sun, $\approx\SI{6.957e10}{\cm}$}

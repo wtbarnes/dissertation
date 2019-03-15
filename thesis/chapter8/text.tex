@@ -1,5 +1,5 @@
 % Text for chapter 8
-\chapter{Future Work and Conclusions}\label{ch:conclusions}
+\chapter{Conclusions and Future Work}\label{ch:conclusions}
 
 % spell-checker: disable %
 \begin{pycode}[chapter8]
@@ -16,32 +16,43 @@ from script import spatial_heating_profile
 
 \section{Conclusions}\label{sec:conclusions}
 
-% outline three results sections and put the bullets there, just paraphrase from those results sections
+In this thesis, I have closely examined the observable signatures of impulsive nanoflare heating in \AR{} coronal loops with a particular emphasis on connecting model results and observations. More specifically, I have focused on the degree to which observables can be used to diagnose the frequency with which energy is deposited on individual magnetic strands. To this end, I have developed a modular and flexible software pipeline for modeling time-dependent, multi-wavelength optically-thin coronal emission (\autoref{ch:synthesizar}) as well as a two-fluid modification to the EBTEL loop model (\autoref{sec:ebtel-two-fluid}). These modeling tools have been applied to a number of different heating scenarios in order to predict observable diagnostics of the heating. The primary research findings from the three studies that comprise this thesis (\autoref{ch:inferring_hot_plasma}, \autoref{ch:modeling-observables}, and \autoref{ch:classifying-observables}) are summarized below.
+
+In \autoref{ch:inferring_hot_plasma}, I examined the observability of the high-temperature (\SIrange{8}{10}{\mega\kelvin}) component of the differential emission measure distribution ($\dem$), the ``smoking gun'' of nanoflare heating, using a single loop modeled with EBTEL. In particular, I studied the impact of nanoflare duration $\tau$, heat flux limiting, preferential heating of the electrons and ions, the assumption of electron-ion equilibrium, and nonequilibirum ionization on the hot component of the $\dem$. In each case, the loop was heated by a single nanoflare, equivalent to low-frequency heating. Additionally, in each case, the EBTEL results are compared with spatially-averaged results from the more sophisticated field-aligned model HYDRAD (\autoref{sec:hydrad}).
+
+In the case where electron-ion equilibrium is enforced at all times (i.e. single-fluid model) ionization equilibrium is assumed, the expected signatures of conductive cooling appear in the emission measure. For short nanoflares with $\tau<\SI{100}{\second}$ there is a significant plasma component well above \SI{10}{\mega\kelvin}; for longer duration events ($\tau=\SIlist{200;500}{\second}$) there is significant plasma in the temperature range $\argmax_T{\emd[T]} < T < \SI{10}{\mega\kelvin}$. However, inclusion of several pieces of additional physics modifies this result considerably, in each case making it much less likely that any plasma that is above 10 MK can be detected.
+
+Preferentially heating the electrons leads to similar results to the single fluid case. However, in the case where only the ions are heated, the $\emd$ is sharply truncated below \SI{8}{\mega\kelvin} due to the principal electron heating mechanism being a relatively slow collisional process. In all cases, when the assumption of ionization equilibrium is relaxed, the $\emd$ is sharply truncated at or below \SI{10}{\mega\kelvin}, since the time needed to create highly ionized states such as Fe XXI is longer than any relevant cooling time. Taken together, these results suggest that while low-frequency nanoflares may be able to produce a $\sim\SI{10}{\mega\kelvin}$ component of the $\emd$, observing this very hot plasma is likely to be very challenging. 
+
+\autoref{ch:modeling-observables} describes a series of numerical simulations carried out in an effort to understand how signatures of the nanoflare heating frequency, defined in terms of the ratio between the waiting time and the loop cooling time, are manifested in the emission measure slope and the timelag. I apply the synthesizAR forward modeling code combined with the two-fluid EBTEL code to model the projected LOS intensity as observed by all six EUV channels of AIA for many loops in \AR{} NOAA 1158. These steps are carried for three different nanoflare heating frequencies, high, intermediate, and low, (see \autoref{eq:modeling-observables:heating_types}) in addition to two control models, for a total of five different heating scenarios (see \autoref{tab:modeling-observables:heating}).
+
+The results of this study can be summarized as follows.As the heating frequency decreases, the emission measure slope, $a$, becomes increasingly shallow, saturating at $a\approx2$. As the heating frequency increases, the distribution of slopes over the \AR{} is shifted to higher values and broadens. Additionally, the timelag becomes increasingly spatially coherent with decreasing heating frequency. When strands are allowed to cool without being reenergized, the spatial distribution of timelags is largely determined by the distribution of loop lengths over the \AR{}. Furthermore, the flattened distribution of timelags becomes increasingly broad and approaches a uniform distribution as the heating frequency increases, consistent with the results of \citet{viall_signatures_2016}. Lastly, negative timelags in channel pairs where the second (``cool'') channel is \SI{131}{\angstrom} provide a possible diagnostic for $\ge\SI{10}{\mega\kelvin}$ plasma
+
+Finally, in \autoref{ch:classifying-observables}, I used the predicted diagnostics from \autoref{ch:modeling-observables} to systematically classify each pixel of \AR{} NOAA 1158 in terms of the frequency of energy deposition. First, observations of NOAA 1158 in the six EUV channels of SDO/AIA were used to compute the emission measure slope over the temperature range $\SI{8e5}{\kelvin}\le T < T_{peak}$ as well as the timelag and cross-correlation for all possible ``hot-cool'' pairs of the six EUV channels, 15 in total. These observables were computed in each pixel of the \AR{}. Then, I trained a random forest classifier using the predicted emission measure slopes, timelags, and cross-correlations from \autoref{ch:modeling-observables} and used the trained model to classify each observed pixel as consistent with either high-, intermediate-, or low-frequency heating, thus mapping the heating frequency across the entire \AR{}.
+
+The results of this study can be summarized as follows. Comparing the model and observed emission measure slopes, the distribution of observed emission measure slopes overlaps with the distributions of predicted emission measure slopes for high-, intermediate-, and low-frequency heating, suggesting a range of heating frequencies across the \AR{}. Based on the results of the classification model, high-frequency heating dominates in the center of \AR{} and is coincident with the areas of large magnetic field strength while intermediate-frequency heating is more likely in longer loops surrounding the center of the \AR{}. In most pixels, low-frequency heating, as defined in \autoref{eq:modeling-observables:heating_types}, is not needed to explain the observed diagnostics. Interpreting the trained classifer revealed that the emission measure slope is the strongest predictor of the heating frequency. Radiative cooling and draining around \SIrange{1}{2}{\mega\kelvin} as manifested in the maximum cross-correlation also appears to be a strong indicator relative to the timelags. However, the feature importance as determined by the classifer should be interpreted carefully.
 
 \section{Future Work}\label{sec:future-work}
 
-% A few more topics:
-% - use HYDRAD not EBTEL
-% - NLFF field extrapolations
-% - additional observables (e.g. doppler shifts)
+This work presented in this thesis has made significant progress in understanding the observable signatures of nanoflare heating and placing constraints on the frequency of energy deposition in \AR s. However, a number of improvements can be made, particularly in the prescription of the heating model in \autoref{ch:modeling-observables}. The following sections outline several possible improvements.
 
-This work presented in this thesis has made significant progress in understanding the observable signatures of nanoflare heating and placing constraints on the frequency of energy deposition in \AR s. However, a number of improvements remain to be made, particularly in the prescription of the heating model in \autoref{ch:modeling-observables}. The following sections outline several possible improvements.
-
-\subsection{Relating the Heating Frequency to the Magnetic Field Strength}\label{sec:bundle}
+\subsection{Nanoflare Storms on Bundles of Strands}\label{sec:bundle}
 
 The heating model described in \autoref{sec:modeling-observables:heating} parameterizes the heating frequency in terms of a simple ratio $\varepsilon=\frac{\twait}{\tau_\textup{cool}}$ such that $\varepsilon<1$ denotes to high-frequency heating, $\varepsilon\sim1$ denotes intermediate-frequency heating, and $\varepsilon>1$ denotes low-frequency heating. While useful, this prescription leaves $\varepsilon$ as an unconstrained free parameter. However, in the context of the nanoflare model of \citet[see \autoref{sec:nanoflares}]{parker_nanoflares_1988}, the frequency with which field lines reconnect and dissipate their stored energy into the coronal plasma is certainly related to the magnetic field. Thus, the spatial distribution of magnetic flux across an \AR{} provides a potential constraint the heating frequency.
 
-I will now outline a possible method for relating the heating frequency to the observed magnetic field (e.g. from a field extrapolation). First, consider a collection of magnetic strands in an \AR{}, similar to the \num{5e3} traced field lines traced in \autoref{ch:modeling-observables}, whose footpoints all close back at the solar surface. Next, divide up the surface into $n$ equal area boxes and bin the strands into these boxes based on the coordinates of one of their footpoints. This gives $N_\textup{bundles}$ ``bundles'' of strands, where a bundle, $b$, is a collection of strands whose footpoints are in close proximity. Bins with no footpoints are discarded.
+I will now outline a possible method for relating the heating frequency to the observed magnetic field (e.g. from a field extrapolation). First, consider a collection of magnetic strands in an \AR{}, similar to the \num{5e3} traced field lines traced in \autoref{ch:modeling-observables}, whose footpoints all close back at the solar surface. Next, divide up the surface into $n$ equal area boxes and bin the strands into these boxes based on the coordinates of one of their footpoints. This gives $N_\textup{bundles}$ ``bundles'' of strands, where a bundle, $b$, is a collection of strands whose footpoints are in close proximity. Bins with no footpoints are discarded. Rather than heating each strand individually as in \autoref{ch:modeling-observables}, the strands on each bundle $b$ are heated collectively. This is often referred to as a nanoflare ``storm'' in which each strand in the bundle is heated once in quick succession \citep{klimchuk_key_2015,schmelz_what_2015,mulu-moore_can_2011} such that the strands evolve nearly in-phase. Qualitatively, this is also similar to so-called avalanche models \citep[e.g.][]{hood_mhd_2016} wherein a single unstable strand in a flux tube causes neighboring strands to also become unstable, leading to a cascade or avalanche of relaxation and, potentially, heating of the surrounding plasma.
 
-Rather than heating each strand individually as in \autoref{ch:modeling-observables}, the strands on each bundle $b$ are heated collectively. This is often referred to as a nanoflare ``storm'' in which each strand in the bundle is heated once in quick succession \citep{klimchuk_key_2015,schmelz_what_2015,mulu-moore_can_2011} such that the strands evolve nearly in-phase. Given a uniform distribution of nanoflare storm onset times $\mathcal{U}(0,t_\textup{total})$, where $t_\textup{total}$ is the total simulation time, $N_\textup{storms}$ onset times are chosen, where $N_\textup{storms}$ is the total number of storms occurring on all bundles in the \AR{}. Each start time $t_s^\textup{start}$ is then assigned to a bundle given the probability,
-\begin{equation}
+Given a uniform distribution of nanoflare storm onset times $\mathcal{U}(0,t_\textup{total})$, where $t_\textup{total}$ is the total simulation time, $N_\textup{storms}$ onset times are chosen, where $N_\textup{storms}$ is the total number of storms occurring on all bundles in the \AR{}. Each start time $t_s^\textup{start}$ is then assigned to a bundle given the probability,
+\begin{equation*}
     P_b = \frac{B_b}{\sum_b B_b},
-\end{equation}
+\end{equation*}
 where $B_b$ is the average field strength of all strands in bundle $b$,
-\begin{equation}
+\begin{equation*}
     B_b = \frac{\sum_s B_s}{N^\textup{strands}_b},
-\end{equation}
+\end{equation*}
 and $B_s$ is the coronally-averaged field strength of strand $s$ and $N^\textup{strands}_b$ is the total number of strands in $b$. Thus, \textit{bundles rooted in areas of higher field strength are heated much more frequently}. Additionally, $N_\textup{storms}$ can be chosen by constraining the total energy flux of all bundles over all storms based on observations \citep[e.g. \SI{e7}{\erg\per\square\cm\per\second} from][as in \autoref{sec:modeling-observables:heating}]{withbroe_mass_1977}.
+
+This model has two primary advantages compared to the parameterization in \autoref{sec:modeling-observables:heating}: (1) the frequency with which each strand is reenergized is chosen based on the observed field strength rather than being left as a free parameter and (2) nanoflare storms leads to coherent evolution within strands, consistent with the observed collective behavior of loops made up of many strands \citep{klimchuk_key_2015}.
 
 % spell-checker: disable %
 \begin{pycode}[chapter8]
@@ -53,7 +64,7 @@ plot_params = { 'title': False, 'annotate': False, 'norm': norm, 'cmap': 'idl_bg
 
 fig = plt.figure(figsize=texfigure.figsize(
     pytex,
-    scale=1,
+    scale=0.75,
     height_ratio=1,
 ))
 
@@ -100,15 +111,14 @@ plt.subplots_adjust(wspace=0.025,hspace=0.025)
 # Save
 tfig = ch8.save_figure('bundle-timelags', fext='.pdf')
 tfig.caption = r"Timelag maps produced by the bundle heating model as simulated from a field extrapolation of \AR{} NOAA 1158. A sample of four channel pairs are shown here: 94-335, 335-171, 211-193, and 171-131 \si{\angstrom}. The value of each pixel indicates the temporal offset, in seconds, which maximizes the cross-correlation (see \autoref{eq:timelag}). The range of the colorbar is $\pm\SI{5000}{\second}$. If $\max{\mathcal{C}_{AB}}<0.1$, the pixel is masked and colored white."
+tfig.figure_width = r'0.75\textwidth'
 \end{pycode}
 \py[chapter8]|tfig|
 % spell-checker: enable %
 
-This model has two primary advantages compared to the parameterization in \autoref{sec:modeling-observables:heating}: (1) the frequency with which each strand is reenergized is chosen based on the observed field strength rather than being left as a free parameter and (2) nanoflare storms leads to coherent evolution within strands, consistent with the observed collective behavior of loops made up of many strands \citep{klimchuk_key_2015}.
+As a proof of concept, I have applied this heating model to the collection of \num{5e3} strands traced from NOAA 1158 used in \autoref{ch:modeling-observables}. The magnetogram of NOAA 1158 is divided into 50 segments in each direction such that there are 2500 possible bundles though most are empty. The total simulation time is $t_\textup{total}=\SI{3e4}{\second}$ and $N_\textup{storms}$ is constrained such that the average flux through the \AR{} is $\approx\SI{e7}{\erg\per\square\cm\per\second}$. The evolution of the plasma along these strands is then simulated with the two-fluid EBTEL model (\autoref{sec:ebtel-two-fluid}) in the same manner as \autoref{sec:modeling-observables:loops}.
 
-As a proof of concept, I have applied this heating model to the collection of \num{5e3} strands traced from NOAA 1158 as described in \autoref{ch:modeling-observables}. The magnetogram of NOAA 1158 is divided into 50 segments in each direction such that there are 2500 possible bundles though most are empty. The total simulation time is $t_\textup{total}=\SI{3e4}{\second}$ and $N_\textup{storms}$ is constrained such that the average flux through the \AR{} is $\approx\SI{e7}{\erg\per\square\cm\per\second}$.
-
-\autoref{fig:bundle-timelags} shows the resulting timelags in four different channel pairs as computed from the predicted intensities from an \AR{} heated by this bundle model. Notably, the timelags in all channel pairs are more spatially coherent than any of the heating scenarios in \autoref{ch:modeling-observables} (except perhaps the pure cooling model). Detailed comparisons with observations may be needed in order to evaluate the viability of tying the heating frequency directly the magnetic field strength.
+\autoref{fig:bundle-timelags} shows the resulting timelag maps for four different channel pairs as computed from the predicted intensities from an \AR{} heated by the bundle model. Notably, the timelags in all channel pairs are significantly more spatially coherent than any of the heating scenarios in \autoref{ch:modeling-observables} (except perhaps the pure cooling model). Qualitatively, this is more similar to the spatial distribution of timelags found in the observations of NOAA 1158 (see \autoref{fig:classifying-observables:timelags}). More detailed comparisons with observations are needed in order to evaluate the viability of tying the heating frequency directly the magnetic field strength. Additional numerical experiments will be performed using the more sophisticated HYDRAD code (\autoref{sec:hydrad}) to model the field-aligned physics of each strand.
 
 \subsection{Thermal Non-equilibrium}\label{sec:tne}
 
@@ -130,13 +140,13 @@ with h5py.File(os.path.join(ch8.data_dir, 'hydrad_tne_results.h5'), 'r') as hf:
 \end{pycode}
 % spell-checker: enable %
 
+Underlying all of the work in this thesis is the assumption that the observed EUV and X-ray variability in \AR{} emission must be driven by some time-varying source of energy (e.g. bursty reconnection). However, nonuniform, steady heating may still be consistent with observed loop variability. The phenomenon of \textit{thermal non-equilibrium}, or TNE, occurs when the energy deposition is at least quasi-steady (relative to a loop cooling time) and highly-localized near the base of the coronal loop. An example of such a heating profile is shown in \autoref{fig:future-work:tne-heating}. The resulting chromospheric evaporation and increase in density lead to increased radiative losses and if the heating is sufficiently localized to the footpoints, thermal conduction may not be able to balance the enhanced radiative cooling at the apex \citep{kuin_thermal_1982,antiochos_model_1991}. A cool condensation will form near the loop apex and then fall down the loop toward the chromosphere as this configuration is Rayleigh-Taylor unstable. Since there exists no stable equilibrium, this drives a continual evaporation-condensation cycle and, consequently, dynamic evolution of the temperature and density structure of the loop.
+
 % spell-checker: disable %
 \begin{pycode}[chapter8]
 h_profile = spatial_heating_profile(s_grid, os.path.join(ch8.data_dir, 'hydrad_tne_config.asdf'))
 fig = plt.figure(figsize=texfigure.figsize(
     pytex,
-    scale=0.65,
-    height_ratio=1,
 ))
 ax = fig.gca()
 ax.plot(s_grid.to(u.Mm), h_profile)
@@ -152,6 +162,8 @@ tfig.figure_width = r'0.65\textwidth'
 \py[chapter8]|tfig|
 % spell-checker: enable %
 
+\autoref{fig:future-work:tne-results} shows the temperature (top) and density (bottom) as a function of field-aligned coordinate, $s$, and time, $t$, of a semi-circular loop with full-length $2L=\SI{120}{\mega\m}$ subject to the time-independent heating function shown in \autoref{fig:future-work:tne-heating}. The field-aligned hydrodynamic evolution of the loop is modeled using the HYDRAD code (see \autoref{sec:hydrad}) and the total simulation time is $\SI{24}{\hour}$. While the thermal structure of the loop is initially quite steady, a cool condensation forms near the apex of the loop at $t\approx\SI{3}{\hour}$. and then falls back down the loop over a period of $\approx\SI{7}{\hour}$. The cycle then repeats with another condensation forming just before $t=\SI{15}{\hour}$ and at $t\approx\SI{23}{\hour}$. Note that compared to the dynamics predicted by impulsive nanoflare heating, the variability timescales associated with TNE are very long. 
+
 % spell-checker: disable %
 \begin{pycode}[chapter8]
 # Setup grid
@@ -160,8 +172,7 @@ tmesh, smesh = np.meshgrid(s_grid.to(u.Mm), t_grid.to(u.h))
 fig,axes = plt.subplots(2,1,figsize=texfigure.figsize(
     pytex,
     scale=1,
-    height_ratio=2/3,
-    figure_width_context='figurewidth',)
+    height_ratio=2/3,)
 )
 # Temperature
 im_T = axes[0].pcolormesh(
@@ -193,7 +204,11 @@ cax = fig.add_axes([pos[1,0]+0.005,pos[0,1],0.015,pos[1,1]-pos[0,1]])
 cbar = fig.colorbar(im_n, cax=cax, orientation='vertical')
 # Save figure
 tfig = ch8.save_figure('future-work:tne-results', fext='.pdf')
-tfig.caption = r'Electron temperature, in \si{\mega\kelvin} (top), and density, in \si{\per\cubic\cm} (bottom), as a function of field-aligned coordinate, $s$, and time, $t$ as simulated by the HYDRAD code for a semi-circular loop of full-length $L=\SI{120}{\mega\m}$. The time-independent heating function is localized to the footpoints and is shown as a function of $s$ in \autoref{fig:future-work:tne-heating}.'
+tfig.caption = r'Electron temperature, in \si{\mega\kelvin} (top), and density, in \si{\per\cubic\cm} (bottom), as a function of field-aligned coordinate, $s$, and time, $t$ as simulated by the HYDRAD code for a semi-circular loop of full-length $2L=\SI{120}{\mega\m}$. The time-independent heating function is localized to the footpoints and is shown as a function of $s$ in \autoref{fig:future-work:tne-heating}.'
 \end{pycode}
 \py[chapter8]|tfig|
 % spell-checker: enable %
+
+Past studies have shown that TNE provides a viable explanation for both prominences \citep{antiochos_model_1991,muller_dynamics_2003} and coronal rain \citep{antolin_coronal_2010,antolin_multithermal_2015,auchere_coronal_2018}. However, recent results from field-aligned models \citep{mikic_importance_2013} and AIA observations of long-period intensity variations \citep{auchere_long-period_2014,froment_evidence_2015,auchere_thermal_2016} suggest that TNE may be important in driving AR variability as well \citep[though see][]{klimchuk_can_2010}. Several recent numerical investigations \citep{lionello_can_2016,winebarger_investigation_2016} claim the longest observed timelags are not consistent with impulsive heating, but can be explained by TNE. Additionally, \citet{froment_long-period_2017} found that observed long-period intensity variations were consistent with synthetic timelags produced by both TNE and nanoflares. Most recently, \citet{winebarger_identifying_2018} performed a parameter search over both TNE and impulsive heating models and found that the timelag and ratio between peak intensities in different channels were useful diagnostics in discriminating between these two heating scenarios. While these findings challenge the idea that observed time-variability in ARs implies exclusively time-dependent heating, it is not yet clear whether TNE can reproduce the entire range of observables.
+
+TNE offers an alternative explanation to the observed variability in \AR{} loops. Both the emission measure slope (\autoref{sec:em_slope}) and the timelag (\autoref{sec:timelag}) provide a possible path forward for discriminating between these two heating scenarios. However, it is not yet clear whether signatures of these heating scenarios in these diagnostics can be meaningfully discerned. Using the synthesizAR forward modeling code (\autoref{ch:synthesizar}) and the HYDRAD model, I will forward model time-dependent, multi-wavelength intensities for a subset of \AR s from the catalogue of \citet{warren_systematic_2012} for both an impulsive nanoflare heating scenario and a case in which the energy deposition in each loop in the \AR{} is steady and localized near the footpoints (as in \autoref{fig:future-work:tne-heating}). From these predicted intensities, I will compute the emission measure slope and in order to understand whether a meaningful distinction can be made between these two heating scenarios. Comparisions to observations in the manner outlined in \autoref{ch:classifying-observables} are important in quantitatively deciding whether an observed pixel is undergoing TNE or being heating impulsively.

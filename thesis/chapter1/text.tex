@@ -18,9 +18,11 @@ from formatting import remove_ticks_and_spines
 \end{pycode}
 % spell-checker: enable
 
-% lead with description of the 2017 eclipse
-% transition to discussion of ancient eclipse observations
-% sun affects us everyday: life, space weather, analogue for other stars
+Perhaps no other consistent celestial event has attracted as much attention as the total solar eclipse. Solar eclipses have been observed and recorded for thousands of years, with some reports dating back to the fourteenth century BC \citep{golub_solar_2010}. The recordings of ancient eclipses have been heavily studied. Chinese rock drawings dating back to the Han dynasty (approximately 1900 years ago) appear to show the moon completely obscuring the Sun. Most recently on 21 August 2017, the ``Great American Eclipse'' captured the attention of millions from Oregon to South Carolina as it diagonally traversed the United States, offering a breathtaking view of the otherwise-invisible solar corona. 
+
+The Sun is the most important celestial body to life on Earth. For the last five billion years, it has provided the light by which humans observe the world around them and the heat to save the planet from the frigid temperatures of interplanetary space. Because of its proximity, the Sun provides astronomers an exclusive and unique look into how stars behave. At the same time, space weather on Earth driven by magnetized material ejected from the solar atmosphere, threatens modern technological infrastructure.
+
+The focus of this thesis is the solar corona, the outermost layer of the Sun's atmosphere and the manner in which energy is deposited into the hot, tenuous coronal plasma. This chapter serves as a brief introduction to the astrophysics of the Sun. In \autoref{sec:structure}, I give a brief description of the interior of the Sun and the layers of the solar atmosphere. \autoref{sec:magnetic-field} describes the magnetic field of the Sun and \autoref{sec:coronal-heating} introduces the coronal heating problem. I conclude by summarizing the overall aims of this thesis in \autoref{sec:aims} and offering comments on the use of software and data in this work in \autoref{sec:software-data}.
 
 \section{The Structure of the Solar Atmosphere}\label{sec:structure}
 
@@ -174,7 +176,7 @@ The \textit{core} of the Sun is very hot, $\approx\SI{1.57e7}{\kelvin}$, and den
 
 Moving radially outward from the core, the density drops, inhibiting the production of photons through the pp chain, and the temperature decreases such that $dT/dr < 0$. This decrease in temperature causes a decrease in radiation pressure with increasing $r$, leading to the slow upward diffusion of photons produced by the pp chain reactions. These photons thus undergo a ``random walk'' from the core to the surface as the photons are continually absorbed and reemitted isotropically. Radiation is the dominant energy transport mechanism in the region $0.3R_\solar\le r\le 0.714R_\solar$, often referred to as the radiative zone \citep{carroll_introduction_2007}. 
 
-While radiation is the dominant transport process deep in the core, convection is likely to be more efficient in the region $0.714R_\solar<r\le1R_\solar$, the so-called convective zone (see \autoref{fig:interior-cartoon}). As the temperature gradient continues to steepen, the opacity increases thus inhibiting energy transport by radiation and convection becomes the dominant transport mechanism. In particular, the transition from radiative to convective transport occurs when the temperature gradient becomes ``super adiabatic'' \citep[see Section 10.4 of][]{carroll_introduction_2007}. In the convective zone, hot, buoyant mass elements carry excess energy outward while cool mass elements fall inward and the cycle repeats, repeatedly carrying energy to the surface. 
+While radiation is the dominant transport process deep in the core, convection is  more efficient in the region $0.714R_\solar<r\le1R_\solar$, the so-called convective zone (see \autoref{fig:interior-cartoon}). As the temperature gradient continues to steepen, the opacity increases thus inhibiting energy transport by radiation and convection becomes the dominant transport mechanism. In particular, the transition from radiative to convective transport occurs when the temperature gradient becomes ``super adiabatic'' \citep[see Section 10.4 of][]{carroll_introduction_2007}. In the convective zone, hot, buoyant mass elements carry excess energy outward while cool mass elements fall inward and the cycle repeats, repeatedly carrying energy to the surface. 
 
 \subsection{Photosphere}\label{sec:photosphere}
 
@@ -256,7 +258,7 @@ The top left panel of \autoref{fig:example-images} shows an observation of the p
 
 \subsection{Chromosphere}\label{sec:chromosphere}
 
-Above the photosphere lies the \textit{chromosphere} which has a depth of $\approx\SI{1600}{\km}$. Moving upward through the chromosphere from the temperature minimum at the top of the photosphere, the temperature increases at first gradually and then more rapidly with increasing height to many times \SI{e4}{\kelvin} (see \autoref{fig:val-atmosphere}). At the same time, the density is falling off very rapidly. Though not visible with the naked eye, the chromosphere is highly structured. Spicules, tall columns of gas that extend high into the solar atmosphere thought to heavily impact the behavior of plasma in the corona \citep{de_pontieu_origins_2011}, are primarily visible off the solar disk in $\isotope{H}\alpha$ and originate in the photosphere as well as filaments (spicules observed on-disk) and plage, bright regions surrounding sunspots.
+Above the photosphere lies the \textit{chromosphere} which has a depth of $\approx\SI{1600}{\km}$. Moving upward through the chromosphere from the temperature minimum at the top of the photosphere, the temperature increases at first gradually and then more rapidly with increasing height to many times \SI{e4}{\kelvin} (see \autoref{fig:val-atmosphere}). At the same time, the density is falling off very rapidly. Though not visible with the naked eye, the chromosphere is highly structured. Spicules, tall columns of gas that extend high into the solar atmosphere thought to heavily impact the behavior of plasma in the corona \citep{de_pontieu_origins_2011}, are primarily visible off the solar disk in $\isotope{H}\alpha$ and originate in the photosphere in addition to filaments (spicules observed on-disk) and plage, bright regions surrounding sunspots.
 
 % spell-checker: disable %
 \begin{pycode}[chapter1]
@@ -279,8 +281,8 @@ maps[3] = Map(
 for i,m in enumerate(maps):
     f = 1 if i == 0 else 0.1
     m.plot_settings['norm'] = ImageNormalize(vmin=max(0,m.data.min()),
-                                                vmax=f*m.data.max(),
-                                                stretch=AsinhStretch(0.1))
+                                             vmax=f*m.data.max(),
+                                             stretch=AsinhStretch(0.1))
 
 # Make figure
 fig = plt.figure(figsize=texfigure.figsize(
@@ -330,7 +332,7 @@ The top right panel \autoref{fig:example-images} shows the chromosphere as obser
 
 \subsection{Transition Region}\label{sec:transition_region}
 
-The extremely thin \textit{transition region} (TR) sits between the chromosphere and the corona and primarily emits emission in the extreme ultraviolet (EUV) portion of the electromagnetic spectrum. It is only a few hundred \si{\km} thick, but the temperature increases over an order of magnitude, from a few \SI{e4}{\kelvin} to well above \SI{e5}{\kelvin}, as illustrated in \autoref{fig:val-atmosphere}. The density also continues to rapidly decrease in the TR.
+The extremely thin \textit{transition region} (TR) sits between the chromosphere and the corona and primarily emits emission in the extreme ultraviolet (EUV) portion of the electromagnetic spectrum. It is only a few hundred \si{\km} thick, but is characterized by very steep temperature gradients as the temperature increases over an order of magnitude, from a few \SI{e4}{\kelvin} to well above \SI{e5}{\kelvin}, as illustrated in \autoref{fig:val-atmosphere}. The density also continues to rapidly decrease in the TR.
 
 The upper boundary of the TR is not static and is more properly defined in terms of the role of thermal conduction in the TR energy balance. This is discussed in more detail in \autoref{sec:heat-flux}.  
 
@@ -338,27 +340,15 @@ The upper boundary of the TR is not static and is more properly defined in terms
 
 The outermost layer of the solar atmosphere is the \textit{corona} (Latin, ``crown'') and begins a little over \SI{2e3}{\km} above the surface. The corona is very hot ($\gtrsim\SI{e6}{\kelvin}$) and diffuse ($\lesssim\SI{e9}{\per\cubic\cm}$) and is characterized primarily by \textit{optically-thin} emission in the X-ray and EUV bands such that photons are not reemitted or absorbed once they are produced in the corona. The corona is only visible by the naked eye during an eclipse.
 
-The corona is highly-structured by the complex coronal magnetic field into \textit{coronal loops} because of the relative strength of the magnetic field compared to the gas pressure (see \autoref{ch:loops}). These hot, dynamic structures emit primarily in the EUV and X-ray. The bottom panels of \autoref{fig:example-images} show the corona at $\approx\SI{8e5}{\kelvin}$ as imaged by the \SI{171}{\angstrom} channel of SDO/AIA (left panel) and at $\approx\SI{e7}{\kelvin}$ as imaged by the X-ray Telescope \citep[XRT][]{golub_x-ray_2007} on the \textit{Hinode} satellite \citep{kosugi_hinode_2007}. Note how drastically the appearance of the Sun changes moving upward from the photosphere (top left) to the chromosphere (top right) to the EUV corona (bottom left).
+The corona is highly-structured by the complex coronal magnetic field into \textit{coronal loops} because of the relative strength of the magnetic field compared to the gas pressure (see \autoref{ch:loops}). These hot, dynamic structures emit primarily in the EUV and X-ray. The bottom panels of \autoref{fig:example-images} show the corona at $\approx\SI{8e5}{\kelvin}$ as imaged by the \SI{171}{\angstrom} channel of SDO/AIA (left panel) and at $\approx\SI{e7}{\kelvin}$ as imaged by the X-ray Telescope \citep[XRT][]{golub_x-ray_2007} on the \textit{Hinode} satellite \citep{kosugi_hinode_2007}. Note how drastically the appearance of the Sun changes moving upward from the photosphere (top left) to the chromosphere (top right) to the EUV corona (bottom left). The dynamics of these EUV- and X-ray-bright loop structures in the corona is the primary focus of this thesis.
 
 Above the corona, the solar atmosphere transitions to empty space. If the solar magnetic field is open such that it connects to the interplanetary magnetic field rather than closing back at the surface, particles can escape from the Sun into the \textit{solar wind}. The existence of the solar wind was first predicted by \citet{parker_dynamics_1958} based on the relatively simple idea that a hot, hydrostatic corona should be expanding given the pressure measured in interplanetary space. The solar wind has two components: a fast solar wind with velocity $\approx\SI{800}{\km\per\second}$ and a slow solar wind with velocity $\approx\SI{400}{\km\per\second}$ \citep{golub_solar_2010}. While it is generally agreed that the fast wind originates from cool, dark coronal holes, the origin of the slow wind is much less certain.
 
-\section{The Solar Magnetic Field}
+\section{The Solar Magnetic Field}\label{sec:magnetic-field}
 
-% comment on beta, frozen-in flux condition
+Like the Earth, the Sun possesses an intrinsic magnetic field. Near the polar regions, the solar magnetic field is approximately dipolar, but closer to the equator, the field is highly nonuniform and dynamic. In areas of intense magnetic activity, the magnetic field strength can reach a few \SI{e3}{\gauss}\footnote{For reference, the Earth's magnetic field at its surface has an average value of $\approx\SI{0.5}{\gauss}$ \citep{finlay_international_2010}.} while in more ``quiet'' regions, it is much lower, \SIrange{0.1}{0.5}{\gauss} \citep{aschwanden_physics_2006}. Interestingly, global magnetic activity on the Sun varies on a $\approx\SI{11}{\year}$ cycle in which the dipolar also reverses \citep{golub_solar_2010}. The exact physical mechanism responsible for this cyclic variability and the generation of the intrinsic field are not well understood. 
 
-\subsection{Flux Emergence}
-
-% dynamo, flux emergence, formation of ARs (define AR)
-
-\subsection{Observations}
-
-% comments on how we observe magnetic fields in the corona (Zeeeman, Hanle)
-% LOS vs vector magnetograms
-% show a synoptic map (GONG) or full-disk (HMI)
-
-\subsection{Field Extrapolation}\label{sec:field_extrapolation}
-
-In general, determining the vector magnetic field in the corona requires solving the coupled, non-linear equations of \textit{magnetohydrodynamics} (MHD),
+The solar magnetic field extends high into the solar atmosphere and dominates the structuring and dynamics in the hot, tenous corona. Because of the high temperatures that characterize both the solar atmosphere and interior, much of the gas that makes up the Sun is ionized; that is, each atom has been stripped of at least one of its electrons. This means that the Sun is filled by a sea of charged particles called a \textit{plasma}. Because these particles are charged, the dynamics of the plasma are strongly influenced by solar magnetic field and vice versa such that the solar plasma and magnetic field represent a coupled system. In general, the coupled dynamics of the solar plasma and magnetic field are described by the equations of \textit{magnetohydrodynamics} (MHD),
 \begin{align}
     &\frac{d}{dt}\rho + \rho\nabla\cdot\mathbf{v} = 0, \label{eq:mhd_continuity} \\
     &\rho\frac{d}{dt}\mathbf{v} = \frac{1}{c}\mathbf{j}\times\mathbf{B} - \nabla p, \label{eq:mhd_momentum} \\
@@ -367,13 +357,100 @@ In general, determining the vector magnetic field in the corona requires solving
     &\nabla\cdot\mathbf{B} = 0, \label{eq:mhd_divb} \\
     &\frac{\rho^\gamma}{\gamma - 1}\frac{d}{dt}\left(\frac{p}{\rho^{\gamma}}\right) = -\nabla\cdot\mathbf{q} - R + H, \label{eq:mhd_energy}
 \end{align}
-where $\rho$ is the mass density, $\mathbf{v}$ is the bulk flow velocity, $\mathbf{j}$ is the current density, $\mathbf{B}$ is the magnetic field, $p$ is the thermal pressure, $\eta$ is the magnetic diffusivity, $\gamma=5/3$ is the ratio of specific heats, $\mathbf{q}$ is the heat flux, $R$ is the radiative loss term, $H$ is heating due to Ohmic and viscous dissipation, and $d/dt\equiv\partial/\partial t + \mathbf{v}\cdot\nabla$ \citep{priest_magnetohydrodynamics_2014}. Solving the MHD equations for the time-dependent, vector magnetic field in three-dimensions is an extremely challenging problem that requires sophisticated numerical tools and significant computational resources. However, several methods exist for efficiently approximating the coronal magnetic field in \textit{magnetohydrostatic equilibrium} given an observation of the photospheric LOS magnetic field.
+where $\rho$ is the mass density, $\mathbf{v}$ is the bulk flow velocity, $\mathbf{j}$ is the current density, $\mathbf{B}$ is the magnetic field, $p$ is the thermal pressure, $\eta$ is the magnetic diffusivity, $\gamma=5/3$ is the ratio of specific heats, $\mathbf{q}$ is the heat flux, $R$ is the radiative loss term, $H$ is heating due to Ohmic and viscous dissipation, and $d/dt\equiv\partial/\partial t + \mathbf{v}\cdot\nabla$ \citep{priest_magnetohydrodynamics_2014}. Solving the MHD equations for the time-dependent, vector magnetic field in three-dimensions is an extremely challenging problem that requires sophisticated numerical codes and significant computational resources.
 
-\textit{Magnetic field extrapolation} is a commonly-used technique for approximating the three-dimensional vector magnetic field in the corona. Following the treatment in \citet[Chapter 3]{priest_magnetohydrodynamics_2014}, \autoref{eq:mhd_momentum}, the ideal MHD momentum equation, in magnetohydrostatic balance can be written as,
+\subsection{Origin of the Magnetic Field and Flux Emergence}\label{sec:magnetic-origins}
+
+The generation and emergence of the complex magnetic field at the surface is due primarily to two mechanisms in the solar interior: differential rotation and convection. Because the Sun is not a rigid body, the rotation rate of the solar plasma varies latitudinally as well as radially where the radial dependence is also latitude dependent. In particular, at a latitude of \SI{60}{\degree}, the solar interior seems to rotate faster than the surface while the opposite is true at the equator \citep{thompson_differential_1996}. At $r\sim0.6R_\solar$ near the base of the convection zone (see \autoref{fig:interior-cartoon}) the rotation rates at all latitudes converge \citep{golub_solar_2010}. This region of convergence is often called the tachocline \citep{aschwanden_physics_2006}.
+
+This radial dependence of the rotation rate is important to the magnetic field because the field is magnetic field is ``frozen-in'' to the plasma. Another way of stating this is that the magnetic flux $\Phi=\int_\Sigma\dd{\mathbf{S}}\cdot\mathbf{B}$ through a surface $\Sigma$ does not change in time along the path of a fluid element such that,
+\begin{equation}\label{eq:frozen-flux}
+    \frac{d}{dt}\Phi = 0.
+\end{equation}
+As proof of this, consider a small change in flux $\delta\Phi$ as the fluid element travels through two surfaces $\Sigma$ and $\Sigma^\prime$ in time $\delta t$ with velocity $\mathbf{v}$. $\delta\Phi$ can be expressed as,
+\begin{equation*}
+    \delta\Phi = \int_{\Sigma^\prime}\dd{\mathbf{S}}\cdot\mathbf{B}(t+\delta t) - \int_\Sigma\dd{\mathbf{S}}\cdot\mathbf{B}(t).
+\end{equation*}
+Using the divergent-free condition of $\mathbf{B}$ (\autoref{eq:mhd_divb}) combined with Stoke's theorem and the fact that $\dd{\mathbf{S}}=\dd{\ell}\times\delta t\mathbf{v}$ gives,
+\begin{align}
+    \delta\Phi =& \int_\Sigma\dd{\mathbf{S}}\cdot(\mathbf{B}(t+\delta t) - \mathbf{B}(t)) - \delta t\oint_\mathcal{C}\dd{\ell}\cdot\mathbf{v}\times\mathbf{B}(t + \delta t), \nonumber\\
+    \frac{\delta\Phi}{\delta t} =& \int_\Sigma\dd{\mathbf{S}}\cdot\left( \frac{\mathbf{B}(t+\delta t)}{\delta t} - \nabla\times(\mathbf{v}\times\mathbf{B}(t + \delta t)) \right),\nonumber
+\end{align}
+where $\mathcal{C}$ is the curve that encloses $\Sigma$. Taking the limit $\delta t\to0$ and using the ideal MHD induction equation (\autoref{eq:mhd_faraday} with $\eta=0$) gives \autoref{eq:frozen-flux}.
+
+Under the condition of \autoref{eq:frozen-flux} the magnetized plasma drags the magnetic field with along with it. Following the treatment of \citet{golub_solar_2010}, an initially straight magnetic field line oriented along the solar rotation axis, the plasma frozen to the field line will undergo differential rotation such that the field line will be stretched perpendicular to the original orientation. As the Sun continues to rotate, the field is continually ``wound up'' and the perpendicular component increases. This amplification of effect of an initially dipolar field is purely a consequence of differential rotation and the assumption of flux freezing (\autoref{eq:frozen-flux}) and provides a qualitative picture for the generation of the intrinsic magnetic field of the Sun. A more quantitative approach requires solving the non-linear dynamo equations \citep[see Section 4.3.3 of][]{golub_solar_2010}.
+
+As the magnetic field in the solar interior becomes continually deformed due to differential rotation, these twisted magnetic field lines are carried upward through the convection zone to the surface due to magnetic buoyancy. First proposed by \citet{parker_formation_1955}, this effect occurs when the internal pressure of plasma plus the magnetic pressure of the frozen-in field cannot balance the ambient pressure, thus forcing the field line upward. This twisted and amplified field is carried up through the photosphere, forming dipolar loop-like structures that extend high above the surface and into the chromosphere, transition region, and corona. This phenomenon, called flux emergence, leads to the formation of \textit{active regions}, areas of intense magnetic activity characterized by densely-packed closed magnetic structures.
+
+Active regions are manifested as cool, dark sunspots in the photosphere due to the reduced internal pressure required to bring the flux to the surface. Additionally, the corona is typically referred to as a ``low-$\beta$'' plasma where,
+\begin{equation}\label{eq:plasma-beta}
+    \beta\equiv\frac{8\pi p}{B^2},
+\end{equation}
+is the ratio between the gas pressure ($p$) and the magnetic pressure ($B^2/8\pi$) and $\beta\ll1$ in an active region. As a result, active regions appear as bright loop-like structures in the EUV and X-ray bands as plasma is heated to temperatures in excess of several million \si{\kelvin} and traces out the magnetic field. The multi-wavelength appearance of an \AR{} can be seen in the top right quadrants of the top left (photosphere) and bottom (EUV and X-ray) panels in \autoref{fig:example-images}.
+
+\subsection{Observations}\label{sec:magnetic-observations}
+
+Knowledge of the magnetic field in the corona is crucial to understanding the dynamics and heating (see \autoref{sec:coronal-heating}) of the coronal plasma. However, direct measurements of the coronal vector magnetic field have proved challenging\footnote{The Daniel K. Inouye Telescope \citep{elmore_daniel_2014}, with expected first light in 2020, is expected to provide vastly improved measurements of the coronal magnetic field via high-resolution spectropolarimetry.} because the optical and infrared coronal lines sensitive to the field are relatively faint compared to the much brighter solar disk \citep{judge_coronal_2001}. As such, it is common practice to measure the LOS component of the photospheric magnetic field and then treat this measurement as a lower boundary condition for a model of the coronal field (see \autoref{sec:field_extrapolation}). The photospheric field can be measured using the \textit{Zeeman effect} wherein the magnetic field ``breaks'' the degeneracy of the atomic energy levels with respect to the total angular momentum operator. The resulting level splitting can be approximated by,
+\begin{equation}\label{eq:zeeman}
+    \Delta\lambda \approx 5\times10^{-13}B\lambda_0^2,
+\end{equation}
+where $B$ is the field strength and $\lambda_0$ is the wavelength when $B=0$ \citep{phillips_ultraviolet_2008}. In order for this splitting to be resolved compared to the instrument or thermal width, $B$ must be sufficiently strong and $\lambda_0$ sufficently long such that measurements of the coronal field ($B\sim\SI{e3}{\gauss}$) can only be made in the infrared.
+
+% spell-checker: disable %
+\begin{pycode}[chapter1]
+# Prepare map
+m = Map(ch1.data_file('hmi_example.fits')).rotate(order=3)
+x, y = np.meshgrid(*[np.arange(v.value) for v in m.dimensions]) * u.pixel
+hpc_coords = m.pixel_to_world(x, y)
+r = np.sqrt(hpc_coords.Tx ** 2 + hpc_coords.Ty ** 2) / m.rsun_obs
+mask = np.ma.masked_greater(r, 1)
+m = Map(m.data, m.meta, mask=mask.mask)
+
+# Build figure
+scale = 0.45
+fig = plt.figure(figsize=texfigure.figsize(
+    pytex,
+    scale=scale,
+    height_ratio=1,
+    figure_width_context='figurewidth',
+))
+ax = fig.gca(projection=m)
+im = m.plot(
+    axes=ax,
+    annotate=False,
+    title=False,
+    cmap='better_RdBu_r',
+    norm=matplotlib.colors.SymLogNorm(10, vmin=-7.5e2, vmax=7.5e2)
+)
+
+# Remove frame, HPC grid, add HGS grid
+ax.grid(alpha=0)
+lon,lat = ax.coords[0], ax.coords[1]
+lon.frame.set_linewidth(0)
+lat.frame.set_linewidth(0)
+lon.set_ticks_visible(False)
+lat.set_ticks_visible(False)
+lon.set_ticklabel_visible(False)
+lat.set_ticklabel_visible(False)
+m.draw_grid(axes=ax, color='k', alpha=0.25, lw=0.5, grid_spacing=30*u.deg)
+
+# Save
+tfig = ch1.save_figure('example-magnetogram', fext='.pdf')
+tfig.caption = r'The LOS magnetic field strength at the photosphere (i.e. a magnetogram) as measured by the HMI instrument on the SDO spacecraft at 19:00 UTC 2010 December 1. Red indicates positive polarity (out of the page) and blue indicates negative polarity (into the page). The colorbar is on a semi-log scale from $-\SI{750}{\gauss}$ to $+\SI{750}{\gauss}$.'
+tfig.figure_width = r'{}\textwidth'.format(scale)
+\end{pycode}
+\py[chapter1]|tfig|
+% spell-checker: enable %
+
+Many ground-based telescopes \citep[e.g. GONG, Mt. Wilson][]{howard_mount_1976} and space-based instruments \citep[e.g. SOHO/MDI][]{scherrer_solar_1995} provide high-quality measurements of the LOS photospheric magnetic field. \autoref{fig:example-magnetogram} shows a full-disk magnetogram produced from measurements by the Helioseismic Magnetic Imager \citep[HMI,][]{hoeksema_helioseismic_2014} on SDO which measures the Fe I \SI{6173.34}{\angstrom} absorption line. Note that the region of enhanced adjacent positive and negative polarities seen in the top right quadrant is spatially coincedent with the sunspot and bright loops seen in the photospheric, EUV, and X-ray images in \autoref{fig:example-images}.
+
+\subsection{Field Extrapolation}\label{sec:field_extrapolation}
+
+\textit{Magnetic field extrapolation} is a commonly-used technique for approximating the three-dimensional vector magnetic field in the corona from a line-of-sight (LOS) measurement of the photospheric field strength. Following the treatment in \citet[Chapter 3]{priest_magnetohydrodynamics_2014}, \autoref{eq:mhd_momentum}, the ideal MHD momentum equation, in magnetohydrostatic balance can be written as,
 \begin{equation}\label{eq:magnetohydrostatic_balance}
     0 = \frac{1}{c}\mathbf{j}\times\mathbf{B} - \nabla p.
 \end{equation}
-In a low-$\beta$ plasma where the magnetic pressure dominates over the thermal pressure (see \autoref{ch:loops}), the first term on the right-hand side can often be neglected such that \autoref{eq:magnetohydrostatic_balance} becomes,
+In a low-$\beta$ plasma (see \autoref{eq:plasma-beta}), the first term on the right-hand side can often be neglected such that \autoref{eq:magnetohydrostatic_balance} becomes,
 \begin{equation}\label{eq:force_free}
     \mathbf{j}\times\mathbf{B} = 0.
 \end{equation}
@@ -399,7 +476,7 @@ The potential field represents the lowest possible energy state of the magnetic 
 
 \subsection{Reconnection}\label{sec:reconnection}
 
-After the magnetic field is forced into the solar atmosphere by the bouyant motion of the convective zone, it remains rooted in the photosphere, whether it is \textit{open} (flux tube extends radially outward, possibly connecting with the interplanetary magnetic field) or \textit{closed} (both ends attached to the solar surface). Because the field is \textit{line-tied}, or frozen into the photospheric plasma, the turbulent motion of the photosphere deforms and stresses the overlying field, leading to the storage of magnetic energy. This motion can eventually lead to a topological restructuring of the magnetic field as it relaxes from a stressed to an equilibrium state, a process commonly referred to as \textit{magnetic reconnection}.
+After the magnetic field is forced into the solar atmosphere by the bouyant motion of the convection zone, it remains rooted in the photosphere, whether it is \textit{open} (flux tube extends radially outward, possibly connecting with the interplanetary magnetic field) or \textit{closed} (both ends attached to the solar surface). Because the field is frozen into the photospheric plasma (\autoref{eq:frozen-flux}), the turbulent motion of the photosphere deforms and stresses the overlying field, leading to the storage of magnetic energy. This motion can eventually lead to a topological restructuring of the magnetic field as it relaxes from a stressed to an equilibrium state, a process commonly referred to as \textit{magnetic reconnection}.
 
 % spell-checker: disable %
 \begin{pycode}[chapter1]
@@ -527,7 +604,7 @@ The footpoints of magnetic flux tubes loops rooted in the photosphere are subjec
 
 \subsection{Nanoflare Heating}\label{sec:nanoflares}
 
-\citet{parker_nanoflares_1988} suggests that the observed X-ray corona is due to the superposition of many \textit{nanoflares}, small-scale reconnections in the twisted and braided coronal magnetic field. Current sheets develop at discontinuities between adjacent flux tubes and when these discontinuities reach some critical value, the field reconnects and the current sheet dissipates, heating the plasma. Based on the hard X-ray observations of \citet{lin_solar_1984} and the EUV observations of \citet{brueckner_observations_1983}, \citeauthor{parker_nanoflares_1988} estimate that each reconnection releases \SI{e24}{\erg} on average though the amount could be as high as \SI{e27}{\erg}. A simplified ``cartoon'' version of this process is illustrated in \autoref{fig:nanoflare-cartoon}.
+\citet{parker_nanoflares_1988} suggests that the observed X-ray corona is due to the superposition of many \textit{nanoflares}, small-scale reconnections in the twisted and braided coronal magnetic field that release an amount of energy approximately equal to $\approx\num{e-9}$ of that of a typical solar flare. Current sheets develop at discontinuities between adjacent flux tubes and when these discontinuities reach some critical value, the field reconnects and the current sheet dissipates, heating the plasma. Based on the hard X-ray observations of \citet{lin_solar_1984} and the EUV observations of \citet{brueckner_observations_1983}, \citeauthor{parker_nanoflares_1988} estimate that each reconnection releases \SI{e24}{\erg} on average though the amount could be as high as \SI{e27}{\erg}. A simplified ``cartoon'' version of this process is illustrated in \autoref{fig:nanoflare-cartoon}.
 
 \begin{figure}
     \centering

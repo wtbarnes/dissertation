@@ -465,7 +465,7 @@ from synthesizAR.atomic import EmissionModel
 em_model = EmissionModel(n, *ions)
 \end{pyblock}
 % spell-checker: enable %
-For this example workflow, I model only a few of the dominant ions in the EUV passbands of AIA: Fe VIII, XIV, XVI, and XVIII. In practice, it is better to include as many ions as possible though this may significantly increase compute times. The ions are specified as \pyv{Ion} objects from the fiasco library, a Python interface to the CHIANTI atomic database. \autoref{ap:fiasco} provides a detailed description of the fiasco package. The ions are then passed to the \pyv{EmissionModel}, a subclass of the fiasco \pyv{IonCollection} obect (see \autoref{sec:ion-collection}). The \pyv{T} and \pyv{n} variables define the grid of temperature and density over which the emissivity is calculated.
+For this example workflow, I model only a few of the dominant ions in the EUV passbands of AIA: Fe VIII, XIV, XVI, and XVIII. In practice, it is better to include as many ions as possible though this may significantly increase compute times. The ions are specified as \pyv{Ion} objects from the fiasco library, a Python interface to the CHIANTI atomic database. \autoref{ap:fiasco} provides a detailed description of the fiasco package. The ions are then passed to the \pyv{EmissionModel}, a subclass of the fiasco \pyv{IonCollection} object (see \autoref{sec:ion-collection}). The \pyv{T} and \pyv{n} variables define the grid of temperature and density over which the emissivity is calculated.
 
 After constructing the \pyv{EmissionModel}, the population fraction of each ion specified above is computed for each loop,
 % spell-checker: disable %

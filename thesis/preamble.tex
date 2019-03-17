@@ -69,6 +69,10 @@
 % Fix for missing appendix name with autoref
 \newcommand*{\Appendixautorefname}{Appendix}
 
+\usepackage[capitalise,nameinlink,noabbrev]{cleveref}
+\crefrangelabelformat{equation}{#3#1#4 to~#5#2#6}
+\creflabelformat{equation}{#2#1#3}
+
 % *************************** Graphics and figures *****************************
 
 %\usepackage{rotating}
@@ -234,7 +238,7 @@
 \DeclareSIUnit[number-unit-product={}]\dn{DN}
 \DeclareSIUnit[number-unit-product={}]\pixel{pixel}
 \DeclareSIUnit[number-unit-product={}]\photon{photon}
-\DeclareSIUnit[number-unit-product={}]\gauss{G}
+\DeclareSIUnit[number-unit-product={}]\gauss{\,G}
 \DeclareSIUnit[number-unit-product={}]\dyne{dyne}
 \DeclareSIUnit\year{yr}
 % Citation aliases

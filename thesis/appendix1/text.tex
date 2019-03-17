@@ -13,7 +13,8 @@ ap1 = texfigure.Manager(
 from astropy.table import QTable
 from fiasco.io import Parser
 import fiasco
-from fiasco import Ion
+from fiasco import Ion, Element, IonCollection
+T = np.logspace(4, 9, 100) * u.K
 \end{pycode}
 % spell-checker: enable %
 
@@ -33,7 +34,7 @@ p = Parser('fe_16.elvlc')
 table = p.parse()
 \end{pyblock}
 % spell-checker: enable %
-\autoref{tab:appendix1:fe16elvlc} shows the \LaTeX representation of the table directly parsed from the file by fiasco, including units. To access the observed energies of each level of Fe XVI and convert them to \si{\erg},
+\autoref{tab:appendix1:fe16elvlc} shows the \LaTeX{} representation of the table directly parsed from the file by fiasco, including units. To access the observed energies of each level of Fe XVI and convert them to \si{\erg},
 % spell-checker: disable %
 \begin{pyblock}[appendix1][baselinestretch=1,xleftmargin=3em]
 e_obs = table['E_obs']
@@ -67,25 +68,21 @@ with io.StringIO() as f:
 
 Other filenames can be parsed in the exact same manner. Because each file format (e.g. \texttt{wgfa}, \texttt{elvlc}) is slightly different, a unique parser subclass is implemented for each filetype in the CHIANTI database. There are 23 unique filetypes. Rather than forcing the user to call a different function or instantiate a separate class for each unique filetype, fiasco uses a \textit{factory pattern}, a common design pattern in software engineering, to create an instance of a class ``on the fly'' based on the filename passed to the \pyv{Parser} object. This greatly simplifies the user interface by providing a single entrypoint for parsing data files.
 
-A key advantage of fiasco is that it rebuilds the entire CHIANTI database as a hierarchical data format (HDF5) file. While ChiantiPy and the CHIANTI IDL routines read the raw data files directly, fiasco parses the raw data files once and then writes the entire database to a single HDF5 file. This is more efficient, particular in the case of large files (e.g. Fe IX and XI with many transitions), as HDF5 allows efficient read access to parts of the database without reading unneeded data into memory. The database 
+A key advantage of fiasco is that it rebuilds the entire CHIANTI database as a hierarchical data format (HDF5) file. While ChiantiPy and the CHIANTI IDL routines read the raw data files directly, fiasco parses the raw data files once and then writes the entire database to a single HDF5 file. This is more efficient, particular in the case of large files (e.g. Fe IX and XI with many transitions), as HDF5 allows efficient read access to parts of the database without reading unneeded data into memory. 
 
 \section{The \texttt{Ion} Class}\label{sec:fiasco-ion}
 
-Similar to the ChiantiPy package, fiasco provides several useful abstractions of the database. The first is the \pyv{Ion} object. To instantiate an \pyv{Ion} object for Fe XVI,
+Similar to the ChiantiPy package, fiasco provides several useful abstractions of the database. The first is the \pyv{Ion} object. To instantiate an ion of Fe XVI,
 % spell-checker: disable %
 \begin{pyblock}[appendix1][baselinestretch=1,xleftmargin=3em]
+from fiasco import Ion
 T = np.logspace(4, 9, 100) * u.K
-fe16 = fiasco.Ion('Fe 16', temperature=T)
+fe16 = Ion('Fe 16', temperature=T)
+# alternatively
+fe16 = Ion('iron 16', temperature=T)
 \end{pyblock}
 % spell-checker: enable %
-The manner in which the ion is specified is very flexible such that all of the following are equivalent,
-% spell-checker: disable %
-\begin{pyblock}[appendix1][baselinestretch=1,xleftmargin=3em]
-fe16 = Ion('Fe 15+', np.logspace(4, 9, 100) * u.K)
-fe16 = Ion('iron 16', np.logspace(4, 9, 100) * u.K)
-\end{pyblock}
-% spell-checker: enable %
-Additionally, note that, just as in the synthesizAR package (\autoref{ch:synthesizar}), all inputs corresponding to physical quantities require units.
+Note that, just as in the synthesizAR package (\autoref{ch:synthesizar}), all inputs corresponding to physical quantities require units.
 
 Basic metadata can be accessed as attributes on the ion,
 % spell-checker: disable %
@@ -96,7 +93,6 @@ fe16.atomic_symbol
 fe16.abundance
 \end{pyblock}
 % spell-checker: enable %
-
 Additionally, information about the energy levels can be accessed by indexing the object directly as a list
 % spell-checker: disable %
 \begin{pyblock}[appendix1][baselinestretch=1,xleftmargin=3em]
@@ -159,9 +155,7 @@ ioneq = fe.equilibrium_ionization()
 
 \section{Working with Multiple Ions}\label{sec:ion-collection}
 
-Some quantities such as spectra or radiative loss curves require data from more than one ion and not necessarily of the same element. fiasco provides a general \pyv{IonCollection} object.
-
-An ion collection can be created directly,
+Some quantities such as spectra or radiative loss curves require data from more than one ion and not necessarily of the same element. fiasco provides a general \pyv{IonCollection} object.An ion collection can be created directly,
 % spell-checker: disable %
 \begin{pyblock}[appendix1][baselinestretch=1,xleftmargin=3em]
 from fiasco import IonCollection

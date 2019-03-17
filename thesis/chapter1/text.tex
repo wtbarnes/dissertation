@@ -375,9 +375,9 @@ As proof of this, consider a small change in flux $\delta\Phi$ as the fluid elem
 \begin{equation*}
     \delta\Phi = \int_{\Sigma^\prime}\dd{\mathbf{S}}\cdot\mathbf{B}(t+\delta t) - \int_\Sigma\dd{\mathbf{S}}\cdot\mathbf{B}(t).
 \end{equation*}
-Using the divergent-free condition of $\mathbf{B}$ (\autoref{eq:mhd_divb}) combined with Stoke's theorem and the fact that $\dd{\mathbf{S}}=\dd{\ell}\times\delta t\mathbf{v}$ gives,
+Using the divergent-free condition of $\mathbf{B}$ (\autoref{eq:mhd_divb}) combined with Stoke's theorem and the fact that $\dd{\mathbf{S}}=\dd{\bm{\ell}}\times\delta t\mathbf{v}$ gives,
 \begin{align}
-    \delta\Phi =& \int_\Sigma\dd{\mathbf{S}}\cdot(\mathbf{B}(t+\delta t) - \mathbf{B}(t)) - \delta t\oint_\mathcal{C}\dd{\ell}\cdot\mathbf{v}\times\mathbf{B}(t + \delta t), \nonumber\\
+    \delta\Phi =& \int_\Sigma\dd{\mathbf{S}}\cdot(\mathbf{B}(t+\delta t) - \mathbf{B}(t)) - \delta t\oint_\mathcal{C}\dd{\bm{\ell}}\cdot\mathbf{v}\times\mathbf{B}(t + \delta t), \nonumber\\
     \frac{\delta\Phi}{\delta t} =& \int_\Sigma\dd{\mathbf{S}}\cdot\left( \frac{\mathbf{B}(t+\delta t)}{\delta t} - \nabla\times(\mathbf{v}\times\mathbf{B}(t + \delta t)) \right),\nonumber
 \end{align}
 where $\mathcal{C}$ is the curve that encloses $\Sigma$. Taking the limit $\delta t\to0$ and using the ideal MHD induction equation (\autoref{eq:mhd_faraday} with $\eta=0$) gives \autoref{eq:frozen-flux}.

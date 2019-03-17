@@ -10,11 +10,6 @@ ap1 = texfigure.Manager(
     number=9,
     **{k: os.path.join('.', name, v) for k,v in manager_opts.items()}
 )
-from astropy.table import QTable
-from fiasco.io import Parser
-import fiasco
-from fiasco import Ion, Element, IonCollection
-T = np.logspace(4, 9, 100) * u.K
 \end{pycode}
 % spell-checker: enable %
 
@@ -28,23 +23,26 @@ For each ion in the CHIANTI database, there are a number of different filetypes 
 
 fiasco provides an easy to use file parser that takes the name of any CHIANTI filename in the database and parses it into the commonly-used Astropy \pyv{Table} format. As an example, to read the data from the energy level file for Fe XVI,
 % spell-checker: disable %
-\begin{pyblock}[appendix1][baselinestretch=1,xleftmargin=3em]
+\begin{pyverbatim}[appendix1][baselinestretch=1,xleftmargin=3em]
 from fiasco.io import Parser
 p = Parser('fe_16.elvlc')
 table = p.parse()
-\end{pyblock}
+\end{pyverbatim}
 % spell-checker: enable %
 \autoref{tab:appendix1:fe16elvlc} shows the \LaTeX{} representation of the table directly parsed from the file by fiasco, including units. To access the observed energies of each level of Fe XVI and convert them to \si{\erg},
 % spell-checker: disable %
-\begin{pyblock}[appendix1][baselinestretch=1,xleftmargin=3em]
+\begin{pyverbatim}[appendix1][baselinestretch=1,xleftmargin=3em]
 e_obs = table['E_obs']
 e_obs_erg = (e_obs * const.h * const.c).to(u.erg)
-\end{pyblock}
+\end{pyverbatim}
 % spell-checker: enable %
 The data in each column is an Astropy \pyv{u.Quantity} and has units attached to it as appropriate. Additional metadata, including descriptions of each of the columns and the information in the footer of the raw data file can be accessed via the \pyv{table.meta} attribute.
 
 % spell-checker: disable %
 \begin{pycode}[appendix1]
+from fiasco.io import Parser
+p = Parser('fe_16.elvlc')
+table = p.parse()
 with io.StringIO() as f:
     table2 = copy.deepcopy(table)
     table2.rename_column('E_obs', r'$E_\textup{obs}$')
@@ -74,48 +72,48 @@ A key advantage of fiasco is that it rebuilds the entire CHIANTI database as a h
 
 Similar to the ChiantiPy package, fiasco provides several useful abstractions of the database. The first is the \pyv{Ion} object. To instantiate an ion of Fe XVI,
 % spell-checker: disable %
-\begin{pyblock}[appendix1][baselinestretch=1,xleftmargin=3em]
+\begin{pyverbatim}[appendix1][baselinestretch=1,xleftmargin=3em]
 from fiasco import Ion
 T = np.logspace(4, 9, 100) * u.K
 fe16 = Ion('Fe 16', temperature=T)
 # alternatively
 fe16 = Ion('iron 16', temperature=T)
-\end{pyblock}
+\end{pyverbatim}
 % spell-checker: enable %
-Note that, just as in the synthesizAR package (\autoref{ch:synthesizar}), all inputs corresponding to physical quantities require units.
+Note that, just as in the synthesizAR package (see \autoref{ch:synthesizar}), all inputs corresponding to physical quantities require units.
 
 Basic metadata can be accessed as attributes on the ion,
 % spell-checker: disable %
-\begin{pyblock}[appendix1][baselinestretch=1,xleftmargin=3em]
+\begin{pyverbatim}[appendix1][baselinestretch=1,xleftmargin=3em]
 fe16.ion_name
 fe16.element_name
 fe16.atomic_symbol
 fe16.abundance
-\end{pyblock}
+\end{pyverbatim}
 % spell-checker: enable %
 Additionally, information about the energy levels can be accessed by indexing the object directly as a list
 % spell-checker: disable %
-\begin{pyblock}[appendix1][baselinestretch=1,xleftmargin=3em]
+\begin{pyverbatim}[appendix1][baselinestretch=1,xleftmargin=3em]
 fe16[0] # the first energy level, a Level object
 fe16[1].level
 fe16[1].energy.to(u.eV)
-\end{pyblock}
+\end{pyverbatim}
 % spell-checker: enable %
 Note that the result of indexing the \pyv{Ion} object is another object corresponding to the energy level within an ion which has several attributes attached to it. Additionally, the raw data files for each ion can also be accessed via attributes,
 % spell-checker: disable %
-\begin{pyblock}[appendix1][baselinestretch=1,xleftmargin=3em]
+\begin{pyverbatim}[appendix1][baselinestretch=1,xleftmargin=3em]
 fe16._elvlc # energy levels
 fe16._wgfa # transitions 
-\end{pyblock}
+\end{pyverbatim}
 % spell-checker: enable %
 In general, these are reserved for internal use by fiasco such that the user need not worry about naming conventions of CHIANTI file formats.
 
 Perhaps most importantly, fiasco provides simple interface for computing derived quantities from the atomic data attached to each ion. For example, to calculate the total ionization and recombination rates as a function of temperature for Fe XVI,
 % spell-checker: disable %
-\begin{pyblock}[appendix1][baselinestretch=1,xleftmargin=3em]
+\begin{pyverbatim}[appendix1][baselinestretch=1,xleftmargin=3em]
 i_rate = fe16.ionization_rate()
 r_rate = fe16.recombination_rate()
-\end{pyblock}
+\end{pyverbatim}
 % spell-checker: enable %
 Many other derived quantities are available. A complete list is available in the documentation.
 
@@ -123,50 +121,50 @@ Many other derived quantities are available. A complete list is available in the
 
 In addition to an individual ion, fiasco also provides an abstraction for many ions of the same element, the \pyv{Element} class. To implement an \pyv{Element} object for iron,
 % spell-checker: disable %
-\begin{pyblock}[appendix1][baselinestretch=1,xleftmargin=3em]
+\begin{pyverbatim}[appendix1][baselinestretch=1,xleftmargin=3em]
 from fiasco import Element
 fe = Element('iron', temperature=T)
-\end{pyblock}
+\end{pyverbatim}
 % spell-checker: enable %
 Basic metadata about the element is available via attributes of the class instance,
 % spell-checker: disable %
-\begin{pyblock}[appendix1][baselinestretch=1,xleftmargin=3em]
+\begin{pyverbatim}[appendix1][baselinestretch=1,xleftmargin=3em]
 fe.element_name
 fe.atomic_number
 fe.atomic_symbol
 fe.abundance
-\end{pyblock}
+\end{pyverbatim}
 % spell-checker: enable %
 
 Additionally, just as the \pyv{Ion} object could be indexed to retrieve the energy levels, the \pyv{Element} object can be indexed to retrieve the constituent ions,
 % spell-checker: disable %
-\begin{pyblock}[appendix1][baselinestretch=1,xleftmargin=3em]
+\begin{pyverbatim}[appendix1][baselinestretch=1,xleftmargin=3em]
 fe[0] # returns Ion object for Fe 1
 fe[15] # returns Ion object for Fe 16
-\end{pyblock}
+\end{pyverbatim}
 % spell-checker: enable %
 
 The \pyv{Element} object can also be used to compute quantities not defined for an individual ion such as the equilibrium population fractions (see \autoref{sec:ioneq}),
 % spell-checker: disable %
-\begin{pyblock}[appendix1][baselinestretch=1,xleftmargin=3em]
+\begin{pyverbatim}[appendix1][baselinestretch=1,xleftmargin=3em]
 ioneq = fe.equilibrium_ionization()
-\end{pyblock}
+\end{pyverbatim}
 % spell-checker: enable %
 
 \section{Working with Multiple Ions}\label{sec:ion-collection}
 
 Some quantities such as spectra or radiative loss curves require data from more than one ion and not necessarily of the same element. fiasco provides a general \pyv{IonCollection} object.An ion collection can be created directly,
 % spell-checker: disable %
-\begin{pyblock}[appendix1][baselinestretch=1,xleftmargin=3em]
+\begin{pyverbatim}[appendix1][baselinestretch=1,xleftmargin=3em]
 from fiasco import IonCollection
 col = IonCollection(Ion('Fe 5', T), Ion('Fe 13', T))
-\end{pyblock}
+\end{pyverbatim}
 % spell-checker: enable %
 or by literally adding the objects together
 % spell-checker: disable %
-\begin{pyblock}[appendix1][baselinestretch=1,xleftmargin=3em]
+\begin{pyverbatim}[appendix1][baselinestretch=1,xleftmargin=3em]
 col = Ion('Fe 5', T) + Ion('Fe 13', T)
-\end{pyblock}
+\end{pyverbatim}
 % spell-checker: enable %
 The latter is implemented by overriding the addition operator on the \pyv{Ion} and \pyv{IonCollection} classes. This type of notation allows for an intuitive exploration of how adding or removing ions impacts spectra or other quantities like the radiative loss curve (\autoref{sec:rad-loss}).
 

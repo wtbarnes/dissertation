@@ -680,7 +680,7 @@ As with the energy expressions, \autoref{eq:hydrodynamic_mass} can be similarly 
     \int_C\dd{s}\frac{\partial}{\partial t}\rho =& - \int_C\dd{s}\frac{\partial}{\partial s}(\rho v), \nonumber \\
     L\frac{d\bar{n}}{dt} =& (nv)_0. \nonumber
 \end{align}
-Using \autoref{eq:1denergy_e_TR,eq:ideal_gas_law_e}, the above equation can be written as
+Using \cref{eq:1denergy_e_TR,eq:ideal_gas_law_e}, the above equation can be written as
 \begin{align}
     L\frac{d\bar{n}}{dt} =& \frac{(p_ev)_0}{k_BT_{e,0}}, \nonumber \\
     L\frac{d\bar{n}}{dt} =& \frac{c_2(\gamma - 1)}{c_3\gamma k_B\bar{T}_e}(-F_{ce,0} - R_{TR} + \psi_{TR}),\nonumber \\
@@ -704,7 +704,7 @@ The next step is to find an expression for $\psi_{TR}$. Dividing \autoref{eq:ide
 \begin{equation}
     \frac{p_ev}{p_iv} = \frac{T_e}{T_i}.
 \end{equation}
-Evaluating this expression at the TR/corona interface, $s=s_0$, and using \autoref{eq:1denergy_e_TR,eq:1denergy_i_TR} yields,
+Evaluating this expression at the TR/corona interface, $s=s_0$, and using \cref{eq:1denergy_e_TR,eq:1denergy_i_TR} yields,
 \begin{equation}
     \frac{- F_{ce,0} + \psi_{TR} - R_{TR}}{- F_{ci,0} - \psi_{TR}} = \xi,
 \end{equation}
@@ -721,7 +721,7 @@ Finally, the set of two-fluid EBTEL equations can be expressed as,
 \end{align}
 where $c_1=R_{TR}/R_C$ is discussed more fully in \autoref{sec:c1-correction}, $R_C=L\bar{n}^2\Lambda(\bar{T}_e)$, $c_2\approx0.9$, and $c_3\approx0.6$.
 
-\autoref{eq:press_e_0d_2fl,eq:press_i_0d_2fl,eq:mass_0d_2fl} are a set of three coupled, non-linear ordinary differential equations. While they still need to be solved numerically, solving these equations is fast and relatively straightforward compared to resolved field-aligned codes (e.g. HYDRAD) due to the lack of a spatial grid. The ebtel++ code\footnote{ebtel++ is thoroughly documented and openly developed. The full source code is available here: \href{https://github.com/rice-solar-physics/ebtelPlusPlus}{github.com/rice-solar-physics/ebtelPlusPlus}. The original single-fluid EBTEL model of \citet{klimchuk_highly_2008,cargill_enthalpy-based_2012} is implemented in IDL and is available here: \href{https://github.com/rice-solar-physics/EBTEL}{github.com/rice-solar-physics/EBTEL}} solves the two-fluid EBTEL equations using a Runge-Kutta Cash-Karp method \citep[Section 16.2]{press_numerical_1992} given a loop half-length $L$ and a prescribed heating function. ebtel++ is written in the C++ programming language and can use either a static or an adaptive timestep. It is very efficient, capable of computing solutions for thousands of loop evolving over many hours of simulation time in a few minutes or less. The ebtel++ code is used extensively in both \autoref{ch:inferring_hot_plasma} and \autoref{ch:modeling-observables}.
+\cref{eq:press_e_0d_2fl,eq:press_i_0d_2fl,eq:mass_0d_2fl} are a set of three coupled, non-linear ordinary differential equations. While they still need to be solved numerically, solving these equations is fast and relatively straightforward compared to resolved field-aligned codes (e.g. HYDRAD) due to the lack of a spatial grid. The ebtel++ code\footnote{ebtel++ is thoroughly documented and openly developed. The full source code is available here: \href{https://github.com/rice-solar-physics/ebtelPlusPlus}{github.com/rice-solar-physics/ebtelPlusPlus}. The original single-fluid EBTEL model of \citet{klimchuk_highly_2008,cargill_enthalpy-based_2012} is implemented in IDL and is available here: \href{https://github.com/rice-solar-physics/EBTEL}{github.com/rice-solar-physics/EBTEL}} solves the two-fluid EBTEL equations using a Runge-Kutta Cash-Karp method \citep[Section 16.2]{press_numerical_1992} given a loop half-length $L$ and a prescribed heating function. ebtel++ is written in the C++ programming language and can use either a static or an adaptive timestep. It is very efficient, capable of computing solutions for thousands of loop evolving over many hours of simulation time in a few minutes or less. The ebtel++ code is used extensively in both \autoref{ch:inferring_hot_plasma} and \autoref{ch:modeling-observables}.
 
 % spell-checker: disable %
 \begin{pycode}[chapter2]
@@ -840,7 +840,7 @@ This section is adapted directly from Appendix A of \citet[\autoref{ch:inferring
 \begin{equation}\label{eq:c1_def}
     c_1 = \frac{R_{TR}}{R_C}.
 \end{equation}
-As can be seen in \autoref{eq:press_e_0d_2fl,eq:press_i_0d_2fl,eq:mass_0d_2fl}, $c_1$ plays an important role in the evolution of the loop in response to the energy supplied by heating. \citet{klimchuk_highly_2008} initially assumed a constant value of $c_1=4$ though they found $c_1$ was much larger at high temperatures. \citet{cargill_enthalpy-based_2012} modified the calculation of $c_1$ to include a correction for gravitational stratification and a more sophisticated approach to radiative cooling such that,
+As can be seen in \cref{eq:press_e_0d_2fl,eq:press_i_0d_2fl,eq:mass_0d_2fl}, $c_1$ plays an important role in the evolution of the loop in response to the energy supplied by heating. \citet{klimchuk_highly_2008} initially assumed a constant value of $c_1=4$ though they found $c_1$ was much larger at high temperatures. \citet{cargill_enthalpy-based_2012} modified the calculation of $c_1$ to include a correction for gravitational stratification and a more sophisticated approach to radiative cooling such that,
 \begin{equation}\label{eq:c1_mod1}
     c_1 =
     \begin{cases}

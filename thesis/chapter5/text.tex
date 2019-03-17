@@ -115,9 +115,9 @@ While it is often assumed that the electrons are the recipients of the prescribe
 
 The two-fluid EBTEL equations are derived fully in \autoref{sec:ebtel-two-fluid} and are restated here for convenience,
 \begin{align}
-    \frac{d}{dt}p_e = \frac{\gamma - 1}{L}(\psi_{TR} - R_C(1 + c_1)) + k_Bn\nu_{ei}(\bar{T}_i - \bar{T}_e) + (\gamma - 1)\bar{Q}_e,\tag{\autoref{eq:press_e_0d_2fl}} \\
-    \frac{d}{dt}p_i = -\frac{\gamma - 1}{L}\psi_{TR} + k_Bn\nu_{ei}(\bar{T}_e - \bar{T}_i) + (\gamma - 1)\bar{Q}_i,\tag{\autoref{eq:press_e_0d_2fl} }\\
-    \frac{d}{dt}n = -\frac{\xi}{1+\xi}\frac{c_2(\gamma - 1)}{c_3L\gamma k_B\bar{T}_e}(F_{ce,0} + F_{ci,0} + c_1R_C),\tag{\autoref{eq:mass_0d_2fl}}
+    \frac{d}{dt}p_e =& \frac{\gamma - 1}{L}(\psi_{TR} - R_C(1 + c_1)) + k_Bn\nu_{ei}(T_i - T_e) + (\gamma - 1)\bar{Q}_e,\tag{\ref{eq:press_e_0d_2fl}} \\
+    \frac{d}{dt}p_i =& -\frac{\gamma - 1}{L}\psi_{TR} + k_Bn\nu_{ei}(T_e - T_i) + (\gamma - 1)\bar{Q}_i,\tag{\ref{eq:press_e_0d_2fl} }\\
+    \frac{d}{dt}n =& -\frac{\xi}{1+\xi}\frac{c_2(\gamma - 1)}{c_3L\gamma k_B\bar{T}_e}(F_{ce,0} + F_{ci,0} + c_1R_C),\tag{\ref{eq:mass_0d_2fl}}
 \end{align}
 This set of equations is closed by the equations of state $p_e=k_BnT_e$ and $p_i=k_BnT_i$. While the notation above is largely self-evident, we draw attention to the additional term $\psi_{TR}$ which originates in the need to maintain charge and current neutrality and is defined by \autoref{eq:psi_TR}. Additionally, in both the single- and two-fluid versions of EBTEL used here, we have implemented an adaptive time-stepping routine to ensure that we are correctly resolving the thermal conduction timescale.
 

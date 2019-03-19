@@ -25,7 +25,7 @@
 \end{equation}
 Note that the $k=1$ and $k=Z+1$ sink terms only have one term as recombination is not permitted past the lowest charge state and when the ion is in the highest charge state ($Z+1$), there are no electrons left to ionize.
 
-Due to drastic changes in the ionization and recombination rates with temperature, the system of equations in \autoref{eq:population_fraction} is very ``stiff,'' making explicit schemes very sensitive to the choice of timestep \citep{macneice_numerical_1984,bradshaw_numerical_2009}. \autoref{eq:population_fraction_matrix} can be solved using an implicit ``deferred correction'' method \citep{npl_national_physical_laboratory_modern_1961}, as pointed out by \citet{macneice_numerical_1984},
+Due to drastic changes in the ionization and recombination rates with temperature, the system of equations in \autoref{eq:population_fraction} is very ``stiff,'' making explicit schemes very sensitive to the choice of timestep \citep{macneice_numerical_1984,bradshaw_numerical_2009}. \autoref{eq:population_fraction_matrix} can be solved using an implicit ``deferred correction'' method \citep{npl_modern_1961}, as pointed out by \citet{macneice_numerical_1984},
 \begin{equation}\label{eq:deferred_correction}
     \mathbf{F}_{l+1} = \mathbf{F}_{l} + \frac{\delta}{2}\left(\frac{d}{dt}\mathbf{F}_{l+1} + \frac{d}{dt}\mathbf{F}_l\right) + \mathcal{O}(\delta^2),
 \end{equation}

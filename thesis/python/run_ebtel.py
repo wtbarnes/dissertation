@@ -32,4 +32,5 @@ def run_ebtel(config, ebtel_dir):
         'electron_pressure': data[:, 4]*u.dyne/(u.cm**2),
         'ion_pressure': data[:, 5]*u.dyne/(u.cm**2), 
         'velocity': data[:, 6]*u.cm/u.s,
+        'heat': data[:,7]*u.erg/u.s/(u.cm**3),
     }, **terms}

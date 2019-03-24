@@ -611,7 +611,7 @@ It should be mentioned that a number of codes have been developed to solve the f
 
 %Derive normal and two-fluid EBTEL equations, show examples
 
-While field-aligned models like HYDRAD are extremely powerful, they are often too computationally expensive to be used in a paramater space exploration, for example, of a range of heating properties. Such studies are critical to constraining properties of the heating in coronal loops. To this end, many zero-dimensional or ``0D'' loop models have been developed \citep[e.g.][]{kuin_thermal_1982,fisher_equation_1990,kopp_coronal_1993,cargill_implications_1994,aschwanden_hydrodynamic_2009}, so-called because they compute the hydrodynamic evolution of a single, spatially-unresolved point rather than an entire loop. Such models are very useful as they incorporate the key physics of the evolution of a coronal loop, but are extremely efficient such that a large parameter space can be explored in a reasonable amount of time. Once a parameter space is sufficiently constrained, a more sophisticated field-aligned model can be used.
+While field-aligned models like HYDRAD are extremely powerful, they are often too computationally expensive to be used in a paramater space exploration, for example, of a range of heating properties. Such studies are critical to constraining properties of the heating in coronal loops. To this end, many zero-dimensional (``0D'') loop models have been developed \citep[e.g.][]{kuin_thermal_1982,fisher_equation_1990,kopp_coronal_1993,cargill_implications_1994,aschwanden_hydrodynamic_2009}, so-called because they compute the hydrodynamic evolution of a single, spatially-unresolved point rather than an entire loop. Such models are very useful as they incorporate the key physics of the evolution of a coronal loop, but are extremely efficient such that a large parameter space can be explored in a reasonable amount of time. Once a parameter space is sufficiently constrained, a more sophisticated field-aligned model can be used.
 
 By far the most advanced and widely-used 0D model is the enthalpy-based thermal evolution of loops model \citep[EBTEL,][]{klimchuk_highly_2008}. Unlike earlier 0D models, EBTEL can include any form of time-dependent heating, allows for cooling by thermal conduction and radiation at all times, and can account for heat flux saturation (see \autoref{sec:heat-flux}). The idea behind the EBTEL model is to equate an enthalpy flux due to ablation or draining with the balance between the heat flux out of the corona and radiative loss rate in the TR. If the TR radiation cannot balance the downward heat flux, this drives an upflow. Conversely, if the TR is radiating away more energy than the heat flux can supply, this drives a downflow.
 
@@ -715,9 +715,9 @@ where $\xi\equiv T_{e,0}/T_{i,0}$. Solving for $\psi_{TR}$ gives,
 
 Finally, the set of two-fluid EBTEL equations can be expressed as,
 \begin{align}
-    \frac{d}{dt}p_e =& \frac{\gamma - 1}{L}(\psi_{TR} - R_C(1 + c_1)) + k_Bn\nu_{ei}(\bar{T}_i - \bar{T}_e) + (\gamma - 1)\bar{Q}_e,\label{eq:press_e_0d_2fl} \\
-    \frac{d}{dt}p_i =& -\frac{\gamma - 1}{L}\psi_{TR} + k_Bn\nu_{ei}(\bar{T}_e - \bar{T}_i) + (\gamma - 1)\bar{Q}_i,\label{eq:press_i_0d_2fl} \\
-    \frac{d}{dt}n =& -\frac{\xi}{1+\xi}\frac{c_2(\gamma - 1)}{c_3L\gamma k_B\bar{T}_e}(F_{ce,0} + F_{ci,0} + c_1R_C),\label{eq:mass_0d_2fl}
+    \frac{d}{dt}\bar{p}_e =& \frac{\gamma - 1}{L}(\psi_{TR} - R_C(1 + c_1)) + k_B\bar{n}\nu_{ei}(\bar{T}_i - \bar{T}_e) + (\gamma - 1)\bar{Q}_e,\label{eq:press_e_0d_2fl} \\
+    \frac{d}{dt}\bar{p}_i =& -\frac{\gamma - 1}{L}\psi_{TR} + k_B\bar{n}\nu_{ei}(\bar{T}_e - \bar{T}_i) + (\gamma - 1)\bar{Q}_i,\label{eq:press_i_0d_2fl} \\
+    \frac{d}{dt}\bar{n} =& -\frac{\xi}{1+\xi}\frac{c_2(\gamma - 1)}{c_3L\gamma k_B\bar{T}_e}(F_{ce,0} + F_{ci,0} + c_1R_C),\label{eq:mass_0d_2fl}
 \end{align}
 where $c_1=R_{TR}/R_C$ is discussed more fully in \autoref{sec:c1-correction}, $R_C=L\bar{n}^2\Lambda(\bar{T}_e)$, $c_2\approx0.9$, and $c_3\approx0.6$.
 

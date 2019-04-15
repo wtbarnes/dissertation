@@ -1,0 +1,88 @@
+// cSpell Settings
+{
+    // Version of the setting file.  Always 0.1
+    "version": "0.1",
+    // language - current active spelling language
+    "language": "en",
+    // words - list of words to be always considered correct
+    "words": [
+        // Physics
+        "magnetohydrodynamic",
+        "magnetohydrodynamics",
+        "magnetohydrostatic",
+        "magnetoacoustic",
+        "reconnection",
+        "reconnections",
+        "blackbody",
+        "reemitted",
+        "footpoint",
+        "footpoints",
+        "poynting",
+        "nucleosynthesis",
+        "dipolar",
+        "isotropically",
+        "diffusivity",
+        "dissipative",
+        "Stoke's",
+        "spectropolarimetry",
+        "tokamak",
+        "discretization",
+        "Maxwellian",
+        "piecewise",
+        "overconstrained",
+        "enthalpy",
+        // Solar
+        "nanoflare",
+        "nanoflares",
+        "magnetogram",
+        "magnetograms",
+        "EBTEL",
+        "tachocline",
+        "Hinode",
+        "helioseismology",
+        "helioseismic",
+        "plage",
+        "imager",
+        "coronium",
+        "underdense",
+        "overdense",
+        "upflow",
+        "downflow",
+        // Names
+        "Zeeman",
+        "Harkness",
+        "Petschek",
+        "Petschek's",
+        "Alfv",
+        "Inouye",
+        "Runge",
+        "Kutta",
+        "Karp",
+        // Abbreviations
+        "PFSS",
+        "NOAA",
+        "SDO",
+        "AIA",
+        "HYDRAD",
+        "EBTEL",
+        "RADYN",
+        "NLTE",
+        // Software
+        "matplotlib",
+        "astropy",
+        "scikit",
+        "dask",
+        "seaborn",
+        "scipy",
+        "multithreading",
+        "Lare",
+        // Other
+        "brightenings",
+        "observability",
+        "dimensionalize"
+    ],
+    // flagWords - list of words to be always considered incorrect
+    // This is useful for offensive words and common spelling errors.
+    // For example "hte" should be "the"
+    "flagWords": []
+}

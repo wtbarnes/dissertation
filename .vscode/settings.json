@@ -1,4 +1,5 @@
 {   // LaTeX Workshop
+    "latex-workshop.latex.autoBuild.run": "onFileChange",
     "latex-workshop.latex.autoBuild.cleanAndRetry.enabled": false,
     "latex-workshop.latex.tools": [
         {

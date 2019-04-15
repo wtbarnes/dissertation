@@ -1105,7 +1105,6 @@ wish to left align your text}
     \defineAbstractfalse
 \fi
 
-
 \newenvironment{abstract} {
 \ifPHD@abstract
 % Separate abstract as per Student Registry guidelines
@@ -1117,10 +1116,15 @@ wish to left align your text}
   \end{center}
 \else
 % Normal abstract in the thesis
+  \thispagestyle{empty}
   \cleardoublepage
   \setsinglecolumn
-  \chapter*{\centering \Large \@abstracttitle}
-  \thispagestyle{empty}
+  \chapter*{
+    \centering \Large {\normalfont \sc \@abstracttitle} \\ 
+    \Large {\@title} \\ 
+    \large{\normalfont by} \\ 
+    \Large{\@author}
+  }
 \fi
 }
 

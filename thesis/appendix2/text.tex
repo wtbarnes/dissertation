@@ -1,5 +1,5 @@
 % Text for appendix 2
-\chapter{An Implicit Method for Computing Nonequilibrium Charge States}\label{ap:nonequilibrium_implicit}
+\chapter{An Implicit Method for Computing Non-Equilibrium Charge States}\label{ap:nonequilibrium_implicit}
 \thispagestyle{firstpageofchapterstyle}
 
  In cases where the electron temperature, $T_e$, changes sufficiently slowly such that the charge state remains in equilibrium with $T_e$, $\frac{df_k}{dt}=0$ in \autoref{eq:population_fraction} and the population fraction, $f_k$, is determined by a set of linear, homogeneous equations (\autoref{eq:ionization_equilibrium_matrix}). However, when a low-density, optically-thin plasma undergoes a rapid change in $T_e$, the charge state cannot keep pace with the electron temperature such that $f_k$ and $T_e$ are in out of equilibrium and $df_k/dt$ cannot be ignored. 
@@ -30,15 +30,15 @@ Due to drastic changes in the ionization and recombination rates with temperatur
 \begin{equation}\label{eq:deferred_correction}
     \mathbf{F}_{l+1} = \mathbf{F}_{l} + \frac{\delta}{2}\left(\frac{d}{dt}\mathbf{F}_{l+1} + \frac{d}{dt}\mathbf{F}_l\right) + \mathcal{O}(\delta^2),
 \end{equation}
-where $\mathbf{F}_l=\mathbf{F}(t_l)$, $\delta = t_{l+1} - t_l$ is the timestep, and $\mathcal{O}(\delta^2)$ denotes all terms that are second-order or higher in $\delta$. Dropping the $\mathcal{O}(\delta^2)$ terms and using \autoref{eq:population_fraction_matrix} gives an expression for $\mathbf{F}_{l+1}$,
+where $\mathbf{F}_l=\mathbf{F}(t_l)$, $\delta = t_{l+1} - t_l$ is the time step, and $\mathcal{O}(\delta^2)$ denotes all terms that are second-order or higher in $\delta$. Dropping the $\mathcal{O}(\delta^2)$ terms and using \autoref{eq:population_fraction_matrix} gives an expression for $\mathbf{F}_{l+1}$,
 \begin{align}\label{eq:population_fraction_solution}
     \mathbf{F}_{l+1} &= \mathbf{F}_{l} + \frac{\delta}{2}\left(\mathbf{A}_{l+1}\mathbf{F}_{l+1} + \mathbf{A}_l\mathbf{F}_l\right), \nonumber \\
     \mathbf{F}_{l+1} - \frac{\delta}{2}\mathbf{A}_{l+1}\mathbf{F}_{l+1} &= \mathbf{F}_{l} + \frac{\delta}{2}\mathbf{A}_l\mathbf{F}_l, \nonumber \\
     \mathbf{F}_{l+1} &= \left(\mathbb{I} - \frac{\delta}{2}\mathbf{A}_{l+1}\right)^{-1}\left(\mathbb{I} + \frac{\delta}{2}\mathbf{A}_l\right)\mathbf{F}_l,
 \end{align}
-where $\mathbb{I}$ is the identity matrix. Thus, to solve \autoref{eq:population_fraction_matrix} for a given $n_e(t),T_e(t)$, one need only compute $\mathbf{A}_l$ at each $T_e(t_l)$, set $\mathbf{F}_0$ to the equilibrium population fractions (as determined from \autoref{eq:ionization_equilibrium_matrix}) and then iteratively compute \autoref{eq:population_fraction_solution} for each $l$. An example calculation of the population fractions of Fe in nonequilibrium calculated using \autoref{eq:population_fraction_solution} is shown in \autoref{fig:nonequilibrium-ionization}.
+where $\mathbb{I}$ is the identity matrix. Thus, to solve \autoref{eq:population_fraction_matrix} for a given $n_e(t),T_e(t)$, one need only compute $\mathbf{A}_l$ at each $T_e(t_l)$, set $\mathbf{F}_0$ to the equilibrium population fractions (as determined from \autoref{eq:ionization_equilibrium_matrix}) and then iteratively compute \autoref{eq:population_fraction_solution} for each $l$. An example calculation of the population fractions of Fe in non-equilibrium calculated using \autoref{eq:population_fraction_solution} is shown in \autoref{fig:nonequilibrium-ionization}.
 
-While \autoref{eq:population_fraction_solution} is unconditionally stable for all $\delta$, implicit schemes only guarantee convergence to the equilibrium solution (i.e. \autoref{eq:ionization_equilibrium_matrix}) such that a poor choice of $\delta$ may still give inaccurate results for the nonequilibrium, time-dependent solution to \autoref{eq:population_fraction_matrix} \citep{bradshaw_numerical_2009}. \citet{macneice_numerical_1984} recommend choosing $\delta$ sufficiently small such that the following conditions are satisfied for all $k$,
+While \autoref{eq:population_fraction_solution} is unconditionally stable for all $\delta$, implicit schemes only guarantee convergence to the equilibrium solution (i.e. \autoref{eq:ionization_equilibrium_matrix}) such that a poor choice of $\delta$ may still give inaccurate results for the non-equilibrium, time-dependent solution to \autoref{eq:population_fraction_matrix} \citep{bradshaw_numerical_2009}. \citet{macneice_numerical_1984} recommend choosing $\delta$ sufficiently small such that the following conditions are satisfied for all $k$,
 \begin{align}
     &|f_{k,l+1} - f_{k,l}| \lesssim \varepsilon_d, \\
     &10^{-\varepsilon_r} \lesssim \frac{f_{k,l+1}}{f_{k,l}} \lesssim 10^{\varepsilon_r},

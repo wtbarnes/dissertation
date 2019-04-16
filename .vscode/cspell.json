@@ -45,6 +45,7 @@
         "inhomogeneous",
         "arcminute",
         "arcsecond",
+        "integrand",
         // Solar
         "nanoflare",
         "nanoflares",
@@ -69,6 +70,9 @@
         "reflectance",
         "coolward",
         "hotward",
+        "helioprojective",
+        "heliographic",
+        "emissivities",
         // Names
         "Zeeman",
         "Harkness",
@@ -81,6 +85,7 @@
         "Karp",
         "Laguerre",
         "Fredholm",
+        "Stonyhurst",
         // Abbreviations
         "PFSS",
         "NOAA",
@@ -90,6 +95,7 @@
         "EBTEL",
         "RADYN",
         "NLTE",
+        "HEEQ",
         // Software
         "matplotlib",
         "astropy",
@@ -103,7 +109,12 @@
         "brightenings",
         "observability",
         "dimensionalize",
-        "positivity"
+        "positivity",
+        "resample",
+        "resamples",
+        "resampled",
+        "precomputed",
+        "pixelization"
     ],
     // flagWords - list of words to be always considered incorrect
     // This is useful for offensive words and common spelling errors.

@@ -499,7 +499,7 @@ Calculating the level population using \autoref{eq:level_pop} is computationally
 
 \section{Instrument Effects}\label{sec:instrument-effects}
 
-\subsection{Constructing the Virtual Observer}
+\subsection{Constructing the Virtual Observer}\label{sec:constructing-observer}
 
 Now that the magnetic skeleton has been constructed, the thermal structure calculated, and the emissivities tabulated for the relevant ions, the last step in the synthesizAR pipeline is to account for the observing instrument. As in previous steps, the instrument is defined in an object-oriented manner and then passed in as an argument,
 % spell-checker: disable %
@@ -522,7 +522,7 @@ The \pyv{InstrumentSDOAIA} object defines all of the properties of the instrumen
 
 This instrument object is then passed to the \pyv{Observer} object along with the \pyv{Field} object which contains the magnetic skeleton and information about the thermal structure along each strand. Notice that the instrument object is passed in as a list such that multiple virtual instruments can be passed to the same \pyv{Observer} in order to predict observations of the same \AR{} using multiple instruments. Though synthesizAR includes several predefined instruments, as in the case of the field-aligned model interfaces (see \autoref{sec:field-aligned-modeling}), a user can define their own instrument and pass it to the \pyv{Observer} without modifying the underlying package code. To maximize code reuse and make it easier to define custom instrument classes, synthesizAR also provides an \pyv{InstrumentBase} class from which user-defined instruments can inherit.
 
-\subsection{Projecting Along the LOS}
+\subsection{Projecting Along the LOS}\label{sec:projecting-along-los}
 
 Next, the wavelength response functions (see \autoref{fig:aia-wavelength-response}) defined in the instrument class are used to evaluate the integrand of \autoref{eq:aia_intensity} for each channel of the instrument and each strand in the magnetic skeleton. The summation in \autoref{eq:temperature_response_discrete} is over all available transitions from CHIANTI for the four ions added to the emission model in \autoref{sec:atomic-physics} and the contribution from the continuum is not included. This quantity is computed as a function of field-aligned coordinate along the strand and time (for time-dependent loop models).
 
@@ -665,15 +665,20 @@ tfig.caption = r'Predicted intensities, in \si{\dn\per\pixel\per\second}, for \A
 
 \autoref{fig:aia-intensities} shows the final output of the synthesizAR forward modeling pipeline as applied to NOAA 12733. Each panel shows a map of the intensity across the \AR{} for four out of the six EUV channels of AIA. Since the thermal structure of each strand was modeled using the hydrostatic scaling laws of \citet{martens_scaling_2010}, only one map is produced per channel. Note that in the top right panel, the intensity is greatest near the base of each loop because the \SI{131}{\angstrom} channel is most sensitive to cool plasma (\autoref{fig:aia-temperature-response}) and the temperature along each strand decreases with decreasing height (\autoref{fig:martens-loops}). In the other three channels, the core is much brighter as \SIlist{94;211;335}{\angstrom} are all sensitive to much warmer plasma.
 
-Because the coronal emission is optically-thin, an important consideration when interpreting observations is the angle between the observer and the object of interest as the temperature structure along the LOS will change depending on the viewing angle. Because synthesizAR defines the projection in terms of a HPC frame, changing the viewing angle is only a matter of specifying a different \pyv{SkyCoord} object for the observer. For example, to view the \AR{} off-limb rather than on-disk, the HGS longitude is changed to $\Phi=\SI{-90}{\degree}$ and the new observer is passed to the instrument object,
+Because the coronal emission is optically-thin, an important consideration when interpreting observations is the angle between the observer and the object of interest as the temperature structure along the LOS will change depending on the viewing angle. Because synthesizAR defines the projection in terms of a HPC frame, changing the viewing angle is only a matter of specifying a different \pyv{SkyCoord} object for the observer. For example, to view the \AR{} off-limb rather than on-disk, the HGS longitude is changed to $\Phi=\SI{-90}{\degree}$,
 % spell-checker: disable %
 \begin{pyblock}[chapter4][baselinestretch=1,xleftmargin=3em]
 new_observer = SkyCoord(
     lon=-90*u.deg,
     lat=noaa12733.magnetogram.observer_coordinate.lat,
     radius=noaa12733.magnetogram.observer_coordinate.radius,
-    frame=HeliographicStonyhurst,
+    frame=HeliographicStonyhurst
 )
+\end{pyblock}
+% spell-checker: enable %
+Then, this new observer is passed to the instrument object,
+% spell-checker: disable %
+\begin{pyblock}[chapter4][baselinestretch=1,xleftmargin=3em]
 new_aia = InstrumentSDOAIA([0,1]*u.s, new_observer)
 \end{pyblock}
 % spell-checker: enable %

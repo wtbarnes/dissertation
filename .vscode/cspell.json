@@ -46,9 +46,15 @@
         "arcminute",
         "arcsecond",
         "integrand",
+        "overbar",
+        "collisionless",
+        "quantization",
+        "decoherence",
         // Solar
         "nanoflare",
         "nanoflares",
+        "microflare",
+        "microflares",
         "magnetogram",
         "magnetograms",
         "EBTEL",
@@ -62,6 +68,7 @@
         "underdense",
         "overdense",
         "upflow",
+        "upflows",
         "downflow",
         "passband",
         "passbands",
@@ -73,6 +80,9 @@
         "helioprojective",
         "heliographic",
         "emissivities",
+        "polychrometer",
+        "reheating",
+        "reheatings",
         // Names
         "Zeeman",
         "Harkness",
@@ -86,6 +96,7 @@
         "Laguerre",
         "Fredholm",
         "Stonyhurst",
+        "Spitzer",
         // Abbreviations
         "PFSS",
         "NOAA",
@@ -105,6 +116,7 @@
         "scipy",
         "multithreading",
         "Lare",
+        "colorbar",
         // Other
         "brightenings",
         "observability",
@@ -114,7 +126,15 @@
         "resamples",
         "resampled",
         "precomputed",
-        "pixelization"
+        "pixelization",
+        "observationally",
+        "scalings",
+        "Amptek",
+        "conductively",
+        "parameterize",
+        "parameterizing",
+        "distinguishability",
+        "disambiguating"
     ],
     // flagWords - list of words to be always considered incorrect
     // This is useful for offensive words and common spelling errors.

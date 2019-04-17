@@ -83,6 +83,11 @@
         "polychrometer",
         "reheating",
         "reheatings",
+        "derotate",
+        "derotates",
+        "derotated",
+        "derotating",
+        "aiaprep",
         // Names
         "Zeeman",
         "Harkness",
@@ -97,6 +102,8 @@
         "Fredholm",
         "Stonyhurst",
         "Spitzer",
+        "Snodgrass",
+        "Gini",
         // Abbreviations
         "PFSS",
         "NOAA",
@@ -132,9 +139,18 @@
         "Amptek",
         "conductively",
         "parameterize",
+        "parameterizes",
         "parameterizing",
         "distinguishability",
-        "disambiguating"
+        "disambiguating",
+        "overfit",
+        "overfits",
+        "overfitting",
+        "deconvolving",
+        "hyperparameter",
+        "hyperparameters",
+        "decorrelate",
+        "decorrelated"
     ],
     // flagWords - list of words to be always considered incorrect
     // This is useful for offensive words and common spelling errors.

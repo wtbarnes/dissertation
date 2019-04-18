@@ -88,6 +88,7 @@
         "derotated",
         "derotating",
         "aiaprep",
+        "heliophysics",
         // Names
         "Zeeman",
         "Harkness",
@@ -150,7 +151,8 @@
         "hyperparameter",
         "hyperparameters",
         "decorrelate",
-        "decorrelated"
+        "decorrelated",
+        "bursty"
     ],
     // flagWords - list of words to be always considered incorrect
     // This is useful for offensive words and common spelling errors.

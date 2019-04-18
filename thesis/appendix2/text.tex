@@ -2,17 +2,17 @@
 \chapter{An Implicit Method for Computing Non-Equilibrium Charge States}\label{ap:nonequilibrium_implicit}
 \thispagestyle{firstpageofchapterstyle}
 
- In cases where the electron temperature, $T_e$, changes sufficiently slowly such that the charge state remains in equilibrium with $T_e$, $\frac{df_k}{dt}=0$ in \autoref{eq:population_fraction} and the population fraction, $f_k$, is determined by a set of linear, homogeneous equations (\autoref{eq:ionization_equilibrium_matrix}). However, when a low-density, optically-thin plasma undergoes a rapid change in $T_e$, the charge state cannot keep pace with the electron temperature such that $f_k$ and $T_e$ are in out of equilibrium and $df_k/dt$ cannot be ignored. 
+ In cases where the electron temperature, $T_e$, changes sufficiently slowly such that the charge state remains in equilibrium with $T_e$, $\frac{df_k}{dt}=0$ in \autoref{eq:population_fraction} and the population fraction, $f_k$, is determined by a set of linear, homogeneous equations (\autoref{eq:ionization_equilibrium_matrix}). However, when a low-density, optically-thin plasma undergoes a rapid change in $T_e$, the charge state cannot keep pace with the electron temperature such that $f_k$ and $T_e$ are out of equilibrium and $df_k/dt$ cannot be ignored. 
  
  Recall that the time evolution of the population fraction $f_{X,k}$, for an element $X$ and charge state $k$, is governed by,
  \begin{equation*}\tag{\ref{eq:population_fraction}}
      \frac{d}{dt}f_k = n_e(\alpha_{k-1}^I f_{k-1} + \alpha_{k+1}^R f_{k+1} - \alpha_{k}^I f_k - \alpha_k^R f_k),
  \end{equation*}
- where $n_e$ is the electron density and $\alpha^\textup{I}_k$ and $\alpha^\textup{R}_k$ are the total ionization and recombination rate coefficienets for charge state $k$, respectively (see \autoref{subsec:ionization_recombination}). Following the approaches of \citet{masai_x-ray_1984,hughes_self-consistent_1985}, \autoref{eq:population_fraction} can be written more compactly for all $k$ in matrix form as,
+ where $n_e$ is the electron density and $\alpha^\textup{I}_k$ and $\alpha^\textup{R}_k$ are the total ionization and recombination rate coefficients for charge state $k$, respectively (see \autoref{subsec:ionization_recombination}). Following the approaches of \citet{masai_x-ray_1984,hughes_self-consistent_1985}, \autoref{eq:population_fraction} can be written more compactly for all $k$ in matrix form as,
  \begin{equation}\label{eq:population_fraction_matrix}
      \frac{d}{dt}\mathbf{F} = \mathbf{A}\mathbf{F},
  \end{equation}
- where $\mathbf{F}=(f_1,f_2,\ldots,f_k,\ldots,f_{Z+1})$ and $\mathbf{A}$ is a $Z+1{\times}Z+1$ block tri-diagonal matrix containing all of the ionzation and recombination rates given by,
+ where $\mathbf{F}=(f_1,f_2,\ldots,f_k,\ldots,f_{Z+1})$ and $\mathbf{A}$ is a $Z+1{\times}Z+1$ block tri-diagonal matrix containing all of the ionization and recombination rates given by,
  \begin{equation}\label{eq:rate_matrix}
     \mathbf{A} = n_e
         \begin{pmatrix}
@@ -26,7 +26,7 @@
 \end{equation}
 Note that the $k=1$ and $k=Z+1$ sink terms only have one term as recombination is not permitted past the lowest charge state and when the ion is in the highest charge state ($Z+1$), there are no electrons left to ionize.
 
-Due to drastic changes in the ionization and recombination rates with temperature, the system of equations in \autoref{eq:population_fraction} is very ``stiff,'' making explicit schemes very sensitive to the choice of timestep \citep{macneice_numerical_1984,bradshaw_numerical_2009}. \autoref{eq:population_fraction_matrix} can be solved using an implicit ``deferred correction'' method \citep{npl_modern_1961}, as pointed out by \citet{macneice_numerical_1984},
+Due to drastic changes in the ionization and recombination rates with temperature, the system of equations in \autoref{eq:population_fraction} is very ``stiff,'' making explicit schemes very sensitive to the choice of time step \citep{macneice_numerical_1984,bradshaw_numerical_2009}. \autoref{eq:population_fraction_matrix} can be solved using an implicit ``deferred correction'' method \citep{npl_modern_1961}, as pointed out by \citet{macneice_numerical_1984},
 \begin{equation}\label{eq:deferred_correction}
     \mathbf{F}_{l+1} = \mathbf{F}_{l} + \frac{\delta}{2}\left(\frac{d}{dt}\mathbf{F}_{l+1} + \frac{d}{dt}\mathbf{F}_l\right) + \mathcal{O}(\delta^2),
 \end{equation}
@@ -36,11 +36,11 @@ where $\mathbf{F}_l=\mathbf{F}(t_l)$, $\delta = t_{l+1} - t_l$ is the time step,
     \mathbf{F}_{l+1} - \frac{\delta}{2}\mathbf{A}_{l+1}\mathbf{F}_{l+1} &= \mathbf{F}_{l} + \frac{\delta}{2}\mathbf{A}_l\mathbf{F}_l, \nonumber \\
     \mathbf{F}_{l+1} &= \left(\mathbb{I} - \frac{\delta}{2}\mathbf{A}_{l+1}\right)^{-1}\left(\mathbb{I} + \frac{\delta}{2}\mathbf{A}_l\right)\mathbf{F}_l,
 \end{align}
-where $\mathbb{I}$ is the identity matrix. Thus, to solve \autoref{eq:population_fraction_matrix} for a given $n_e(t),T_e(t)$, one need only compute $\mathbf{A}_l$ at each $T_e(t_l)$, set $\mathbf{F}_0$ to the equilibrium population fractions (as determined from \autoref{eq:ionization_equilibrium_matrix}) and then iteratively compute \autoref{eq:population_fraction_solution} for each $l$. An example calculation of the population fractions of Fe in non-equilibrium calculated using \autoref{eq:population_fraction_solution} is shown in \autoref{fig:nonequilibrium-ionization}.
+where $\mathbb{I}$ is the identity matrix. Thus, to solve \autoref{eq:population_fraction_matrix} for a given $n_e(t),T_e(t)$, one need only compute $\mathbf{A}_l$ at each $T_e(t_l)$, set $\mathbf{F}_0$ to the equilibrium population fractions (as determined from \autoref{eq:ionization_equilibrium_matrix}) and then iteratively compute \autoref{eq:population_fraction_solution} at each $t_l$. An example calculation of the population fractions of Fe in non-equilibrium using \autoref{eq:population_fraction_solution} is shown in \autoref{fig:nonequilibrium-ionization}.
 
-While \autoref{eq:population_fraction_solution} is unconditionally stable for all $\delta$, implicit schemes only guarantee convergence to the equilibrium solution (i.e. \autoref{eq:ionization_equilibrium_matrix}) such that a poor choice of $\delta$ may still give inaccurate results for the non-equilibrium, time-dependent solution to \autoref{eq:population_fraction_matrix} \citep{bradshaw_numerical_2009}. \citet{macneice_numerical_1984} recommend choosing $\delta$ sufficiently small such that the following conditions are satisfied for all $k$,
+While \autoref{eq:population_fraction_solution} is unconditionally stable for all $\delta$, implicit schemes only guarantee convergence to the equilibrium solution (i.e. \autoref{eq:ionization_equilibrium_matrix}) such that a poor choice of $\delta$ may still give inaccurate results for the non-equilibrium, time-dependent solution to \autoref{eq:population_fraction_matrix} \citep{bradshaw_numerical_2009}. \citet{macneice_numerical_1984} recommend choosing $\delta$ sufficiently small such that the following conditions are satisfied for all $k$ and $l$,
 \begin{align}
     &|f_{k,l+1} - f_{k,l}| \lesssim \varepsilon_d, \\
     &10^{-\varepsilon_r} \lesssim \frac{f_{k,l+1}}{f_{k,l}} \lesssim 10^{\varepsilon_r},
 \end{align}
-where $\varepsilon_d$ and $\varepsilon_r$ are control parameters with typical values of 0.1 and 0.6, respectively. Additionally, \citet{masai_x-ray_1984}, as well as \citet{shen_lagrangian_2015}, provide an alternate scheme for choosing the timestep \textit{a priori} based on $n_e$ and the eigenvalues of \autoref{eq:rate_matrix}.
+where $\varepsilon_d$ and $\varepsilon_r$ are control parameters with typical values of 0.1 and 0.6, respectively. Additionally, \citet{masai_x-ray_1984}, as well as \citet{shen_lagrangian_2015}, provide an alternate scheme for choosing the time step \textit{a priori} based on $n_e$ and the eigenvalues of \autoref{eq:rate_matrix}.

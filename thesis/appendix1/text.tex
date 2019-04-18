@@ -14,9 +14,9 @@ ap1 = texfigure.Manager(
 \end{pycode}
 % spell-checker: enable %
 
-As noted in \autoref{sec:chianti}, the CHIANTI atomic database is an invaluable resource in the field of solar physics, both for modeling and interpreting observations. During the course of my graduate work, I developed the fiasco\footnote{The name of the package derives from the Italian word \textit{fiasco}, the style of bottle typically used to serve a wine from the Chianti region of Italy.} package for interacting with CHIANTI in the Python programming language. fiasco provides an intuitive Python interface to every part of the CHIANTI database as well as many calculations for many common derived quantities. The goal of the fiasco package is to provide largely the same functionality as the CHIANTI IDL routines via an object-oriented interface \citep[similar to ChiantiPy][]{landi_chiantiatomic_2012,barnes_chiantipy_2017} as well as improved interoperability with the greater Python ecosystems in astronomy and heliophysics. The following sections will briefly describe the fiasco software for parsing the raw atomic data and interacting with higher-level objects.
+As noted in \autoref{sec:chianti}, the CHIANTI atomic database is an invaluable resource in the field of solar physics, both for modeling and interpreting observations. During the course of my graduate work, I developed the fiasco\footnote{The name of the package derives from the Italian word \textit{fiasco}, the style of bottle typically used to serve a wine from the Chianti region of Italy.} package for interacting with CHIANTI in the Python programming language. fiasco provides an intuitive Python interface to every part of the CHIANTI database as well as many calculations for many common derived quantities. The goal of the fiasco package is to provide largely the same functionality as the CHIANTI IDL routines via an object-oriented interface \citep[similar to ChiantiPy,][]{landi_chiantiatomic_2012,barnes_chiantipy_2017} as well as improved interoperability with the greater Python ecosystems in astronomy and heliophysics. The following sections will briefly describe the fiasco software for parsing the raw atomic data and interacting with higher-level objects.
 
-fiasco is developed openly on GitHub and fully documented\footnote{The full source is available at \href{https://github.com/wtbarnes/fiasco}{github.com/wtbarnes/fiasco} and the documentation, which is rebuilt at each code check-in, is available at \href{https://fiasco.readthedocs.io/en/latest/}{fiasco.readthedocs.io}.}, including several examples. fiasco also includes a test suite that is run at each code check-in to prevent unexpected changes. In the following sections, I provide a brief overview of the package. Additional details can be found in the documentation.  
+fiasco is developed openly on GitHub and is fully documented\footnote{The full source is available at \href{https://github.com/wtbarnes/fiasco}{github.com/wtbarnes/fiasco} and the documentation, which is rebuilt at each code check-in, is available at \href{https://fiasco.readthedocs.io/en/latest/}{fiasco.readthedocs.io}.}, including several examples. fiasco also includes a test suite that is run at each code check-in to prevent unexpected changes. In the following sections, I provide a brief overview of the package. Additional details can be found in the documentation.  
 
 \section{Parsing Data}\label{sec:parsing-chianti}
 
@@ -50,6 +50,7 @@ with io.StringIO() as f:
     table2.rename_column('E_th', r'$E_\textup{th}$')
     table2.rename_column('L_label', r'$L$')
     table2.rename_column('J', r'$J$')
+    table2.remove_column('label')
     astropy.io.ascii.write(
         table2[:5],
         format='latex',
@@ -65,9 +66,9 @@ with io.StringIO() as f:
 \py[appendix1]|tab|
 % spell-checker: enable %
 
-Other filenames can be parsed in the exact same manner. Because each file format (e.g. \texttt{wgfa}, \texttt{elvlc}) is slightly different, a unique parser subclass is implemented for each filetype in the CHIANTI database. There are 23 unique filetypes. Rather than forcing the user to call a different function or instantiate a separate class for each unique filetype, fiasco uses a \textit{factory pattern}, a common design pattern in software engineering, to create an instance of a class ``on the fly'' based on the filename passed to the \pyv{Parser} object. This greatly simplifies the user interface by providing a single entrypoint for parsing data files.
+Other filenames can be parsed in the exact same manner. Because each file format (e.g. \texttt{wgfa}, \texttt{elvlc}) is slightly different, a unique parser subclass is implemented for each filetype in the CHIANTI database. There are 23 unique filetypes. Rather than forcing the user to call a different function or instantiate a separate class for each unique filetype, fiasco uses a \textit{factory pattern}, a common design pattern in software engineering, to create an instance of a class ``on the fly'' based on the filename passed to the \pyv{Parser} object. This greatly simplifies the user interface by providing a single entry point for parsing data files.
 
-A key advantage of fiasco is that it rebuilds the entire CHIANTI database as a hierarchical data format (HDF5) file. While ChiantiPy and the CHIANTI IDL routines read the raw data files directly, fiasco parses the raw data files once and then writes the entire database to a single HDF5 file. This is more efficient, particular in the case of large files (e.g. Fe IX and XI with many transitions), as HDF5 allows efficient read access to parts of the database without reading unneeded data into memory. 
+A key advantage of fiasco is that it rebuilds the entire CHIANTI database as a hierarchical data format (HDF5) file. While ChiantiPy and the CHIANTI IDL routines read the raw data files directly, fiasco parses the raw data files once and then writes the entire database to a single HDF5 file. This is more efficient, particularly in the case of large files (e.g. Fe IX and XI with many transitions), as HDF5 allows efficient read access to parts of the database without reading unneeded data into memory. 
 
 \section{The \texttt{Ion} Class}\label{sec:fiasco-ion}
 
@@ -109,7 +110,7 @@ fe16._wgfa # transitions
 % spell-checker: enable %
 In general, these are reserved for internal use by fiasco such that the user need not worry about naming conventions of CHIANTI file formats.
 
-Perhaps most importantly, fiasco provides simple interface for computing derived quantities from the atomic data attached to each ion. For example, to calculate the total ionization and recombination rates as a function of temperature for Fe XVI,
+Perhaps most importantly, fiasco provides a simple interface for computing derived quantities from the atomic data attached to each ion. For example, to calculate the total ionization and recombination rates as a function of temperature for Fe XVI,
 % spell-checker: disable %
 \begin{pyverbatim}[appendix1][baselinestretch=1,xleftmargin=3em]
 i_rate = fe16.ionization_rate()
@@ -154,7 +155,7 @@ ioneq = fe.equilibrium_ionization()
 
 \section{Working with Multiple Ions}\label{sec:ion-collection}
 
-Some quantities such as spectra or radiative loss curves require data from more than one ion and not necessarily of the same element. fiasco provides a general \pyv{IonCollection} object.An ion collection can be created directly,
+Some quantities such as spectra or radiative loss curves require data from more than one ion and not necessarily of the same element. fiasco provides a general \pyv{IonCollection} object. An ion collection can be created directly,
 % spell-checker: disable %
 \begin{pyverbatim}[appendix1][baselinestretch=1,xleftmargin=3em]
 from fiasco import IonCollection
@@ -167,6 +168,6 @@ or by literally adding the objects together
 col = Ion('Fe 5', T) + Ion('Fe 13', T)
 \end{pyverbatim}
 % spell-checker: enable %
-The latter is implemented by overriding the addition operator on the \pyv{Ion} and \pyv{IonCollection} classes. This type of notation allows for an intuitive exploration of how adding or removing ions impacts spectra or other quantities like the radiative loss curve (\autoref{sec:rad-loss}).
+The latter is implemented by overriding the addition operator on the \pyv{Ion} and \pyv{IonCollection} classes. This type of notation allows for an intuitive exploration of how adding or removing ions impacts spectra or other quantities like the radiative loss curve (see \autoref{fig:radiative-loss}).
 
-Note that the \pyv{Element} class is just a subclass of \pyv{IonCollection} where every ion is from the same element. The \pyv{EmissionModel} class (\autoref{sec:atomic-physics}) in the synthesizAR forward modeling code is also a subclass of \pyv{IonCollection}.
+Note that the \pyv{Element} class is just a subclass of \pyv{IonCollection} where every ion is from the same element. The \pyv{EmissionModel} class (see \autoref{sec:atomic-physics}) in the synthesizAR forward modeling code is also a subclass of \pyv{IonCollection}.
